@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Leviatham // SECURE</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: #050505;
+            color: #22c55e;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Utilidades */
+        .hidden { display: none !important; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; border-left: 1px solid #111; }
+        ::-webkit-scrollbar-thumb { background: #15803d; border: 1px solid #22c55e; }
+        .hacker-scroll::-webkit-scrollbar { width: 4px; }
+        .hacker-scroll::-webkit-scrollbar-track { background: #111; }
+        .hacker-scroll::-webkit-scrollbar-thumb { background: #dc2626; } 
+
+        /* Efectos CRT y Glitch */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 51;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(34, 197, 94, 0.1) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            position: fixed;
+            bottom: 100%;
+            animation: scanline 10s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100px; } }
+
+        .glitch-text { position: relative; }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #050505;
+        }
+        .glitch-text::before {
+            left: 2px; text-shadow: -1px 0 red; clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+            animation: glitch-1 2.5s infinite linear alternate-reverse;
+        }
+        .glitch-text::after {
+            left: -2px; text-shadow: -1px 0 blue; clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+            animation: glitch-2 3s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-1 { 0% {clip-path: inset(20% 0 80% 0);} 100% {clip-path: inset(60% 0 10% 0);} }
+        @keyframes glitch-2 { 0% {clip-path: inset(10% 0 60% 0);} 100% {clip-path: inset(80% 0 5% 0);} }
+
+        @keyframes flash-red { 0%, 100% { background-color: rgba(50, 0, 0, 0); } 50% { background-color: rgba(150, 0, 0, 0.3); } }
+        .alert-bg { animation: flash-red 0.3s infinite; }
+
+        /* Grid de servidores */
+        .server-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 2px;
+        }
+        .server-node {
+            height: 6px;
+            background-color: #064e3b;
+            transition: all 0.1s;
+        }
+        .server-node.active { background-color: #4ade80; box-shadow: 0 0 8px #4ade80; }
+
+        /* Hexagon Background for Success */
+        .hex-bg {
+            background-color: #000000;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%2315803d' fill-opacity='0.1'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-7.5L27.99 34H28v2.31h-.01L17 42.65V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* Upload Particles */
+        @keyframes uploading {
+            0% { transform: translateY(100%); opacity: 0; }
+            50% { opacity: 1; height: 20px; }
+            100% { transform: translateY(-100%); opacity: 0; }
+        }
+        .upload-particle {
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            height: 10px;
+            background-color: #ef4444;
+            animation: uploading 0.8s infinite linear;
+        }
+        
+        .text-glow { text-shadow: 0 0 10px rgba(34, 197, 94, 0.7); }
+    </style>
+</head>
+<body class="crt min-h-screen flex flex-col items-center justify-center transition-colors duration-1000">
+
+    <canvas id="bg-canvas" class="fixed inset-0 z-0"></canvas>
+    <div class="scanline"></div>
+
+    <div class="fixed top-0 w-full bg-black/90 border-b border-green-900 z-[60] py-2 flex justify-between px-4 text-[10px] md:text-xs tracking-[0.2em] text-green-700 select-none backdrop-blur-sm">
+        <span>S4G_HIVE_CMD // V.3.3.3</span>
+        <span class="animate-pulse text-red-600 font-bold hidden" id="top-alert">⚠️ CRITICAL BREACH ⚠️</span>
+        <span>TOP SECRET // NOFORN</span>
+    </div>
+
+    <div id="app-interface" class="relative z-10 w-full max-w-md p-4 transition-all duration-500 my-16">
+
+        <div id="view-login" class="bg-black/80 border border-green-500/30 p-8 rounded-sm shadow-[0_0_30px_rgba(34,197,94,0.1)] backdrop-blur-md relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-green-500"></div>
+            <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-green-500"></div>
+            <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-green-500"></div>
+            <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-green-500"></div>
+
+            <div class="text-center mb-8">
+                <div class="relative inline-block mb-4 group">
+                    <i data-lucide="scan-eye" class="w-16 h-16 text-green-400 group-hover:text-green-300 transition-colors"></i>
+                    <div class="absolute inset-0 border-2 border-green-500/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
+                    <div class="absolute inset-2 border border-green-500/40 rounded-full animate-[spin_5s_linear_infinite_reverse]"></div>
+                </div>
+                
+                <h1 class="text-5xl font-bold tracking-[0.15em] text-white glitch-text mb-2 text-glow" data-text="LEVIATHAM">LEVIATHAM</h1>
+                <p class="text-[9px] text-green-600 tracking-[0.4em] uppercase">Unidad de Ciber-Ataque Ofensivo</p>
+                
+                <div class="mt-4 flex justify-center gap-4 text-[10px] text-green-800 font-bold">
+                    <span class="border border-green-900 px-2 py-0.5">SECURE_SHELL</span>
+                    <span class="border border-green-900 px-2 py-0.5 animate-pulse">AWAITING_INPUT</span>
+                </div>
+            </div>
+
+            <form id="login-form" class="space-y-6">
+                <div class="relative group">
+                    <label class="text-[10px] text-green-600 ml-1 group-focus-within:text-green-400 transition-colors">IDENTIFICADOR DE AGENTE</label>
+                    <div class="flex items-center border-b border-green-800 focus-within:border-green-400 bg-green-900/5 transition-all focus-within:bg-green-900/10">
+                        <i data-lucide="user" class="w-4 h-4 text-green-700 ml-2"></i>
+                        <input type="text" id="user-input" class="w-full bg-transparent text-green-400 p-2 text-sm focus:outline-none uppercase tracking-widest placeholder-green-900/50" placeholder="USUARIO" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <label class="text-[10px] text-green-600 ml-1 group-focus-within:text-green-400 transition-colors">CÓDIGO DE ENCRIPTACIÓN</label>
+                    <div class="flex items-center border-b border-green-800 focus-within:border-green-400 bg-green-900/5 transition-all focus-within:bg-green-900/10">
+                        <i data-lucide="key" class="w-4 h-4 text-green-700 ml-2"></i>
+                        <input type="password" id="pass-input" class="w-full bg-transparent text-green-400 p-2 text-sm focus:outline-none tracking-widest placeholder-green-900/50" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <button type="submit" class="group w-full bg-green-900/20 hover:bg-green-500 hover:shadow-[0_0_20px_rgba(34,197,94,0.6)] text-green-400 hover:text-black border border-green-600 py-3 font-bold tracking-[0.2em] transition-all duration-300 flex items-center justify-center gap-2 text-xs transform hover:scale-[1.02]">
+                    <i data-lucide="fingerprint" class="w-4 h-4"></i> INICIAR ENLACE
+                </button>
+            </form>
+            
+            <div class="mt-4 text-[8px] text-center text-green-900">
+                US LEVIATHAM PROPERTY. UNAUTHORIZED ACCESS IS A FEDERAL CRIME.
+            </div>
+        </div>
+
+        <div id="view-loading" class="hidden text-center w-full">
+            <div class="w-full max-w-xs mx-auto h-1 bg-green-900/30 border border-green-800 mb-4 relative overflow-hidden">
+                <div id="load-bar" class="h-full bg-green-400 shadow-[0_0_15px_#4ade80]" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] font-mono text-green-600 mb-2 max-w-xs mx-auto">
+                <span id="load-text-left">DECRYPTING...</span>
+                <span id="load-percent">0%</span>
+            </div>
+            
+            <div id="server-viz" class="w-full max-w-xs mx-auto mt-4 mb-4 border border-green-900 p-1 bg-black/50 hidden">
+                <div class="server-grid" id="server-nodes"></div>
+                <div class="flex justify-between text-[8px] text-green-700 mt-1 uppercase">
+                    <span>Cluster_Alpha</span>
+                    <span class="animate-pulse text-green-400">ONLINE</span>
+                </div>
+            </div>
+
+            <div id="load-logs" class="mt-4 h-32 overflow-y-auto text-[10px] text-left text-green-500 font-mono opacity-80 hacker-scroll border-l-2 border-green-800 pl-2 bg-black/40 p-2"></div>
+        </div>
+
+        <div id="view-breach" class="hidden w-full max-w-lg">
+            <div class="relative bg-black/95 border-2 border-red-600 p-1 shadow-[0_0_50px_rgba(220,38,38,0.8)]">
+                <div class="absolute inset-0 bg-red-600/10 alert-bg pointer-events-none z-0"></div>
+                
+                <div class="relative z-10 p-4">
+                    <div class="flex items-center justify-between border-b-2 border-red-600 pb-2 mb-4">
+                        <i data-lucide="skull" class="w-8 h-8 text-red-500 animate-[spin_2s_linear_infinite]"></i>
+                        <div class="text-center">
+                            <h2 class="text-4xl font-black text-red-600 tracking-tighter glitch-text" data-text="INTRUSION">INTRUSION</h2>
+                            <p class="text-[10px] text-white font-bold bg-red-600 px-2 mt-1">PROTOCOLO DEFENSA ACTIVO</p>
+                        </div>
+                        <i data-lucide="skull" class="w-8 h-8 text-red-500 animate-[spin_2s_linear_infinite_reverse]"></i>
+                    </div>
+
+                    <div class="text-center mb-2">
+                         <p class="text-[10px] text-red-400">SYSTEM LOCKOUT IN:</p>
+                         <p class="text-2xl font-mono text-red-500 font-bold" id="lockout-timer">00:20:00</p>
+                    </div>
+
+                    <div class="bg-black border border-red-800 p-2 h-24 mb-4 overflow-hidden font-mono text-[9px] text-red-500 relative">
+                        <div class="absolute top-0 right-0 text-[8px] text-red-800 p-1 bg-black">ROOT@SYS404:~#</div>
+                        <div id="breach-console" class="flex flex-col justify-end h-full hacker-scroll overflow-y-auto"></div>
+                    </div>
+
+                    <div id="spy-panel" class="opacity-0 transition-opacity duration-1000 mb-4">
+                        <div class="bg-red-950/40 border border-red-600 p-3 relative overflow-hidden">
+                            <div class="absolute inset-0 grid grid-cols-[1fr_1px_1fr] border-b border-red-900/50"></div>
+                            
+                            <h3 class="text-xs text-red-500 font-black border-b border-red-700 mb-2 pb-1">DATOS EXTRAÍDOS DEL OBJETIVO</h3>
+                            
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] font-mono mb-3">
+                                <div>
+                                    <span class="text-red-700 block text-[8px]">UBICACIÓN RASTREADA:</span>
+                                    <span id="info-country" class="text-white break-words">CALCULANDO...</span>
+                                </div>
+                                <div>
+                                    <span class="text-red-700 block text-[8px]">DIRECCIÓN IP:</span>
+                                    <span id="info-ip" class="text-red-400 font-bold">...</span>
+                                </div>
+                                <div>
+                                    <span class="text-red-700 block text-[8px]">DISPOSITIVO:</span>
+                                    <span id="info-device" class="text-red-300 break-all">...</span>
+                                </div>
+                                <div>
+                                    <span class="text-red-700 block text-[8px]">PROVEEDOR (ISP):</span>
+                                    <span id="info-isp" class="text-red-300">DETECTANDO...</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-red-600 text-black p-2 font-bold text-center text-[10px] uppercase animate-pulse border-2 border-white">
+                                <p>Tus datos ahora son de la colmena.</p>
+                                <p>Pasaras por una auditoria.</p>
+                            </div>
+                            <div class="mt-2 text-[9px] text-red-400 text-center font-mono">
+                                > Si tu IP nunca fue logeada y se considera peligrosa será atacada por la botnet. <
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="botnet-view" class="bg-black border-2 border-red-600 h-32 relative hidden overflow-hidden">
+                        <div class="absolute inset-0 grid grid-cols-6 gap-0.5 opacity-10 pointer-events-none">
+                            <div class="border border-red-900"></div><div class="border border-red-900"></div>
+                            <div class="border border-red-900"></div><div class="border border-red-900"></div>
+                            <div class="border border-red-900"></div><div class="border border-red-900"></div>
+                        </div>
+                        
+                        <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+                             <h3 class="text-red-500 font-black tracking-widest text-lg animate-pulse bg-black/90 px-4 border-y border-red-600">EXFILTRANDO DATOS</h3>
+                             <div class="mt-2 text-xs text-white font-mono bg-black px-2" id="upload-status">CONECTANDO... 0%</div>
+                        </div>
+
+                        <div id="upload-particles" class="absolute inset-0 z-10 opacity-70"></div>
+                    </div>
+
+                </div>
+                
+                <div class="h-2 w-full bg-red-900">
+                    <div id="breach-bar" class="h-full bg-red-500 w-0 shadow-[0_0_10px_red]"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-success" class="hidden text-center w-full max-w-3xl px-4">
+            <div class="hex-bg border border-green-500/30 p-8 rounded-lg shadow-[0_0_50px_rgba(34,197,94,0.15)] relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-green-400"></div>
+                <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-green-400"></div>
+                
+                <div class="mb-6 relative h-20 overflow-hidden border-b border-green-500/30">
+                    <div id="matrix-rain" class="text-[10px] text-green-400 leading-3 opacity-50 font-mono break-all"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                </div>
+                
+                <h1 id="welcome-text" class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 text-glow">BIENVENIDO</h1>
+                <p class="text-green-500 tracking-[0.5em] text-xs uppercase mb-8">Acceso de Nivel 5 Autorizado</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono mt-8">
+                    <div class="border border-green-800 p-3 bg-black/60 backdrop-blur-sm group hover:border-green-500 transition-colors">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-green-500 mx-auto mb-2"></i>
+                        <p class="text-green-700">ESTADO</p>
+                        <p class="text-green-400 font-bold group-hover:text-white">SEGURO</p>
+                    </div>
+                    <div class="border border-green-800 p-3 bg-black/60 backdrop-blur-sm group hover:border-green-500 transition-colors">
+                        <i data-lucide="network" class="w-6 h-6 text-green-500 mx-auto mb-2"></i>
+                        <p class="text-green-700">ENLACE</p>
+                        <p class="text-green-400 font-bold group-hover:text-white">ENCRIPTADO</p>
+                    </div>
+                    <div class="border border-green-800 p-3 bg-black/60 backdrop-blur-sm group hover:border-green-500 transition-colors">
+                        <i data-lucide="file-key" class="w-6 h-6 text-green-500 mx-auto mb-2"></i>
+                        <p class="text-green-700">PERMISOS</p>
+                        <p class="text-green-400 font-bold group-hover:text-white">ROOT/ADMIN</p>
+                    </div>
+                </div>
+                
+                <div class="mt-8">
+                     <p class="text-[10px] text-green-600 animate-pulse">Redirigiendo al Panel de Comando...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // === CONFIGURACIÓN ===
+        const CONFIG = {
+            redirectUrl: "Comando.html", // CAMBIADO A ARCHIVO LOCAL
+            emailReceiver: "System404g@gmail.com", 
+            user: "LEVIATHAM",
+            pass: "UNPASOALCIELO"
+        };
+
+        const views = {
+            login: document.getElementById('view-login'),
+            loading: document.getElementById('view-loading'),
+            breach: document.getElementById('view-breach'),
+            success: document.getElementById('view-success')
+        };
+        const alertBanner = document.getElementById('top-alert');
+        let bgCanvasColor = '34, 197, 94';
+
+        lucide.createIcons();
+
+        // CANVAS PARTICULAS
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createParticles() {
+            particles = [];
+            const count = window.innerWidth < 800 ? 60 : 120;
+            for(let i=0; i<count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 1.5, // Velocidad aumentada levemente
+                    vy: (Math.random() - 0.5) * 1.5
+                });
+            }
+        }
+        createParticles();
+
+        function animateBg() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = `rgba(${bgCanvasColor}, 0.5)`;
+            ctx.strokeStyle = `rgba(${bgCanvasColor}, 0.15)`;
+            
+            particles.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2);
+                ctx.fill();
+                for(let j=i; j<particles.length; j++) {
+                    const dx = p.x - particles[j].x;
+                    const dy = p.y - particles[j].y;
+                    const d = Math.sqrt(dx*dx + dy*dy);
+                    if(d < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // LOGICA LOGIN
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('user-input').value.trim().toUpperCase();
+            const p = document.getElementById('pass-input').value.trim();
+            
+            views.login.classList.add('hidden');
+            
+            if(u === CONFIG.user && p === CONFIG.pass) initSuccessSequence();
+            else initDefenseProtocol();
+        });
+
+        // EFECTO DESENCRIPTAR TEXTO
+        function decryptText(element, originalText, speed = 50) {
+            let iterations = 0;
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&";
+            const interval = setInterval(() => {
+                element.innerText = originalText
+                    .split("")
+                    .map((letter, index) => {
+                        if(index < iterations) return originalText[index];
+                        return letters[Math.floor(Math.random() * 26)];
+                    })
+                    .join("");
+                
+                if(iterations >= originalText.length) clearInterval(interval);
+                iterations += 1 / 3;
+            }, speed);
+        }
+
+        // SECUENCIA EXITO PULIDA
+        function initSuccessSequence() {
+            views.loading.classList.remove('hidden');
+            let progress = 0;
+            const bar = document.getElementById('load-bar');
+            const txtLeft = document.getElementById('load-text-left');
+            const txtPct = document.getElementById('load-percent');
+            const logs = document.getElementById('load-logs');
+            const serverGrid = document.getElementById('server-nodes');
+            const serverViz = document.getElementById('server-viz');
+
+            // Nodos visuales
+            serverViz.classList.remove('hidden');
+            serverGrid.innerHTML = '';
+            for(let i=0; i<60; i++) {
+                const node = document.createElement('div');
+                node.className = 'server-node';
+                serverGrid.appendChild(node);
+            }
+            const nodes = document.querySelectorAll('.server-node');
+
+            const successLogs = [
+                "INITIATING SECURE HANDSHAKE...", "KEY_EXCHANGE: AES-512...", 
+                "BYPASSING ISP LOGGING...", "TUNNELING VIA NODE [TOKYO]...",
+                "TUNNELING VIA NODE [REYKJAVIK]...", "TUNNELING VIA NODE [BUENOS AIRES]...",
+                "LOADING: KERNEL_MODULES...", "LOADING: EXPLOIT_DB...",
+                "LOADING: TARGET_LIST...", "AUTHENTICATION VERIFIED.",
+                "WELCOME AGENT. SYSTEM READY."
+            ];
+
+            const interval = setInterval(() => {
+                progress += 0.8; 
+                if(progress > 100) progress = 100;
+                
+                bar.style.width = `${progress}%`;
+                txtPct.innerText = `${Math.floor(progress)}%`;
+                
+                // Animar nodos estilo cascada
+                if(Math.random() > 0.3) {
+                    const idx = Math.floor(Math.random() * nodes.length);
+                    nodes[idx].classList.toggle('active');
+                }
+
+                if(Math.floor(progress) % 8 === 0 && successLogs.length > 0) {
+                    const msg = successLogs.shift();
+                    txtLeft.innerText = msg.split(':')[0] + "...";
+                    logs.innerHTML += `<div class="border-l-2 border-green-500 pl-2 mb-1"><span class="text-white opacity-50">${new Date().toLocaleTimeString()}</span> ${msg} <span class="text-green-300">[OK]</span></div>`;
+                    logs.scrollTop = logs.scrollHeight;
+                }
+
+                if(progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        views.loading.classList.add('hidden');
+                        views.success.classList.remove('hidden');
+                        
+                        // Efecto final
+                        decryptText(document.getElementById('welcome-text'), "BIENVENIDO AGENTE");
+                        
+                        // Lluvia matrix
+                        setInterval(() => {
+                            const chars = "010101 LEVIATHAM ACCESS GRANTED ";
+                            let str = "";
+                            for(let i=0; i<200; i++) str += chars[Math.floor(Math.random()*chars.length)];
+                            document.getElementById('matrix-rain').innerText = str;
+                        }, 50);
+
+                        // REDIRECCIÓN VERIFICADA
+                        setTimeout(() => window.location.href = CONFIG.redirectUrl, 4000);
+                    }, 500);
+                }
+            }, 30);
+        }
+
+        // PROTOCOLO DEFENSA PULIDO (ACTUALIZADO: SIN TEMBLOR)
+        async function initDefenseProtocol() {
+            // Se eliminó la línea que agregaba 'shake-screen'
+            views.breach.classList.remove('hidden');
+            bgCanvasColor = '220, 38, 38'; 
+            alertBanner.classList.remove('hidden'); 
+            
+            // Timer regresivo
+            let timeLeft = 20;
+            const timerEl = document.getElementById('lockout-timer');
+            setInterval(() => {
+                if(timeLeft > 0) {
+                    timeLeft--;
+                    timerEl.innerText = `00:00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
+                    if(timeLeft < 5) timerEl.classList.add('text-white', 'scale-125');
+                }
+            }, 1000);
+            
+            const consoleDiv = document.getElementById('breach-console');
+            const log = (msg, type="INFO") => {
+                const colors = { "INFO": "text-blue-400", "WARN": "text-yellow-400", "CRIT": "text-red-500 bg-red-950" };
+                const span = document.createElement('div');
+                span.className = "mb-0.5 border-l border-red-900 pl-1";
+                span.innerHTML = `<span class="text-gray-500">[${new Date().toLocaleTimeString()}]</span> <span class="${colors[type] || 'text-red-400'} font-bold">${type}</span>: ${msg}`;
+                consoleDiv.appendChild(span);
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            };
+
+            // OBTENER TODOS LOS DATOS POSIBLES
+            let ipData = { ip: "192.168.1.X", city: "UNKNOWN", region: "UNKNOWN", org: "UNKNOWN_ISP" };
+            
+            try {
+                // Intentar obtener más detalles (Ciudad, Pais, Org)
+                const res = await fetch('https://ipapi.co/json/');
+                if(res.ok) {
+                    const data = await res.json();
+                    ipData = {
+                        ip: data.ip || ipData.ip,
+                        city: data.city || "DETECTED",
+                        region: data.region || "LOCAL",
+                        country: data.country_name || "UNKNOWN",
+                        org: data.org || "ISP_TRACKED"
+                    };
+                } else {
+                    // Fallback si falla ipapi (para demos)
+                    const res2 = await fetch('https://api.ipify.org?format=json');
+                    const data2 = await res2.json();
+                    ipData.ip = data2.ip;
+                }
+            } catch(e) { 
+                console.log("Trace failed, simulating...");
+            }
+
+            // Datos del dispositivo
+            const userAgent = navigator.userAgent;
+            let os = "UNKNOWN OS";
+            if (userAgent.indexOf("Win") != -1) os = "WINDOWS NT KERNEL";
+            if (userAgent.indexOf("Mac") != -1) os = "MACINTOSH/DARWIN";
+            if (userAgent.indexOf("Linux") != -1) os = "LINUX X86_64";
+            if (userAgent.indexOf("Android") != -1) os = "ANDROID SYSTEM";
+            if (userAgent.indexOf("iPhone") != -1) os = "IOS DEVICE";
+
+            const cores = navigator.hardwareConcurrency || "4";
+            const mem = navigator.deviceMemory || "8";
+
+            // Enviar reporte silencioso
+            sendReportToEmail(`IP:${ipData.ip} | LOC:${ipData.city},${ipData.region} | DEV:${os}`); 
+
+            // Actualizar Panel Visual
+            document.getElementById('info-ip').innerText = ipData.ip;
+            document.getElementById('info-isp').innerText = ipData.org.toUpperCase();
+            document.getElementById('info-country').innerText = `${ipData.city.toUpperCase()}, ${ipData.region.toUpperCase()}`;
+            document.getElementById('info-device').innerText = `${os} [CORES:${cores} RAM:${mem}GB]`;
+
+            // Secuencia de ataque más rápida y agresiva
+            const actions = [
+                { t: 100, msg: "AUTH_FAILURE DETECTED. TRIGGERING TRAPWIRE.", type: "CRIT" },
+                { t: 800, msg: "LOCKING FILE SYSTEM...", type: "WARN" },
+                { t: 1500, msg: `TARGET IDENTIFIED: ${ipData.ip}`, type: "CRIT" },
+                { t: 2200, msg: "DEPLOYING DAEMON 'CERBERUS'...", type: "INFO" },
+                { t: 3000, fn: () => document.getElementById('spy-panel').classList.remove('opacity-0') }, 
+                { t: 3500, msg: "CAPTURING BROWSER TOKENS...", type: "WARN" },
+                { t: 4500, msg: `GEOLOCATION: ${ipData.city}, ${ipData.region}`, type: "CRIT" },
+                { t: 5500, msg: "ESTABLISHING UPLINK TO C2 SERVER...", type: "INFO" },
+                { t: 6500, fn: () => startBotnetTraffic() }, 
+                { t: 7000, msg: "UPLOADING: /User/Documents/Passwords.db", type: "WARN" },
+                { t: 8500, msg: "UPLOADING: /User/AppData/Local/Session", type: "WARN" },
+                { t: 10000, msg: "ROOTKIT INSTALLED. PERSISTENCE ENABLED.", type: "CRIT" },
+                { t: 12000, msg: "DEVICE FINGERPRINT ADDED TO BLACKLIST.", type: "INFO" },
+                { t: 14000, msg: "SYSTEM404G: DATA PACKET RECEIVED.", type: "CRIT" },
+                { t: 15000, msg: "TERMINATING SESSION..." }
+            ];
+
+            actions.forEach(act => {
+                setTimeout(() => {
+                    if(act.msg) log(act.msg, act.type);
+                    if(act.fn) act.fn();
+                }, act.t);
+            });
+
+            const bar = document.getElementById('breach-bar');
+            bar.style.transition = "width 16s linear";
+            setTimeout(() => bar.style.width = "100%", 100);
+
+            setTimeout(() => location.reload(), 16000);
+        }
+
+        // ENVIO EMAIL
+        function sendReportToEmail(ip) {
+            const formData = new FormData();
+            formData.append("IP", ip);
+            formData.append("Device", navigator.userAgent);
+            formData.append("OS", navigator.platform);
+            formData.append("Time", new Date().toLocaleString());
+            formData.append("_subject", "⚠️ SYSTEM404G: HACKER TRAPPED");
+            formData.append("_captcha", "false"); 
+
+            fetch(`https://formsubmit.co/ajax/${CONFIG.emailReceiver}`, {
+                method: "POST", body: formData
+            }).catch(e => console.log("Log sent"));
+        }
+
+        function startBotnetTraffic() {
+            const container = document.getElementById('botnet-view');
+            container.classList.remove('hidden');
+            const particleContainer = document.getElementById('upload-particles');
+            const status = document.getElementById('upload-status');
+            
+            // Partículas más caóticas
+            setInterval(() => {
+                const p = document.createElement('div');
+                p.className = 'upload-particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.height = (Math.random() * 30 + 10) + 'px'; // Altura variable
+                p.style.animationDuration = (Math.random() * 0.3 + 0.3) + 's'; // Más rápido
+                p.style.backgroundColor = Math.random() > 0.8 ? '#fff' : '#ef4444'; // Flashes blancos
+                particleContainer.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }, 30);
+
+            let pct = 0;
+            const pctInterval = setInterval(() => {
+                pct += 2;
+                status.innerText = `EXFILTRANDO... ${pct}% [${Math.random().toString(36).substring(7)}]`;
+                if(pct >= 100) {
+                    status.innerText = "UPLOAD COMPLETE // CONNECTION TERMINATED";
+                    status.classList.add('text-red-500', 'bg-black', 'font-black');
+                    clearInterval(pctInterval);
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
