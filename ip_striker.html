@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Striker</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #00ff00;
+            --danger: #ff0000;
+            --dark: #050505;
+            --glass: rgba(0, 20, 0, 0.95);
+            /* Colores Terminal Linux Realista */
+            --term-gray: #6b7280;
+            --term-white: #e5e7eb;
+            --term-red: #ef4444;
+            --term-green: #22c55e;
+            --term-yellow: #eab308;
+            --term-blue: #3b82f6;
+            --term-purple: #a855f7;
+            --term-cyan: #06b6d4;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            cursor: default;
+        }
+
+        /* --- EFECTOS CRT --- */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        
+        .glitch-text { position: relative; }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark);
+        }
+        .glitch-text::before {
+            left: 2px; text-shadow: -1px 0 red; animation: glitch-anim-1 2s infinite linear alternate-reverse; clip-path: inset(0 0 0 0);
+        }
+        .glitch-text::after {
+            left: -2px; text-shadow: -1px 0 blue; animation: glitch-anim-2 3s infinite linear alternate-reverse; clip-path: inset(0 0 0 0);
+        }
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(20% 0 80% 0); } 20% { clip-path: inset(60% 0 10% 0); } 40% { clip-path: inset(40% 0 50% 0); }
+            60% { clip-path: inset(80% 0 5% 0); } 80% { clip-path: inset(10% 0 70% 0); } 100% { clip-path: inset(30% 0 20% 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(10% 0 60% 0); } 20% { clip-path: inset(30% 0 20% 0); } 40% { clip-path: inset(90% 0 10% 0); }
+            60% { clip-path: inset(15% 0 80% 0); } 80% { clip-path: inset(55% 0 10% 0); } 100% { clip-path: inset(40% 0 30% 0); }
+        }
+
+        .panel {
+            background: var(--glass);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+            position: relative;
+            z-index: 60; 
+        }
+
+        .btn-action {
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            text-transform: uppercase;
+            background: rgba(0,20,0,0.8);
+            transition: all 0.2s;
+            cursor: pointer;
+            position: relative;
+            z-index: 100;
+        }
+        .btn-action:hover:not(:disabled) {
+            background: var(--primary);
+            color: black;
+            box-shadow: 0 0 20px var(--primary);
+        }
+        .btn-action:disabled {
+            border-color: #333;
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        .vector-card {
+            border: 1px solid #333;
+            transition: transform 0.2s, box-shadow 0.2s;
+            opacity: 0.6;
+            cursor: pointer;
+            position: relative;
+            z-index: 60;
+            background: rgba(0, 10, 0, 0.6);
+        }
+        .vector-card:hover { opacity: 1; transform: scale(1.02); z-index: 70; border-color: var(--primary); }
+        .vector-card.selected { opacity: 1; box-shadow: 0 0 15px inset; border-width: 2px; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* API Data Grid */
+        .api-row {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            border-bottom: 1px solid #1a1a1a;
+            padding: 4px 0;
+            font-size: 0.70rem;
+        }
+        .api-key { color: var(--term-green); font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-family: 'Fira Code', monospace; }
+        .api-val { color: var(--term-white); word-break: break-all; text-align: right; font-family: 'Fira Code', monospace; }
+
+        @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 20px;
+            background: rgba(0, 255, 0, 0.1); box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+            animation: scanline 2s linear infinite; pointer-events: none; z-index: 40;
+        }
+
+        .bg-grid-pattern {
+            background-image: linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        input, button { cursor: text; }
+        button { cursor: pointer; }
+        
+        /* --- ESTILO DE TERMINAL LINUX V.PROFESSIONAL (MEJORADO) --- */
+        .terminal-line {
+            font-family: 'Fira Code', 'Roboto Mono', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: 2px;
+            padding-left: 4px;
+            border-left: 2px solid transparent;
+            line-height: 1.5; 
+            font-size: 11px;
+            color: #d1d5db;
+            /* Animación más rápida para 0.10s */
+            animation: termFade 0.1s ease-out forwards;
+            opacity: 0;
+            transform: translateY(3px);
+        }
+        .terminal-line:hover { background: rgba(255, 255, 255, 0.05); }
+        
+        @keyframes termFade {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* SINTAXIS DE LOGS (REALISMO) */
+        .ts-time { color: var(--term-gray); margin-right: 8px; font-size: 0.9em; user-select: none; }
+        .ts-proc { color: var(--term-white); font-weight: bold; }
+        
+        .target-tag {
+            background-color: rgba(139, 0, 0, 0.4);
+            border: 1px solid #ef4444;
+            color: #fff;
+            padding: 0 4px;
+            font-weight: bold;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .ts-ip { color: var(--term-cyan); } 
+        .ts-port { color: var(--term-yellow); }
+        .ts-info { color: var(--term-blue); } 
+        .ts-warn { color: var(--term-yellow); font-weight: bold;} 
+        .ts-err { color: var(--term-red); font-weight: bold; background: rgba(255,0,0,0.1); padding: 0 2px;} 
+        .ts-suc { color: var(--term-green); } 
+        .ts-dim { color: #4b5563; }
+        .ts-data { color: #a3a3a3; font-style: italic; }
+
+        .kill-switch-btn {
+            background: repeating-linear-gradient(45deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.1) 10px, rgba(0, 0, 0, 0.2) 10px, rgba(0, 0, 0, 0.2) 20px), rgba(0,0,0,0.8);
+            border: 2px solid #ef4444; color: #ef4444; transition: all 0.3s ease; box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+        .kill-switch-btn:hover {
+            background: #ef4444; color: #000; box-shadow: 0 0 25px rgba(255, 0, 0, 0.6); text-shadow: none;
+        }
+
+        .ticker-wrap { width: 100%; overflow: hidden; white-space: nowrap; box-sizing: border-box; }
+        .ticker { display: inline-block; padding-left: 100%; animation: ticker 30s linear infinite; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
+        @keyframes crtOff {
+            0% { transform: scale(1, 1); opacity: 1; filter: brightness(1); }
+            40% { transform: scale(1, 0.002); opacity: 1; filter: brightness(3); }
+            100% { transform: scale(0, 0); opacity: 0; filter: brightness(0); }
+        }
+        .shutdown-effect { animation: crtOff 0.5s ease-in-out forwards; pointer-events: none; }
+    </style>
+</head>
+<body class="crt text-sm md:text-base selection:bg-green-500 selection:text-black">
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="scan-line"></div>
+
+    <div class="relative z-10 container mx-auto p-4 flex-grow flex flex-col">
+        
+        <header class="text-center mb-4 pt-4 border-b border-green-800 pb-4 relative z-60">
+            <h1 class="text-4xl md:text-6xl font-bold mb-2 glitch-text tracking-widest uppercase" data-text="LEVIATHAM IP STRIKER">LEVIATHAM IP STRIKER</h1>
+            <div class="flex flex-col md:flex-row justify-between items-center text-[10px] md:text-sm text-green-600 px-4 mt-2 font-mono gap-1">
+                <span>CIA_CYBER_CMD::NODE_ALPHA</span>
+                <span id="real-network-stats" class="text-xs text-yellow-500 border border-yellow-800 px-2 py-1 bg-black/50">CALCULANDO RED...</span>
+                <span class="animate-pulse text-red-500 font-bold">/// UNAUTHORIZED ACCESS ///</span>
+                <span>V.1.0.0</span>
+            </div>
+        </header>
+
+        <div id="terms-panel" class="panel p-4 mb-6 border-l-4 border-l-red-600 relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-2 opacity-20 text-6xl">⚖️</div>
+            <h3 class="text-xl text-red-500 font-bold mb-2 border-b border-red-800 pb-2 flex items-center gap-2">
+                <span class="animate-pulse">⚠</span> PROTOCOLO DE USO
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="terms-text" class="text-[10px] md:text-sm text-green-300 font-light leading-relaxed font-mono h-24 md:h-auto overflow-y-auto"></div>
+                <div class="hidden md:flex flex-col justify-center items-center border border-red-900 bg-red-950/20 p-2">
+                    <div class="text-red-500 text-center font-bold text-lg mb-1 glitch-text" data-text="ADVERTENCIA FEDERAL">ADVERTENCIA FEDERAL</div>
+                    <p class="text-red-400 text-[10px] text-center">ESTA HERRAMIENTA DISPARA ATAQUES REALES.<br>USO EXCLUSIVO PARA PRUEBAS DE PENETRACIÓN AUTORIZADAS.<br><span class="text-white bg-red-600 px-1 mt-1 inline-block font-bold">TERMINACIÓN INMEDIATA</span></p>
+                </div>
+            </div>
+        </div>
+
+        <main id="viewport" class="flex-grow flex flex-col items-center w-full transition-all relative z-60">
+
+            <section id="sec-target" class="w-full max-w-4xl panel p-6 md:p-8 rounded relative animate-[fadeIn_0.5s]">
+                <div class="flex items-center mb-4">
+                    <div class="w-3 h-3 bg-green-500 rounded-full animate-ping mr-3"></div>
+                    <h2 class="text-xl md:text-2xl font-bold tracking-widest">TARGET LOCK SYSTEM</h2>
+                </div>
+
+                <div class="mb-6 relative">
+                    <label class="text-[10px] text-green-600 font-bold uppercase mb-1 block">Ingrese Objetivo (IP / Dominio / MAC)</label>
+                    <div class="flex flex-col md:flex-row shadow-[0_0_20px_rgba(0,255,0,0.2)] relative z-50 gap-2 md:gap-0">
+                        <span class="bg-green-900/30 text-green-500 p-3 md:p-4 border border-green-700 items-center justify-center text-xl font-bold hidden md:flex">></span>
+                        <input type="text" id="ip-input" placeholder="192.168.1.1" class="w-full flex-grow bg-black border border-green-700 text-green-400 p-3 md:p-4 text-lg md:text-xl outline-none focus:bg-green-900/10 font-bold tracking-wider placeholder-green-900 cursor-text">
+                        <div class="flex w-full md:w-auto">
+                            <button onclick="resetTarget()" id="btn-reset-target" class="hidden bg-red-900/80 text-red-500 px-4 font-bold border border-green-700 hover:bg-red-600 hover:text-white transition-all cursor-pointer mr-2 md:mr-0 md:border-l-0">X</button>
+                            <button onclick="trackTarget()" id="btn-track" class="w-full md:w-auto btn-action px-4 md:px-8 py-3 md:py-4 font-bold text-lg flex items-center justify-center gap-2 hover:bg-green-500 hover:text-black whitespace-nowrap"><span>⌖</span> LOCALIZAR</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 md:gap-4 mb-6 text-xs relative z-50 justify-center md:justify-start">
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-white bg-green-900/20 p-2 border border-green-800 rounded"><input type="radio" name="ttype" value="ip" checked class="accent-green-500 cursor-pointer" onchange="updatePlaceholder(this.value)"> IPv4 / IPv6</label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-white bg-green-900/20 p-2 border border-green-800 rounded"><input type="radio" name="ttype" value="mac" class="accent-green-500 cursor-pointer" onchange="updatePlaceholder(this.value)"> MAC ADDR (L2)</label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-white bg-green-900/20 p-2 border border-green-800 rounded"><input type="radio" name="ttype" value="web" class="accent-green-500 cursor-pointer" onchange="updatePlaceholder(this.value)"> WEB SERVER</label>
+                </div>
+
+                <div id="api-console" class="hidden border-t-2 border-green-600 pt-4 mt-4 bg-black p-4 h-80 overflow-y-auto font-mono text-xs relative z-50">
+                    <div class="text-green-500 mb-2 font-bold flex justify-between"><span>[+] FULL OSINT INTELLIGENCE DUMP</span><span class="animate-pulse">LIVE FEED</span></div>
+                    <div id="api-output" class="space-y-1"></div>
+                </div>
+
+                <div id="api-error" class="hidden mt-4 p-4 bg-red-900/30 border border-red-500 text-red-500 font-bold text-center animate-pulse">
+                    [!] ERROR CRÍTICO DE ENLACE [!]<br><span class="text-xs font-normal">Reintentando conexión con S4G</span>
+                </div>
+
+                <button id="btn-next-config" onclick="showConfig()" disabled class="w-full mt-4 btn-action py-4 hidden font-bold text-lg md:text-xl tracking-[0.2em] animate-[pulse_2s_infinite] cursor-pointer relative z-100 bg-green-900/40 border-2 border-green-500 hover:bg-green-500 hover:text-black">INICIAR CONFIGURACIÓN DE VECTORES >></button>
+            </section>
+
+            <section id="sec-config" class="hidden w-full max-w-6xl animate-[fadeIn_0.5s] mb-20">
+                <div class="panel p-4 md:p-6 border-t-4 border-t-green-500">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-green-900 pb-2">
+                        <h2 class="text-2xl md:text-3xl font-bold">ATTACK VECTOR CONFIG</h2>
+                        <div class="text-left md:text-right mt-2 md:mt-0">
+                            <div class="text-xs text-green-600">LOCKED TARGET</div>
+                            <div id="config-target-ip" class="text-lg md:text-xl font-bold text-white">0.0.0.0</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+                        <div class="vector-card p-3 border-green-600" onclick="selectVector('UDP FLOOD', 'green')">
+                            <div class="flex justify-between items-center mb-2"><h4 class="font-bold text-green-400 text-sm">UDP FLOOD</h4><span class="text-[9px] border border-green-500 px-1">L4</span></div>
+                            <div class="h-1 bg-green-900 w-full mb-2"><div class="h-full bg-green-500 w-1/4"></div></div>
+                            <p class="text-[9px] text-gray-400">Volcado de datagramas UDP aleatorios. Saturación de ancho de banda.</p>
+                        </div>
+                        <div class="vector-card p-3 border-yellow-600" onclick="selectVector('ICMP ECHO', 'yellow')">
+                            <div class="flex justify-between items-center mb-2"><h4 class="font-bold text-yellow-400 text-sm">ICMP SWARM</h4><span class="text-[9px] border border-yellow-500 px-1">L3</span></div>
+                            <div class="h-1 bg-yellow-900 w-full mb-2"><div class="h-full bg-yellow-500 w-1/2"></div></div>
+                            <p class="text-[9px] text-gray-400">Ping flood masivo. Sobrecarga de peticiones de eco al router.</p>
+                        </div>
+                        <div class="vector-card p-3 border-orange-600" onclick="selectVector('TCP SYN', 'orange')">
+                            <div class="flex justify-between items-center mb-2"><h4 class="font-bold text-orange-500 text-sm">TCP SYN</h4><span class="text-[9px] border border-orange-500 px-1">L4</span></div>
+                            <div class="h-1 bg-orange-900 w-full mb-2"><div class="h-full bg-orange-500 w-3/4"></div></div>
+                            <p class="text-[9px] text-gray-400">Agotamiento de sockets. Llena la tabla de estados del servidor.</p>
+                        </div>
+                        <div class="vector-card p-3 border-red-500 relative overflow-hidden group" onclick="selectVector('DNS AMP', 'red')">
+                            <div class="flex justify-between items-center mb-2 relative z-10"><h4 class="font-bold text-red-500 text-sm">DNS AMP</h4><span class="text-[9px] bg-red-600 text-black font-bold px-1">L4+</span></div>
+                            <div class="h-1 bg-red-900 w-full mb-2"><div class="h-full bg-red-500 w-full animate-pulse"></div></div>
+                            <p class="text-[9px] text-red-300 relative z-10">Reflexión amplificada x70 usando Resolvers públicos.</p>
+                        </div>
+                        <div class="vector-card p-3 border-purple-500 relative overflow-hidden group" onclick="selectVector('LAYER 7 HTTP-FLOOD', 'purple')">
+                             <div class="absolute inset-0 bg-purple-600/10 animate-pulse"></div>
+                            <div class="flex justify-between items-center mb-2 relative z-10"><h4 class="font-bold text-purple-400 text-sm">LAYER 7</h4><span class="text-[9px] bg-purple-600 text-black font-bold px-1 animate-pulse">HTTP</span></div>
+                            <div class="h-1 bg-purple-900 w-full mb-2"><div class="h-full bg-purple-500 w-full"></div></div>
+                            <p class="text-[9px] text-purple-300 relative z-10">Peticiones GET/POST masivas simulando tráfico humano real.</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-8 p-4 bg-black/50 border border-green-800">
+                        <h4 class="text-xs text-green-500 mb-2 font-bold uppercase">Temporizador de Operación</h4>
+                        <div class="flex flex-col md:flex-row gap-2 md:gap-4">
+                            <button onclick="setDuration(10)" class="dur-btn flex-1 py-3 border border-green-800 text-sm hover:bg-green-900 transition-colors cursor-pointer font-bold">10 MIN (TEST)</button>
+                            <button onclick="setDuration(30)" class="dur-btn flex-1 py-3 border border-green-800 text-sm hover:bg-green-900 transition-colors cursor-pointer font-bold">30 MIN (LEVE)</button>
+                            <button onclick="setDuration(60)" class="dur-btn flex-1 py-3 border border-green-800 text-sm hover:bg-green-900 transition-colors cursor-pointer font-bold">1 HORA (FULL)</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row justify-end gap-4">
+                        <button onclick="resetSystem()" class="order-2 md:order-1 px-6 py-3 border border-gray-600 text-gray-500 hover:text-white cursor-pointer w-full md:w-auto">CANCELAR</button>
+                        <button id="btn-launch" onclick="startSimulation()" disabled class="order-1 md:order-2 w-full md:w-auto px-10 py-4 font-bold text-xl uppercase tracking-widest cursor-not-allowed kill-switch-btn z-100 opacity-50">LANZAR ATAQUE</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sec-sim" class="hidden fixed inset-0 bg-black z-[200] flex flex-col p-2 md:p-4 overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start mb-2 border-b-2 border-red-600 pb-2 bg-black shrink-0">
+                    <div>
+                        <div class="text-2xl md:text-4xl text-red-600 font-black glitch-text" data-text="ATAQUE EN PROGRESO">ATAQUE EN PROGRESO</div>
+                        <div class="text-[10px] md:text-xs text-red-400 font-mono mt-1 flex flex-wrap gap-2 md:gap-4">
+                            <span>OBJETIVO: <span id="sim-target-display" class="text-white font-bold">---</span></span>
+                            <span>VECTOR: <span id="sim-vector-display" class="text-white font-bold border px-1 border-red-500">---</span></span>
+                        </div>
+                    </div>
+                    <div class="text-right mt-2 md:mt-0">
+                        <div id="timer-display" class="text-4xl md:text-6xl font-mono text-red-500 font-bold">00:00:00</div>
+                    </div>
+                </div>
+
+                <div class="flex-grow flex flex-col lg:grid lg:grid-cols-12 gap-2 md:gap-4 overflow-hidden mb-16 md:mb-20">
+                    <div class="lg:col-span-8 bg-black border border-green-900 p-2 font-mono text-xs relative flex flex-col h-2/3 lg:h-auto">
+                        <div class="absolute top-0 left-0 w-full h-8 bg-gradient-to-b from-black to-transparent z-10"></div>
+                        <h4 class="text-green-600 border-b border-green-800 mb-2 pb-1 flex justify-between shrink-0">
+                            <span>TERMINAL_LEVIATHAM_CORE V1.0.0: TRAFICO SALIENTE (RAW)</span><span class="animate-pulse text-red-500">LIVE</span>
+                        </h4>
+                        <div id="packet-log" class="flex-grow overflow-hidden flex flex-col justify-end p-1"></div>
+                    </div>
+
+                    <div class="lg:col-span-4 flex flex-col gap-2 md:gap-4 h-1/3 lg:h-auto">
+                        <div class="h-full bg-red-950/10 border border-red-900 p-2 flex flex-col justify-center items-center relative overflow-hidden shrink-0 bg-grid-pattern">
+                            <div class="absolute inset-0 bg-red-500/5 animate-pulse"></div>
+                            <div class="text-red-500 text-[10px] tracking-[0.2em] mb-1 uppercase animate-pulse z-10">ANCHO DE BANDA ENVIADO</div>
+                            <div class="flex items-end gap-2 z-10">
+                                <span id="bytes-val" class="text-3xl md:text-5xl font-bold text-white glitch-text" data-text="00.00">00.00</span>
+                                <span id="unit-val" class="text-sm md:text-xl text-red-500 font-bold mb-1">MB</span>
+                            </div>
+                            <div class="w-full h-1 bg-red-900 mt-2 overflow-hidden z-10">
+                                <div class="h-full bg-red-500 w-1/2 animate-[translateX_1s_infinite_linear]"></div>
+                            </div>
+                            <div class="text-xs text-red-800 font-mono mt-2" id="real-ping-display">LATENCIA REAL: -- ms</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fixed bottom-0 left-0 w-full p-2 md:p-4 bg-black border-t-2 border-red-600 z-50 flex justify-center">
+                    <button onclick="abortSequence()" class="w-full md:w-auto kill-switch-btn px-4 md:px-12 py-2 md:py-3 font-bold text-lg md:text-xl uppercase tracking-widest cursor-pointer relative overflow-hidden">⚠️ ABORTAR (KILL SWITCH) ⚠️</button>
+                </div>
+
+                <div id="abort-screen" class="hidden absolute inset-0 bg-black z-[210] p-4 font-mono text-xs md:text-sm text-gray-400 flex flex-col justify-end pb-10 overflow-hidden">
+                    <div id="abort-terminal" class="space-y-1"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="w-full border-t border-green-900 bg-black/95 p-2 text-[10px] md:text-xs font-mono relative z-50 overflow-hidden">
+            <div class="ticker-wrap border-b border-green-900 mb-2 pb-1 bg-black text-green-700">
+                <div class="ticker">+++ SYSTEM ALERT: NEW CVE-2025-9981 DETECTED +++ NODE ALPHA ACTIVE +++ ENCRYPTION: AES-256-GCM +++ NSA/CSS SURVEILLANCE BLOCKED +++ PROXY CHAIN: 192.168.1.5 -> 10.0.0.8 -> 172.16.55.1 +++ LEVIATHAN CORE V.7.5.1 STABLE +++</div>
+            </div>
+            <div class="container mx-auto flex flex-col md:flex-row justify-between items-center opacity-80 gap-2">
+                <div class="flex flex-col items-center md:items-start">
+                    <span class="glitch-text font-bold tracking-[0.2em] text-green-500 text-sm" data-text="INDUSTRIAS LEVIATHAM">INDUSTRIAS LEVIATHAM © 2018-2025</span>
+                    <span class="text-[9px] text-gray-500">INDUSTRIAS LEVIATHAM</span>
+                </div>
+                <div class="flex gap-4 text-green-900 font-bold border border-green-900/50 p-1 px-2 bg-green-900/10">
+                    <span class="text-green-600">SERVER: <span class="text-green-400">S4G</span></span>
+                    <span class="text-green-600">CLIENT_IP: <span id="client-ip-display" class="text-red-400">DETECTING...</span></span>
+                    <span class="text-green-600">UTC: <span id="utc-clock" class="text-white">00:00:00</span></span>
+                </div>
+           </div>
+        </footer>
+
+    </div>
+
+    <script>
+        const termsHTML = `<div class="mb-2">> INICIANDO SISTEMA DE DENEGACION [OK]</div><div class="mb-2">> DESCRIPCIÓN DE ARSENAL DISPONIBLE:</div><ul class="list-none pl-2 space-y-1"><li><span class="text-green-500 font-bold">1. UDP FLOOD (L4):</span> Envío masivo de paquetes basura. Causa <span class="text-red-500 font-bold animate-pulse">SATURACIÓN DE ANCHO DE BANDA</span>.</li><li><span class="text-yellow-500 font-bold">2. ICMP SWARM (L3):</span> Sobrecarga de peticiones Echo. Provoca <span class="text-red-500 font-bold animate-pulse">COLAPSO DEL ROUTER</span>.</li><li><span class="text-orange-500 font-bold">3. TCP SYN (L4):</span> Inicia conexiones falsas sin cerrarlas. Genera <span class="text-red-500 font-bold animate-pulse">AGOTAMIENTO DE RECURSOS (RAM/CPU)</span>.</li><li><span class="text-red-500 font-bold">4. DNS AMP (Reflejado):</span> Usa servidores públicos para multiplicar el ataque x70. <span class="text-red-500 font-bold animate-pulse">DAÑO CRÍTICO ESTRUCTURAL</span>.</li><li><span class="text-purple-500 font-bold">5. LAYER 7 HTTP:</span> Simula tráfico humano real. Indetectable por firewalls simples. <span class="text-red-500 font-bold animate-pulse">CAÍDA DE SERVICIO WEB</span>.</li></ul><div class="mt-2 text-gray-400">> TODA ACCIÓN ES REGISTRADA LOCALMENTE.</div>`;
+        const termsContainer = document.getElementById('terms-text');
+        
+        window.onload = () => { initCanvas(); animateBg(); monitorNetwork(); startClock(); detectClientIP(); setTimeout(() => { termsContainer.innerHTML = termsHTML; }, 500); };
+        function startClock() { setInterval(() => { const now = new Date(); document.getElementById('utc-clock').innerText = now.toISOString().split('T')[1].split('.')[0] + " Z"; }, 1000); }
+        async function detectClientIP() { try { const req = await fetch('https://api.ipify.org?format=json'); const data = await req.json(); document.getElementById('client-ip-display').innerText = data.ip; } catch(e) { document.getElementById('client-ip-display').innerText = "HIDDEN/VPN"; } }
+
+        const canvas = document.getElementById('bg-canvas'); const ctx = canvas.getContext('2d');
+        let width, height, particles = [];
+        function initCanvas() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; particles = []; for(let j=0; j<60; j++) { particles.push({ x: Math.random()*width, y: Math.random()*height, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5 }); } }
+        window.onresize = initCanvas;
+        function animateBg() { ctx.clearRect(0,0,width,height); ctx.strokeStyle = 'rgba(0, 150, 0, 0.15)'; ctx.fillStyle = '#0f0'; particles.forEach((p, index) => { p.x += p.vx; p.y += p.vy; if(p.x < 0 || p.x > width) p.vx *= -1; if(p.y < 0 || p.y > height) p.vy *= -1; ctx.beginPath(); ctx.arc(p.x, p.y, 1, 0, Math.PI*2); ctx.fill(); particles.slice(index+1).forEach(p2 => { if(Math.hypot(p.x-p2.x, p.y-p2.y) < 100) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); } }); }); requestAnimationFrame(animateBg); }
+
+        function monitorNetwork() {
+            const statsEl = document.getElementById('real-network-stats'); const simPingEl = document.getElementById('real-ping-display');
+            async function checkPing() {
+                const start = performance.now();
+                try { await fetch('https://www.google.com/favicon.ico', { mode: 'no-cors', cache: 'no-store' }); const end = performance.now(); const ping = Math.round(end - start); let connType = 'UNKNOWN'; if (navigator.connection) { connType = navigator.connection.effectiveType ? navigator.connection.effectiveType.toUpperCase() : 'WIFI/ETH'; if(navigator.connection.downlink) { connType += ` | BW: ~${navigator.connection.downlink}Mbps`; } } const statusText = `NET: ${connType} | RTT: ${ping}ms`; statsEl.innerText = statusText; if(simPingEl) simPingEl.innerText = `LATENCIA REAL SISTEMA: ${ping} ms`; if(ping < 50) statsEl.className = "text-xs text-green-500 border border-green-800 px-2 py-1 bg-black/50"; else if(ping < 150) statsEl.className = "text-xs text-yellow-500 border border-yellow-800 px-2 py-1 bg-black/50"; else statsEl.className = "text-xs text-red-500 border border-red-800 px-2 py-1 bg-black/50"; } catch (e) { statsEl.innerText = "NET: OFFLINE / BLOCKED"; statsEl.className = "text-xs text-red-600 border border-red-800 px-2 py-1 bg-black/50"; }
+            } setInterval(checkPing, 2000); checkPing();
+        }
+
+        let state = { ip: '', vector: null, duration: 0, timers: [], totalBytes: 0 };
+        function updatePlaceholder(val) { const input = document.getElementById('ip-input'); if(val === 'ip') input.placeholder = "192.168.1.1"; else if(val === 'mac') input.placeholder = "00:1A:2B:3C:4D:5E"; else if(val === 'web') input.placeholder = "www.google.com"; }
+
+        async function trackTarget() {
+            const input = document.getElementById('ip-input').value.trim(); const type = document.querySelector('input[name="ttype"]:checked').value;
+            if(!input) return alert("¡ERROR! DEBE INGRESAR UN OBJETIVO.");
+            state.ip = input; const btn = document.getElementById('btn-track'); const output = document.getElementById('api-output'); const consoleDiv = document.getElementById('api-console'); const nextBtn = document.getElementById('btn-next-config'); const resetBtn = document.getElementById('btn-reset-target');
+            btn.innerHTML = `<span class="animate-spin">⚙</span> INITIALIZING...`; consoleDiv.classList.add('hidden'); nextBtn.classList.add('hidden'); output.innerHTML = '';
+            let finalData = {}; let isMacMode = (type === 'mac');
+            try {
+                let targetIP = input;
+                if (type === 'web') { if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(input)) { try { const dnsReq = await fetch(`https://dns.google/resolve?name=${input}&type=A`); const dnsJson = await dnsReq.json(); if (dnsJson.Answer) { targetIP = dnsJson.Answer[dnsJson.Answer.length - 1].data; finalData["[DNS] RESOLVED_IP"] = targetIP; } } catch (e) {} } }
+                if (type === 'mac') { if (input.includes('.') && !input.includes(':')) { finalData["WARNING"] = "DOMAIN DETECTED IN MAC INPUT"; finalData["AUTO_CORRECT"] = "VIRTUALIZING NIC..."; finalData["MAC_ADDRESS"] = "52:54:00:" + Math.floor(Math.random()*99).toString() + ":" + Math.floor(Math.random()*99).toString() + ":" + Math.floor(Math.random()*99).toString(); finalData["VENDOR"] = "Virtual Bridge (Auto-Generated)"; finalData["STATUS"] = "ACTIVE (TUNNELED)"; } else { const macDB = { "00:1A:2B": "Cisco Systems", "00:0C:29": "VMware", "F0:98:9D": "Apple", "B8:27:EB": "Raspberry Pi", "24:77:03": "Intel", "50:E5:49": "Giga-Byte", "00:D8:61": "TP-LINK", "C8:3A:35": "Tenda", "00:E0:4C": "Realtek", "D8:50:E6": "Asus", "FC:AA:14": "Giga-Byte", "00:25:90": "Super Micro" }; const clean = input.toUpperCase().replace(/[^A-F0-9]/g, "").substring(0,6); try { const req = await fetch(`https://api.maclookup.app/v2/macs/${input}`); if(req.ok) { const json = await req.json(); if(json.found) finalData["VENDOR"] = json.company; } } catch(e) {} if(!finalData["VENDOR"]) { for(let key in macDB) { if(clean.startsWith(key.replace(/:/g,""))) finalData["VENDOR"] = macDB[key]; } } if(!finalData["VENDOR"]) finalData["VENDOR"] = "PRIVATE / UNKNOWN OUI"; finalData["MAC_ADDR"] = input; finalData["L2_PROTOCOL"] = "ETHERNET II"; finalData["FRAME_CHECK"] = "VALID"; } }
+                if (!isMacMode) { 
+                    const p1 = fetch(`https://ipapi.co/${targetIP}/json/`).then(r=>r.json()).catch(e=>({})); 
+                    const p2 = fetch(`https://ipwho.is/${targetIP}`).then(r=>r.json()).catch(e=>({})); 
+                    const p3 = fetch(`https://api.databat.io/v1/ip/${targetIP}`).then(r=>r.json()).catch(e=>({})); 
+                    const p4 = fetch(`https://api.bgpview.io/ip/${targetIP}`).then(r=>r.json()).catch(e=>({})); 
+                    const p5 = fetch(`https://networkcalc.com/api/ip/${targetIP}`).then(r=>r.json()).catch(e=>({}));
+                    const p6 = fetch(`https://freeipapi.com/api/json/${targetIP}`).then(r=>r.json()).catch(e=>({}));
+                    const p7 = fetch(`https://api.iplocation.net/?ip=${targetIP}`).then(r=>r.json()).catch(e=>({}));
+
+                    const [d1, d2, d3, d4, d5, d6, d7] = await Promise.all([p1, p2, p3, p4, p5, p6, p7]); 
+                    
+                    finalData["[ID] TARGET"] = targetIP; 
+                    finalData["[ID] TYPE"] = d2.type || d6.ipVersion || "IPv4";
+                    finalData["[GEO] CONTINENT"] = d2.continent || d6.continent || "Unknown";
+                    finalData["[GEO] COUNTRY"] = `${d2.country || d1.country_name || d7.country_name} ${d2.flag?.emoji || ''}`;
+                    finalData["[GEO] REGION"] = d2.region || d1.region || d6.regionName;
+                    finalData["[GEO] CITY"] = d2.city || d1.city || d6.cityName;
+                    finalData["[GEO] ZIP"] = d2.postal || d1.postal || d6.zipCode;
+                    finalData["[GEO] COORDS"] = `${d2.latitude || d1.latitude || d6.latitude}, ${d2.longitude || d1.longitude || d6.longitude}`;
+                    finalData["[GEO] TIMEZONE"] = d2.timezone?.id || d1.timezone || d6.timeZone;
+                    finalData["[GEO] UTC OFF"] = d2.timezone?.utc || d1.utc_offset;
+                    finalData["[GEO] CURRENCY"] = `${d2.currency?.name} (${d2.currency?.symbol})`;
+                    finalData["[GEO] CALLING"] = `+${d2.calling_code || d1.country_calling_code}`;
+                    finalData["[NET] ASN"] = d2.connection?.asn || d1.asn || d7.asn; 
+                    finalData["[NET] ISP"] = d2.connection?.isp || d1.org || d7.isp; 
+                    finalData["[NET] ORG"] = d2.connection?.org || d1.org; 
+                    finalData["[NET] RANGE"] = d1.network || d5.address?.cidr || "Unknown";
+                    
+                    if(d4.data && d4.data.prefixes) {
+                        finalData["[BGP] PREFIX"] = d4.data.prefixes[0]?.prefix;
+                        finalData["[BGP] NAME"] = d4.data.prefixes[0]?.name;
+                        finalData["[BGP] DESC"] = d4.data.prefixes[0]?.description;
+                        finalData["[BGP] RIR"] = d4.data.rir_allocation?.rir_name;
+                    }
+
+                    if(d5.address) {
+                        finalData["[CALC] BINARY"] = d5.address.binary;
+                        finalData["[CALC] HEX"] = "0x" + targetIP.split('.').map(x => parseInt(x).toString(16).padStart(2,'0')).join('').toUpperCase();
+                        finalData["[CALC] INT"] = targetIP.split('.').reduce((ip, octet) => (ip << 8) + parseInt(octet, 10), 0) >>> 0;
+                        finalData["[CALC] MASK"] = d5.address.netmask_txt;
+                        finalData["[CALC] CLASS"] = d5.address.class;
+                    } else {
+                        finalData["[CALC] HEX"] = "0x" + targetIP.split('.').map(x => parseInt(x).toString(16).padStart(2,'0')).join('').toUpperCase();
+                    }
+
+                    finalData["[SEC] VPN"] = d2.security?.vpn ? "YES" : "NO"; 
+                    finalData["[SEC] PROXY"] = d2.security?.proxy ? "YES" : "NO"; 
+                    finalData["[SEC] TOR"] = d2.security?.tor ? "YES" : "NO"; 
+                    finalData["[SEC] HOSTING"] = d2.security?.hosting ? "YES" : "NO";
+                    if (type === 'web') { finalData["[WEB] SERVER"] = "nginx/1.18.0 (Ubuntu) [Est]"; finalData["[WEB] PORTS"] = "80, 443 (OPEN)"; } 
+                }
+
+                window.generatePacketLog = function() {
+                    const now = new Date(); const timeStr = now.toLocaleTimeString('es-AR', { hour12: false }) + "." + now.getMilliseconds().toString().padStart(3, '0'); const ts = `<span class="ts-time">${timeStr}</span>`;
+                    const sport = Math.floor(Math.random() * 65535); const pid = Math.floor(Math.random() * 32000); const spoof = `${Math.floor(Math.random()*223)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+                    const targetTag = `<span class="target-tag">${state.ip}</span>`;
+                    let log = "", size = 64;
+
+                    if (state.vector && state.vector.name === 'LAYER 7 HTTP-FLOOD') {
+                        const methods = ["GET", "POST", "HEAD", "PUT"];
+                        const agents = ["Mozilla/5.0", "curl/7.68.0", "python-requests/2.26.0", "Go-http-client/1.1", "Apache-HttpClient/4.5.13"];
+                        const method = methods[Math.floor(Math.random()*methods.length)];
+                        const scenarios = [
+                            `${ts} <span class="ts-proc">httpd[${pid}]:</span> [client ${spoof}] AH00037: Request body exceeded limit (1MB). Possible resource exhaustion attack.`,
+                            `${ts} <span class="ts-proc">nginx:</span> [error] limit_req_zone_req_rate: client ${spoof} exceeded rate limit of 10r/s`,
+                            `${ts} <span class="ts-warn">php-fpm[${pid}]:</span> [WARNING] server reached max_children setting, consider increasing it`,
+                            `${ts} <span class="ts-proc">httpd[${pid}]:</span> [client ${spoof}] "POST /api/search HTTP/1.1" 503 219 "http://..." user-agent: "${agents[0]}"`,
+                            `${ts} <span class="ts-proc">mysql:</span> [Warning] Aborted connection ${Math.floor(Math.random()*20000)} to db: 'appdb' user: 'webuser' (Got timeout reading communication packets)`,
+                            `${ts} <span class="ts-err">502 Bad Gateway</span> - Upstream timed out (110: Connection timed out) from ${targetTag}`,
+                            `${ts} <span class="ts-warn">Varnish:</span> Backend healthy check failed. Retry 3/5.`,
+                            `${ts} <span class="ts-info">POST</span> ${targetTag}/login.php | Payload: user=admin&pass=******** | 302 Found`,
+                            `${ts} <span class="ts-dim">ModSecurity:</span> Warning. Pattern match "bin/bash" at ARGS:cmd.`,
+                            `${ts} <span class="ts-info">RateLimit:</span> 429 Too Many Requests sent to ${targetTag}`
+                        ];
+                        log = scenarios[Math.floor(Math.random() * scenarios.length)];
+                        size = Math.floor(Math.random() * 2000) + 200;
+
+                    } else if (state.vector && state.vector.name === 'TCP SYN') {
+                        const port = `<span class="ts-port">80</span>`;
+                        const scenarios = [
+                            `${ts} <span class="ts-proc">kernel:</span> TCP: request_sock_TCP: Possible SYN flooding on port 80. Dropping request.`,
+                            `${ts} <span class="ts-proc">httpd[${pid}]:</span> [client ${spoof}] AH00447: Server ran out of slots to serve the requests.`,
+                            `${ts} <span class="ts-proc">kernel:</span> IN=eth0 OUT= MAC=... SRC=${spoof} DST=${targetTag} LEN=60 PROTO=TCP SPT=${sport} DPT=80 WINDOW=14600 RES=0x00 SYN`,
+                            `${ts} <span class="ts-info">netstat:</span> tcp_mem is too low. Increasing kernel memory usage by 12MB. 15000 sockets currently in SYN_RECV state.`,
+                            `${ts} <span class="ts-warn">sock:</span> TCP connection reset by peer ${targetTag}`,
+                            `${ts} <span class="ts-dim">nf_conntrack:</span> table full, dropping packet to ${targetTag}.`,
+                            `${ts} <span class="ts-info">Handshake:</span> SYN SENT to ${targetTag} -> Waiting ACK... (Timeout 3000ms)`,
+                            `${ts} <span class="ts-err">RST:</span> ${targetTag} rejected connection on port 443.`
+                        ];
+                        log = scenarios[Math.floor(Math.random() * scenarios.length)];
+                        size = 60;
+
+                    } else if (state.vector && state.vector.name === 'DNS AMP') {
+                        const res = "8.8.8.8";
+                        const scenarios = [
+                            `${ts} <span class="ts-proc">kernel:</span> IN=eth0 OUT= MAC=... SRC=8.8.8.8 DST=${targetTag} LEN=3800 PROTO=UDP SPT=53 DPT=${sport}`,
+                            `${ts} <span class="ts-proc">named[${pid}]:</span> client ${targetTag}#${sport}: RCODE=0 (No error) length 3800`,
+                            `${ts} <span class="ts-err">systemd-network:</span> eth0: critical: Link saturated. Ingress traffic exceeds 1Gbps threshold.`,
+                            `${ts} <span class="ts-warn">auditd:</span> INFO: Query type ANY detected. Source IP spoofing ${targetTag}`,
+                            `${ts} <span class="ts-info">dnstop:</span> 8.8.8.8 count 12000 % 65.0 - Large Response Threshold Exceeded.`,
+                            `${ts} <span class="ts-suc">REFLECT:</span> Received ${Math.floor(Math.random()*4000)} bytes from ${res} -> ${targetTag}`,
+                            `${ts} <span class="ts-err">SERVFAIL:</span> ${targetTag} unable to handle query volume.`,
+                            `${ts} <span class="ts-dim">Bind:</span> rate-limit dropped query from ${targetTag}`
+                        ];
+                        log = scenarios[Math.floor(Math.random() * scenarios.length)];
+                        size = 1200;
+
+                    } else if (state.vector && state.vector.name === 'ICMP ECHO') {
+                        const scenarios = [
+                            `${ts} <span class="ts-proc">kernel:</span> [IPTABLES] ICMP-DROP: IN=eth0 OUT= MAC=... SRC=${spoof} DST=${targetTag} TYPE=8 CODE=0`,
+                            `${ts} <span class="ts-warn">serverX auditd:</span> ALERT: Multiple ICMP Echo Requests from ${spoof} to subnet 192.168.1.0/24 detected.`,
+                            `${ts} <span class="ts-info">systemd-network:</span> interface eth0: ICMP rate limiting active for ${spoof}. Packets per second: 1.`,
+                            `${ts} <span class="ts-warn">snort[${pid}]:</span> [SID 2005] ATTACK-RESPONSES host ${targetTag} did not send ICMP Echo Reply. Stealth mode active.`,
+                            `${ts} <span class="ts-err">systemd:</span> service host-discovery-scan failed to complete. Status: ICMP_TIMEOUT`,
+                            `${ts} <span class="ts-info">PING</span> ${targetTag} (${state.ip}) 56(84) bytes of data.`,
+                            `${ts} <span class="ts-suc">Saturation:</span> ICMP buffer overflow on target router.`
+                        ];
+                        log = scenarios[Math.floor(Math.random() * scenarios.length)];
+                        size = 84;
+
+                    } else { // UDP (Default)
+                        const scenarios = [
+                            `${ts} <span class="ts-proc">kernel:</span> [ALERT] IN=eth0 OUT= MAC=... SRC=${spoof} DST=${targetTag} LEN=1500 PROTO=UDP SPT=${sport} DPT=${Math.floor(Math.random()*65535)}`,
+                            `${ts} <span class="ts-proc">kernel:</span> [CONNTRACK] UDP flood: ${spoof} hit 1000/sec limit. Dropping.`,
+                            `${ts} <span class="ts-err">systemd-network:</span> eth0: critical: RCV_ERR=128, DROPPED=4096. Link utilization 98%`,
+                            `${ts} <span class="ts-err">ping:</span> sendto: No buffer space available`,
+                            `${ts} <span class="ts-info">UDP:</span> Packet injected. Len=${Math.floor(Math.random()*1400)} Src=${spoof} Dst=${targetTag}`,
+                            `${ts} <span class="ts-suc">Bandwidth:</span> Saturating uplink... 500Mbps sent to ${targetTag}`
+                        ];
+                        log = scenarios[Math.floor(Math.random() * scenarios.length)];
+                        size = 1000;
+                    }
+
+                    return { html: `<div class="terminal-line">${log}</div>`, size: size * (Math.random() * 50 + 10) };
+                };
+
+                function renderObject(obj, prefix = '') { for(let key in obj) { if(obj[key] !== undefined && typeof obj[key] !== 'object') { output.innerHTML += `<div class="api-row"><span class="api-key">${prefix}${key}</span><span class="api-val">${obj[key]}</span></div>`; } } }
+                renderObject(finalData); consoleDiv.classList.remove('hidden'); btn.innerHTML = `<span>✓</span> TARGET LOCKED`; btn.classList.add('bg-green-600', 'text-black'); nextBtn.classList.remove('hidden'); nextBtn.disabled = false; nextBtn.style.cursor = "pointer"; resetBtn.classList.remove('hidden');
+            } catch (e) { console.error("Critical Fail:", e); output.innerHTML = `<div class="api-row"><span class="api-key text-red-500">FATAL ERROR</span><span class="api-val">NETWORK UNREACHABLE</span></div>`; consoleDiv.classList.remove('hidden'); btn.innerHTML = `<span>X</span> FAIL`; btn.classList.add('bg-red-900'); resetBtn.classList.remove('hidden'); }
+        }
+
+        function resetTarget() { const input = document.getElementById('ip-input'); const btn = document.getElementById('btn-track'); const output = document.getElementById('api-output'); const consoleDiv = document.getElementById('api-console'); const nextBtn = document.getElementById('btn-next-config'); const resetBtn = document.getElementById('btn-reset-target'); input.value = ''; input.focus(); state.ip = ''; btn.innerHTML = `<span>⌖</span> LOCALIZAR`; btn.classList.remove('bg-green-600', 'text-black', 'bg-red-900', 'bg-yellow-600'); consoleDiv.classList.add('hidden'); nextBtn.classList.add('hidden'); resetBtn.classList.add('hidden'); output.innerHTML = ''; }
+        function showConfig() { document.getElementById('sec-target').classList.add('hidden'); document.getElementById('sec-config').classList.remove('hidden'); document.getElementById('config-target-ip').innerText = state.ip; }
+        function selectVector(name, color) { document.querySelectorAll('.vector-card').forEach(c => c.classList.remove('selected')); event.currentTarget.classList.add('selected'); state.vector = { name, color }; checkLaunch(); }
+        function setDuration(min) { document.querySelectorAll('.dur-btn').forEach(b => { b.classList.remove('bg-green-500', 'text-black'); }); event.target.classList.add('bg-green-500', 'text-black'); state.duration = min; checkLaunch(); }
+        function checkLaunch() { const btn = document.getElementById('btn-launch'); if(state.vector && state.duration) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); btn.classList.add('hover:bg-red-600', 'hover:text-black', 'shadow-[0_0_20px_#f00]'); btn.style.cursor = "pointer"; if(state.vector.color === 'red' || state.vector.color === 'purple') { btn.classList.add('animate-pulse'); } else { btn.classList.remove('animate-pulse'); } } }
+        function startSimulation() { document.getElementById('sec-config').classList.add('hidden'); document.getElementById('sec-sim').classList.remove('hidden'); document.getElementById('sim-target-display').innerText = state.ip; const vecDisplay = document.getElementById('sim-vector-display'); vecDisplay.innerText = state.vector.name; const colors = { green: '#0f0', yellow: '#ff0', orange: '#ffa500', red: '#f00', purple: '#a855f7' }; vecDisplay.style.borderColor = colors[state.vector.color]; vecDisplay.style.color = colors[state.vector.color]; state.totalBytes = 0; runTimer(state.duration * 60); runAttackLoops(); }
+        function runTimer(seconds) { let t = seconds; const el = document.getElementById('timer-display'); state.timers.push(setInterval(() => { const h = Math.floor(t/3600).toString().padStart(2,'0'); const m = Math.floor((t%3600)/60).toString().padStart(2,'0'); const s = (t%60).toString().padStart(2,'0'); el.innerText = `${h}:${m}:${s}`; t--; if(t<0) abortSequence(); }, 1000)); }
+        function runAttackLoops() { 
+            const logBox = document.getElementById('packet-log'); 
+            const byteEl = document.getElementById('bytes-val'); 
+            const unitEl = document.getElementById('unit-val'); 
+            
+            // VELOCIDAD LOGS: 0.10s
+            const speed = 100; 
+            
+            state.timers.push(setInterval(() => { 
+                const packetData = window.generatePacketLog ? window.generatePacketLog() : {html: "Initializing...", size: 0}; 
+                logBox.insertAdjacentHTML('beforeend', packetData.html); 
+                if(logBox.children.length > 25) { logBox.removeChild(logBox.firstChild); } 
+                logBox.scrollTop = logBox.scrollHeight; 
+                
+                // MULTIPLICADORES DE ANCHO DE BANDA
+                let multiplier = 1;
+                if (state.vector.name === 'DNS AMP') multiplier = 50; 
+                else if (state.vector.name === 'UDP FLOOD') multiplier = 20;
+                else if (state.vector.name === 'TCP SYN') multiplier = 10;
+                else multiplier = 5;
+
+                state.totalBytes += packetData.size * multiplier; 
+                
+                const PB = 1024 * 1024 * 1024 * 1024 * 1024; 
+                let displayVal = 0; 
+                let displayUnit = 'MB'; 
+                
+                if (state.totalBytes > PB) { 
+                    byteEl.innerText = "☠️"; 
+                    byteEl.setAttribute('data-text', "∞"); 
+                    unitEl.innerText = "INCALCULABLE"; 
+                    unitEl.classList.add("text-red-500", "animate-pulse"); 
+                } else { 
+                    unitEl.classList.remove("animate-pulse"); 
+                    if (state.totalBytes < 1024 * 1024 * 1024) { 
+                        displayVal = (state.totalBytes / (1024 * 1024)).toFixed(2); displayUnit = 'MB'; 
+                    } else if (state.totalBytes < 1024 * 1024 * 1024 * 1024) { 
+                        displayVal = (state.totalBytes / (1024 * 1024 * 1024)).toFixed(2); displayUnit = 'GB'; 
+                    } else { 
+                        displayVal = (state.totalBytes / (1024 * 1024 * 1024 * 1024)).toFixed(2); displayUnit = 'TB'; 
+                    } 
+                    byteEl.innerText = displayVal; byteEl.setAttribute('data-text', displayVal); unitEl.innerText = displayUnit; 
+                } 
+            }, speed)); 
+        }
+
+        // --- ANIMACIÓN REALISTA DE ABORTAR (SYSTEMD HALT) ---
+        function abortSequence() {
+            state.timers.forEach(clearInterval);
+            const screen = document.getElementById('abort-screen');
+            const term = document.getElementById('abort-terminal');
+            screen.classList.remove('hidden');
+            screen.classList.add('flex'); 
+            
+            const shutdownMsgs = ["[  OK  ] Stopped User Manager for UID 1000.","[  OK  ] Stopped Session 1 of user root.","[  OK  ] Stopped Network Manager.","[  OK  ] Unmounting /home/leviatham/attack_logs...","[  OK  ] Stopped Target Tracking Deamon.","[  OK  ] Stopped Packet Injection Service.","[ INFO ] Caught Signal SIGINT. Stopping all threads.","[ FAIL ] Killing process 1337 (DDoS)... Force SIGKILL sent.","[  OK  ] Process 1337 killed.","[  OK  ] Deactivating Swap /dev/sda2.","[  OK  ] Unmounting /boot/efi...","[  OK  ] Reached target Unmount All Filesystems.","[  OK  ] Stopped System Logging Service.","[  OK  ] Reached target Shutdown.","[ INFO ] System Halted. Powering off."];
+            let i = 0;
+            const interval = setInterval(() => {
+                if(i < shutdownMsgs.length) {
+                    const line = document.createElement('div');
+                    line.innerText = shutdownMsgs[i];
+                    if(line.innerText.includes("[  OK  ]")) line.innerHTML = line.innerText.replace("[  OK  ]", "<span class='text-green-500 font-bold'>[  OK  ]</span>");
+                    else if (line.innerText.includes("[ FAIL ]")) line.innerHTML = line.innerText.replace("[ FAIL ]", "<span class='text-red-500 font-bold'>[ FAIL ]</span>");
+                    else line.className = "text-white font-bold";
+                    term.appendChild(line); window.scrollTo(0, document.body.scrollHeight); i++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => { document.body.classList.add('shutdown-effect'); setTimeout(resetSystem, 1000); }, 500);
+                }
+            }, 80);
+        }
+        function resetSystem() { location.reload(); }
+    </script>
+</body>
+</html>
