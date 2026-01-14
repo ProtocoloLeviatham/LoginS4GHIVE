@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost ID</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuentes Tácticas, de Máquina de Escribir, Sellos y FIRMA -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700;800&family=Courier+Prime:wght@400;700&family=Fira+Code:wght@400;600&family=Special+Elite&family=Black+Ops+One&family=Libre+Barcode+39+Text&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #00ff00;
+            --secondary: #004400;
+            --bg-color: #0a0a0a;
+            --glass: rgba(0, 20, 0, 0.95);
+            --border: 1px solid #00ff00;
+            --paper: #e8e4d9; 
+            --ink: #1a1a1a;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            perspective: 1000px;
+        }
+
+        /* --- FONDO RED NEURONAL --- */
+        #neural-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2; pointer-events: none; }
+
+        /* --- EFECTO CRT --- */
+        .crt::before {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
+        .scanline {
+            width: 100%; height: 100px; z-index: 51;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0, 255, 0, 0.2) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1; position: absolute; bottom: 100%;
+            animation: scanline 8s linear infinite; pointer-events: none;
+        }
+        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100%; } }
+
+        /* --- UI COMPONENTS --- */
+        .container-main { max-width: 900px; margin: 0 auto; width: 100%; padding: 20px; position: relative; z-index: 60; flex-grow: 1; display: flex; flex-direction: column; }
+
+        .cyber-panel {
+            background: var(--glass); border: var(--border);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.15);
+            backdrop-filter: blur(4px); margin-bottom: 20px;
+            position: relative;
+        }
+
+        .cyber-input {
+            background: #0a0a0a; border: 1px solid #333; color: white;
+            padding: 10px; width: 100%; font-family: 'Share Tech Mono', monospace;
+            transition: 0.3s; text-transform: uppercase;
+        }
+        .cyber-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px rgba(0,255,0,0.2); }
+
+        .btn-action {
+            background: var(--secondary); color: var(--primary); border: 1px solid var(--primary);
+            padding: 15px; width: 100%; font-weight: bold; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px; transition: 0.2s;
+            position: relative; overflow: hidden; display: flex; justify-content: center; gap: 10px; align-items: center;
+        }
+        .btn-action:hover { background: var(--primary); color: black; box-shadow: 0 0 20px var(--primary); }
+        .btn-action:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+
+        /* --- MOTOR 3D PURO --- */
+        .scene-3d {
+            width: 100%; max-width: 600px; height: 380px; 
+            margin: 20px auto;
+            perspective: 1500px;
+            cursor: grab;
+        }
+        .scene-3d:active { cursor: grabbing; }
+
+        /* Envoltorio que rota */
+        .card-object {
+            width: 100%; height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s;
+        }
+
+        /* Caras comunes */
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.1);
+            background-color: #080808;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 50, 0, 0.1) 0%, transparent 60%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 5px),
+                repeating-linear-gradient(-45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 5px);
+            border: 1px solid #444;
+        }
+
+        /* --- CARA DELANTERA (FRONT) --- */
+        .card-face.front {
+            display: grid; grid-template-columns: 140px 1fr; gap: 0;
+            font-family: 'Rajdhani', sans-serif; color: #e0e0e0;
+        }
+        
+        .card-face.front::after {
+            content: ""; position: absolute; inset: -50%;
+            background: linear-gradient(135deg, transparent 40%, rgba(0, 255, 136, 0.2) 45%, rgba(0, 119, 255, 0.2) 50%, rgba(0, 255, 136, 0.2) 55%, transparent 60%);
+            mix-blend-mode: color-dodge;
+            animation: holo-shift 8s linear infinite;
+            pointer-events: none; z-index: 50; opacity: 0.6;
+        }
+
+        /* --- CARA TRASERA (BACK) --- */
+        .card-face.back {
+            transform: rotateY(180deg);
+            display: flex; flex-direction: column;
+            background-color: #0a0a0a;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        
+        .magnetic-stripe {
+            height: 50px; width: 100%; background: #111;
+            margin-top: 30px;
+            background-image: repeating-linear-gradient(90deg, #000 0px, #000 2px, #111 2px, #111 4px);
+        }
+
+        .back-content { padding: 20px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1; }
+
+        .signature-panel {
+            background: #fff; height: 40px; width: 80%;
+            margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="40" viewBox="0 0 100 40" xmlns="http://www.w3.org/2000/svg"><text x="50%" y="50%" font-size="10" fill="%23eee" dominant-baseline="middle" text-anchor="middle">AUTHORIZED SIGNATURE</text></svg>');
+        }
+        .real-signature {
+            font-family: 'Mrs Saint Delafield', cursive; font-size: 28px; color: #000;
+            transform: rotate(-2deg);
+        }
+
+        .legal-text { font-size: 8px; color: #666; line-height: 1.2; text-align: justify; }
+        
+        .back-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; }
+        .barcode-box { font-family: 'Libre Barcode 39 Text'; font-size: 32px; color: #888; }
+
+        /* --- Estilos internos --- */
+        @media (max-width: 600px) {
+            .scene-3d { height: 500px; }
+            .card-face.front { grid-template-columns: 1fr; text-align: center; }
+            .id-sidebar { flex-direction: row; width: 100%; border-right: none; border-bottom: 1px solid #333; padding: 10px; justify-content: center; gap: 15px; flex-wrap: wrap; } 
+            .vertical-text { display: none; } 
+        }
+
+        .security-pattern { position: absolute; inset: 0; background-image: url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><text x="30" y="30" font-size="4" fill="%23ffffff" opacity="0.05" font-family="monospace" text-anchor="middle" dominant-baseline="middle" transform="rotate(-30 30 30)">LEVIATHAM OFFICIAL</text></svg>'); z-index: 0; pointer-events: none; }
+        .id-header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--primary); padding: 15px 20px 10px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8); background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
+        .id-header-text h2 { font-size: 20px; font-weight: 900; letter-spacing: 3px; color: #fff; text-transform: uppercase; }
+        .id-header-text span { font-size: 10px; color: var(--primary); letter-spacing: 3px; font-weight: bold; }
+        
+        .id-sidebar { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; position: relative; z-index: 2; background: rgba(0, 20, 0, 0.3); border-right: 1px solid rgba(255,255,255,0.1); padding: 15px 0; flex-shrink: 0; overflow: hidden; }
+        .vertical-text { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); font-size: 8px; color: #444; letter-spacing: 2px; margin-top: 10px; font-family: 'Share Tech Mono'; border-left: 1px solid #333; padding-left: 4px; height: 100%; max-height: 40px; }
+        .id-photo-frame { width: 100px; height: 130px; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 3px; position: relative; background: #000; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,1); margin-bottom: 10px; flex-shrink: 0; }
+        .id-photo-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; filter: grayscale(100%) contrast(1.3) brightness(0.9); position: relative; z-index: 2; }
+        .qr-frame { background: white; padding: 2px; border-radius: 4px; margin-top: auto; margin-bottom: 5px; width: 60px; height: 60px; flex-shrink: 0; }
+        .qr-frame img { width: 100%; height: 100%; }
+        .ghost-photo { position: absolute; right: -20px; bottom: 40px; width: 120px; height: 150px; opacity: 0.15; filter: grayscale(100%) invert(1); mix-blend-mode: overlay; z-index: 1; pointer-events: none; transform: rotate(-5deg); mask-image: radial-gradient(circle, black 30%, transparent 70%); -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%); }
+        .chip { width: 42px; height: 32px; background: linear-gradient(135deg, #a67c00 0%, #ffd700 50%, #a67c00 100%); border-radius: 6px; margin-bottom: 15px; box-shadow: 0 3px 5px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.4); position: relative; overflow: hidden; border: 1px solid #8b6508; flex-shrink: 0; }
+        .chip::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.5) 50%, transparent 52%), linear-gradient(0deg, transparent 48%, rgba(0,0,0,0.5) 50%, transparent 52%); background-size: 14px 100%, 100% 16px; }
+        .id-main { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); padding: 0 20px 20px 10px; }
+        .data-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .data-field-v2 { flex-grow: 1; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px; }
+        .label-v2 { font-size: 7px; color: #aaa; display: block; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 1px; }
+        .value-v2 { font-size: 13px; color: #fff; font-weight: 700; text-transform: uppercase; font-family: 'Rajdhani', sans-serif; letter-spacing: 1px; }
+        .value-v2.highlight { color: var(--primary); font-size: 15px; font-weight: 800; }
+        .mrz-container { font-family: 'OCR-B', 'Courier New', monospace; font-size: 13px; letter-spacing: 2px; color: #222; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 4px; margin-top: auto; width: 100%; white-space: pre; overflow: hidden; font-weight: bold; text-transform: uppercase; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); border: 1px solid #000; }
+        
+        .signature-field { font-family: 'Mrs Saint Delafield', cursive; font-size: 24px; color: rgba(0, 0, 0, 0.7); position: absolute; bottom: 60px; right: 20px; transform: rotate(-5deg); z-index: 5; text-shadow: 0 0 2px rgba(255,255,255,0.5); pointer-events: none; mix-blend-mode: multiply; }
+        .id-card .signature-field { color: rgba(255, 255, 255, 0.8); mix-blend-mode: normal; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
+        .glare { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4), transparent 50%); opacity: 0; mix-blend-mode: overlay; pointer-events: none; z-index: 60; }
+
+        /* --- EXPEDIENTE PAPEL (MEJORADO PARA MÓVIL) --- */
+        .paper-dossier { 
+            background-color: var(--paper); 
+            color: var(--ink); 
+            font-family: 'Special Elite', 'Courier Prime', monospace; 
+            padding: 60px; 
+            margin: 60px auto; 
+            max-width: 850px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 100px rgba(139, 69, 19, 0.4); 
+            position: relative; 
+            transform: rotate(-1deg); 
+            border: none; 
+            background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.6' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.2'/></svg>"), linear-gradient(to bottom right, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.1) 100%); 
+            overflow: hidden; 
+        }
+
+        .dossier-grid-form { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            position: relative; 
+            z-index: 2; 
+            border: 2px solid #333; 
+            padding: 15px; 
+            background: rgba(255,255,255,0.4); 
+        }
+
+        /* MEDIA QUERY PARA MÓVILES (FIX DE ANCHO Y TEXTO) */
+        @media (max-width: 768px) {
+            .container-main {
+                padding: 10px;
+                width: 100%;
+                overflow-x: hidden;
+            }
+            .paper-dossier {
+                padding: 15px; 
+                margin: 20px 0; 
+                width: 100%; 
+                max-width: 100%;
+                transform: none; /* Quitar rotación para aprovechar espacio */
+                box-sizing: border-box;
+            }
+            /* Alinear cuadrícula en una sola columna */
+            .dossier-grid-form {
+                display: flex;
+                flex-direction: column;
+                padding: 5px;
+                gap: 10px;
+            }
+            /* Forzar cajas al 100% de ancho */
+            .form-box, .form-box.span-2, .form-box.span-4 {
+                width: 100%;
+                margin-bottom: 0;
+            }
+            /* Ajuste crítico de texto para evitar desbordes */
+            .box-value, .box-value.mono-sm {
+                white-space: pre-wrap; /* Permitir salto de línea */
+                word-break: break-all; /* Romper palabras largas si es necesario */
+                overflow-wrap: anywhere;
+                font-size: 11px; /* Texto un poco más pequeño */
+                line-height: 1.3;
+            }
+            .dossier-header-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .dh-security-box {
+                margin-top: 15px;
+            }
+            .paper-watermark {
+                font-size: 4rem;
+                opacity: 0.05;
+                top: 20%;
+            }
+        }
+
+        .paper-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg) scale(1.2); font-size: 12rem; color: rgba(0,0,0,0.04); font-family: 'Black Ops One'; pointer-events: none; z-index: 0; white-space: nowrap; text-transform: uppercase; }
+        .stamp-top-secret { position: absolute; top: 30px; right: 30px; border: 6px double #b00; color: #b00; font-size: 32px; font-weight: bold; font-family: 'Black Ops One', sans-serif; padding: 10px 25px; transform: rotate(-8deg); text-transform: uppercase; mix-blend-mode: multiply; opacity: 0.8; mask-image: url("data:image/svg+xml;utf8,<svg width='300' height='150' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>"); }
+        .stamp-copy { position: absolute; bottom: 120px; left: 50px; border: 3px solid #000080; color: #000080; font-size: 18px; font-family: 'Courier Prime'; font-weight: bold; padding: 5px 15px; transform: rotate(5deg); text-transform: uppercase; mix-blend-mode: multiply; opacity: 0.7; }
+        .dossier-header-grid { display: grid; grid-template-columns: 1fr 200px; border-bottom: 4px solid #222; padding-bottom: 20px; margin-bottom: 30px; position: relative; z-index: 2; }
+        .dh-title h1 { font-size: 36px; font-weight: 900; text-decoration: underline; margin-bottom: 5px; }
+        .dh-meta { font-family: 'Fira Code', monospace; font-size: 11px; color: #444; }
+        .dh-security-box { border: 3px solid #222; text-align: center; padding: 5px; display: flex; flex-direction: column; justify-content: center; background: rgba(0,0,0,0.05); }
+        .dh-security-label { font-size: 10px; font-weight: bold; display: block; border-bottom: 2px solid #222; }
+        .dh-security-level { font-family: 'Black Ops One'; font-size: 24px; color: #b00; line-height: 1.2; }
+        
+        .form-box { border: 1px solid #555; padding: 8px; position: relative; background: rgba(240, 240, 230, 0.6); }
+        .form-box.span-2 { grid-column: span 2; }
+        .form-box.span-4 { grid-column: span 4; }
+        .box-label { display: block; font-size: 9px; font-weight: bold; text-transform: uppercase; color: #555; border-bottom: 1px dotted #777; margin-bottom: 5px; font-family: 'Fira Code', monospace; }
+        .box-value { font-family: 'Special Elite', 'Courier New', monospace; font-size: 14px; color: #000; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .box-value.highlight { color: #b00; }
+        .box-value.mono-sm { font-family: 'Fira Code', monospace; font-size: 11px; }
+        .comms-box { background: rgba(0,0,0,0.05); padding: 15px; border-left: 4px solid #b00; font-style: italic; }
+        .dossier-footer { text-center: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #333; font-family: 'Fira Code', monospace; font-size: 10px; color: #555; position: relative; z-index: 2; }
+
+        /* --- TERMINAL WINDOW STYLE --- */
+        #hack-terminal { 
+            position: fixed; inset: 0; z-index: 100;
+            display: none; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.85); /* Fondo oscuro semitransparente */
+            backdrop-filter: blur(5px);
+        }
+        
+        .terminal-window {
+            width: 90%; max-width: 800px; height: 80%; max-height: 600px;
+            background: #000;
+            border: 1px solid #333;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.2);
+            display: flex; flex-direction: column;
+            border-radius: 6px;
+            overflow: hidden;
+            font-family: 'Fira Code', 'Courier New', monospace; font-size: 14px; color: #ccc;
+        }
+
+        .terminal-bar {
+            background: #1a1a1a; padding: 8px 15px;
+            border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .terminal-controls { display: flex; gap: 8px; }
+        .control-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .dot-red { background: #ff5f56; } .dot-yellow { background: #ffbd2e; } .dot-green { background: #27c93f; }
+        .terminal-title { color: #888; font-size: 12px; font-weight: bold; }
+
+        .boot-log { 
+            flex-grow: 1; overflow-y: auto; padding: 20px;
+            line-height: 1.4; scrollbar-width: thin; scrollbar-color: #333 #000;
+        }
+        /* Custom scrollbar */
+        .boot-log::-webkit-scrollbar { width: 8px; }
+        .boot-log::-webkit-scrollbar-track { background: #000; }
+        .boot-log::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+        .linux-ascii { 
+            color: var(--primary); font-size: 10px; line-height: 10px; white-space: pre; 
+            font-weight: bold; margin-bottom: 20px;
+            text-shadow: 0 0 5px rgba(0,255,0,0.5);
+        }
+        
+        .log-line { display: flex; align-items: flex-start; margin-bottom: 4px; }
+        .log-time { color: #666; margin-right: 15px; min-width: 80px; }
+        .log-status { font-weight: bold; margin-right: 10px; min-width: 50px; text-align: center; }
+        .status-ok { color: var(--primary); }
+        .status-fail { color: #ff3333; }
+        .status-warn { color: #ffcc00; }
+        .log-msg { color: #ddd; white-space: pre-wrap; word-break: break-all; }
+
+        .prompt-line { display: flex; align-items: center; color: #fff; margin-top: 10px; }
+        .prompt-user { color: #ff3333; font-weight: bold; }
+        .prompt-host { color: #fff; }
+        .prompt-path { color: #3333ff; font-weight: bold; }
+        .cursor-blink { display: inline-block; width: 8px; height: 16px; background: #ccc; animation: blink 1s step-end infinite; margin-left: 5px; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        
+        .glitch { font-size: 2.5rem; font-weight: bold; text-transform: uppercase; text-shadow: 2px 2px 0px #f00, -2px -2px 0px #00f; animation: glitch 1s infinite alternate; }
+        .glitch-sm { font-size: 1rem; text-shadow: 1px 1px 0px #f00, -1px -1px 0px #00f; animation: glitch 2s infinite alternate-reverse; }
+        @keyframes glitch { 0% { text-shadow: 2px 2px 0px #f00; } 100% { text-shadow: -2px -2px 0px #00f; } }
+    </style>
+</head>
+<body class="crt">
+    <canvas id="neural-canvas"></canvas>
+    <div class="scanline"></div>
+
+    <!-- TERMINAL DE CARGA SYSTEM404G (ENCUADRADA) -->
+    <div id="hack-terminal">
+        <div class="terminal-window">
+            <div class="terminal-bar">
+                <div class="terminal-controls">
+                    <div class="control-dot dot-red"></div>
+                    <div class="control-dot dot-yellow"></div>
+                    <div class="control-dot dot-green"></div>
+                </div>
+                <div class="terminal-title">root@leviatham:~</div>
+                <div style="width: 40px;"></div> <!-- Spacer -->
+            </div>
+            <div class="boot-log" id="boot-log">
+                <div class="linux-ascii">
+  _               _       _   _                     
+ | |    _____   _(_) __ _| |_| |__   __ _ _ __ ___  
+ | |   / _ \ \ / / |/ _` | __| '_ \ / _` | '_ ` _ \ 
+ | |__|  __/\ V /| | (_| | |_| | | | (_| | | | | | |
+ |_____\___| \_/ |_|\__,_|\__|_| |_|\__,_|_| |_| |_|
+ KALI LINUX // LEVIATHAM EDITION v1.0.0
+                </div>
+                <!-- Dynamic Logs Here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container-main">
+        
+        <!-- HEADER -->
+        <header class="text-center border-b-2 border-green-900 pb-4 mb-6">
+            <h1 class="glitch tracking-widest text-white">LEVIATHAM GHOST ID</h1>
+            <div class="flex justify-center gap-4 mt-2 text-xs font-bold">
+                <span class="text-green-600">SYS: <span class="text-white">ONLINE</span></span>
+                <span class="text-green-600">ENCRYPTION: <span class="text-white">AES-256</span></span>
+                <span class="text-green-600">NODE: <span class="text-white">KALI_01</span></span>
+            </div>
+        </header>
+
+        <!-- PROTOCOLO DE USO (AMPLIADO Y DETALLADO) -->
+        <div class="cyber-panel p-4 mb-6 border-l-4 border-green-600 bg-black/40">
+            <h3 class="text-green-400 font-bold text-sm mb-2 tracking-widest">[ PROTOCOLO DE USO OPERATIVO v2.1 ]</h3>
+            <div class="text-xs text-gray-300 leading-relaxed font-mono space-y-2">
+                <p><strong>OBJETIVO:</strong> Esta herramienta genera identidades sintéticas profundas ("Deep Fakes") para operaciones de OSINT (Open Source Intelligence), Red Teaming y anonimato digital avanzado. Cruza más de 25 bases de datos globales en tiempo real.</p>
+                <p><strong>FUNCIONAMIENTO TÉCNICO:</strong> Al ejecutar el comando de fabricación, el núcleo LEVIATHAM interroga nodos públicos y privados (APIs) para ensamblar un perfil coherente que incluye historial financiero, biometría médica (FDA), antecedentes penales (FBI) y huella digital.</p>
+                <p><strong>ADVERTENCIA LEGAL:</strong> El uso de identidades generadas para fraude, evasión o actividades ilícitas constituye una violación de los estatutos federales de ciberseguridad. LEVIATHAM no registra logs de generación.</p>
+                <p><strong>INSTRUCCIONES:</strong> Seleccione los parámetros objetivo (Género/Región) y ejecute el algoritmo. El sistema realizará inyecciones SQL y scraping de APIs gubernamentales publicas y legales para construir un perfil.</p>
+            </div>
+            <div class="bg-green-900/20 p-2 border border-green-800/50 mt-3">
+                <p class="text-[10px] text-green-300 font-bold">
+                    <i class="fas fa-satellite-dish mr-1"></i> TIP TÁCTICO: El nodo de 'ESTADOS UNIDOS (US)' posee la mayor densidad de datos cruzados y coherencia en las bases de datos federales (FBI/FDA). Úsalo para expedientes de máxima credibilidad. Para operaciones en LATAM, utilice 'ARGENTINA (AR)' sabiendo que el sistema forzará algoritmos de aproximación cultural si la base de datos local está fragmentada.
+                </p>
+            </div>
+        </div>
+
+        <!-- PANEL DE CONFIGURACIÓN -->
+        <div id="config-panel" class="cyber-panel p-6">
+            <h2 class="text-lg font-bold mb-4 border-b border-gray-700 pb-2 flex items-center">
+                <i class="fas fa-fingerprint mr-2"></i> GENERADOR DE IDENTIDAD SINTÉTICA
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="label mb-2">GÉNERO DEL OBJETIVO</label>
+                    <select id="gender" class="cyber-input">
+                        <option value="male">MASCULINO</option>
+                        <option value="female">FEMENINO</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="label mb-2">REGIÓN DE ORIGEN</label>
+                    <select id="region" class="cyber-input">
+                        <option value="us">ESTADOS UNIDOS (US)</option>
+                        <option value="gb">REINO UNIDO (GB)</option>
+                        <option value="fr">FRANCIA (FR)</option>
+                        <option value="de">ALEMANIA (DE)</option>
+                        <option value="es">ESPAÑA (ES)</option>
+                        <option value="br">BRASIL (BR)</option>
+                        <option value="mx">MÉXICO (MX)</option>
+                        <option value="ru">RUSIA (RU)</option>
+                        <option value="ar">ARGENTINA (AR)</option>
+                        <option value="it">ITALIA (IT)</option>
+                        <option value="cn">CHINA (CN)</option>
+                        <option value="jp">JAPÓN (JP)</option>
+                        <option value="ua">UCRANIA (UA)</option>
+                        <option value="il">ISRAEL (IL)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="startSequence()" class="btn-action" id="btn-forge">
+                <i class="fas fa-terminal"></i> INICIAR FABRICACIÓN GHOST
+            </button>
+        </div>
+
+        <!-- CONTENEDOR DE RESULTADOS -->
+        <div id="results-container" class="hidden">
+            
+            <!-- Botón Volver -->
+            <div class="flex justify-end mb-4">
+                <button onclick="resetApp()" class="bg-green-900 hover:bg-green-700 text-white font-bold py-2 px-4 rounded border border-green-500 text-xs flex items-center gap-2 transition-all">
+                    <i class="fas fa-undo"></i> GENERAR NUEVA IDENTIDAD
+                </button>
+            </div>
+
+            <!-- TARJETA DE ACCESO MEJORADA (EFECTO 3D REAL) -->
+            <div class="text-center text-xs text-gray-500 mb-2">ARRASTRA PARA ROTAR LA TARJETA</div>
+            <div class="scene-3d">
+                <div class="card-object">
+                    <!-- CARA DELANTERA -->
+                    <div class="card-face front">
+                        <div class="glare"></div>
+                        <div class="security-pattern"></div>
+                        <img id="card-ghost-photo" class="ghost-photo" src="" alt="Ghost">
+                        <div id="card-signature" class="signature-field"></div>
+                        
+                        <div class="id-header">
+                            <div class="id-header-text">
+                                <span>ESTADO SOBERANO DE</span>
+                                <h2>LEVIATHAM</h2>
+                            </div>
+                            <i class="fas fa-fingerprint text-3xl text-green-700 opacity-80"></i>
+                        </div>
+                        
+                        <div class="id-sidebar">
+                            <div class="chip"></div>
+                            <div class="id-photo-frame">
+                                <img id="card-photo" src="" alt="Subject">
+                            </div>
+                            <div class="qr-frame">
+                                <img id="card-qr" src="" alt="QR">
+                            </div>
+                            <div class="vertical-text">
+                                SECURE ID // v2.4
+                            </div>
+                        </div>
+
+                        <div class="id-main">
+                            <div class="data-row">
+                                <div class="data-field-v2">
+                                    <span class="label-v2">SURNAME</span>
+                                    <span id="card-surname" class="value-v2 highlight">---</span>
+                                </div>
+                                <div class="data-field-v2">
+                                    <span class="label-v2">GIVEN NAMES</span>
+                                    <span id="card-firstname" class="value-v2 highlight">---</span>
+                                </div>
+                            </div>
+
+                            <div class="data-row">
+                                <div class="data-field-v2">
+                                    <span class="label-v2">NATIONALITY</span>
+                                    <span id="card-nat" class="value-v2">---</span>
+                                </div>
+                                <div class="data-field-v2">
+                                    <span class="label-v2">DATE OF BIRTH</span>
+                                    <span id="card-dob" class="value-v2">---</span>
+                                </div>
+                                <div class="data-field-v2">
+                                    <span class="label-v2">SEX</span>
+                                    <span id="card-sex" class="value-v2">---</span>
+                                </div>
+                            </div>
+                            
+                            <div class="data-row">
+                                <div class="data-field-v2">
+                                    <span class="label-v2">DOCUMENT NO.</span>
+                                    <span id="card-doc-no" class="value-v2 text-green-400">---</span>
+                                </div>
+                                <div class="data-field-v2">
+                                    <span class="label-v2">HEIGHT</span>
+                                    <span id="card-height" class="value-v2">---</span>
+                                </div>
+                                <div class="data-field-v2">
+                                    <span class="label-v2">EYES</span>
+                                    <span id="card-eyes" class="value-v2">---</span>
+                                </div>
+                            </div>
+
+                            <div class="data-row">
+                                <div class="data-field-v2">
+                                    <span class="label-v2">DEPARTMENT</span>
+                                    <span id="card-dept" class="value-v2 text-green-400">---</span>
+                                </div>
+                                <div class="data-field-v2">
+                                    <span class="label-v2">BLOOD TYPE</span>
+                                    <span id="card-blood" class="value-v2 text-red-500">---</span>
+                                </div>
+                                <div class="data-field-v2">
+                                    <span class="label-v2">ISSUED / EXPIRES</span>
+                                    <span class="value-v2" id="card-dates">--- / PERM</span>
+                                </div>
+                            </div>
+
+                            <div class="data-row">
+                                <div class="data-field-v2" style="border:none;">
+                                    <span class="label-v2">UUID / CONTROL NUMBER</span>
+                                    <span id="card-uuid" class="value-v2 text-[10px] tracking-tight">---</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mrz-container" id="card-mrz">
+                                P&lt;LVTUNKNOWN&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+                                0000000000XXX0000000M0000
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARA TRASERA -->
+                    <div class="card-face back">
+                        <div class="magnetic-stripe"></div>
+                        <div class="back-content">
+                            <div class="legal-text">
+                                This card is the property of LEVIATHAM SECURITY OPERATIONS. 
+                                It must be returned upon demand. If found, return to nearest secure node.
+                                Unauthorized possession of this identification is a federal offense under Section 894-B.
+                            </div>
+                            <div class="signature-panel">
+                                <span id="card-signature-back" class="real-signature">Signature</span>
+                            </div>
+                            <div class="legal-text">
+                                <strong>RESTRICTION CODES:</strong> ALPHA // OMEGA // ZULU<br>
+                                <strong>CLEARANCE:</strong> LEVEL 5 (UNRESTRICTED)<br>
+                                <strong>ISSUING POST:</strong> BUENOS AIRES HQ
+                            </div>
+                            <div class="back-footer">
+                                <div class="text-[10px] text-gray-500">
+                                    SERVICE: +00 123 456 789<br>
+                                    NODE: #KALI-01
+                                </div>
+                                <div class="barcode-box">*849201*</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPEDIENTE FÍSICO -->
+            <div class="paper-dossier">
+                <div class="paper-watermark">LEVIATHAM</div>
+                <div class="stamp-top-secret">TOP SECRET<br>EYES ONLY</div>
+                <div class="stamp-copy">COPY 01 OF 01</div>
+                
+                <div class="dossier-header-grid">
+                    <div class="dh-title">
+                        <h1>INTELLIGENCE DOSSIER</h1>
+                        <div class="dh-meta">
+                            SUBJECT: <span id="doc-header-name">UNKNOWN</span> // REF: LVT-994-ALPHA
+                            <br>SOURCE: DEEP_WEB INTELLIGENCE GATHERING
+                        </div>
+                    </div>
+                    <div class="dh-security-box">
+                        <span class="dh-security-label">SECURITY CLEARANCE</span>
+                        <span class="dh-security-level">LEVEL 5</span>
+                    </div>
+                </div>
+
+                <div class="dossier-grid-form mb-6">
+                    <div class="form-box span-4" style="background: #222; color: #fff;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION I: PRIMARY IDENTIFICATION</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">FULL NAME / ALIAS</span>
+                        <span class="box-value" id="doc-full-name">---</span>
+                    </div>
+                    <div class="form-box">
+                        <span class="box-label">DOB</span>
+                        <span class="box-value" id="doc-dob">---</span>
+                    </div>
+                    <div class="form-box">
+                        <span class="box-label">BLOOD TYPE</span>
+                        <span class="box-value highlight" id="doc-blood">---</span>
+                    </div>
+                    <div class="form-box span-4">
+                        <span class="box-label">KNOWN SAFE HOUSE / LOCATION</span>
+                        <span class="box-value mono-sm" id="doc-address">---</span>
+                    </div>
+                    <div class="form-box span-4">
+                        <span class="box-label">COVERT FRONT COMPANY</span>
+                        <span class="box-value" id="doc-company">---</span>
+                    </div>
+
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION II: FINANCIAL INTELLIGENCE</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">CREDIT CARD NO</span>
+                        <span class="box-value" id="doc-cc">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">EXPIRY / CVV</span>
+                        <span class="box-value" id="doc-cc-exp">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">BANK IBAN</span>
+                        <span class="box-value" id="doc-iban">---</span>
+                    </div>
+                     <div class="form-box span-2">
+                        <span class="box-label">SWIFT / BIC CODE</span>
+                        <span class="box-value" id="doc-swift">---</span>
+                    </div>
+
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION III: DIGITAL FOOTPRINT</span>
+                    </div>
+                     <div class="form-box span-2">
+                        <span class="box-label">IP ADDRESS (V4)</span>
+                        <span class="box-value" id="doc-ip">---</span>
+                    </div>
+                     <div class="form-box span-2">
+                        <span class="box-label">MAC ADDRESS</span>
+                        <span class="box-value mono-sm" id="doc-mac">---</span>
+                    </div>
+                     <div class="form-box span-2">
+                        <span class="box-label">LOGIN USER</span>
+                        <span class="box-value" id="doc-user">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">PASSWORD HASH</span>
+                        <span class="box-value mono-sm" id="doc-pass">---</span>
+                    </div>
+
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION IV: CRYPTO ASSETS</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">BTC WALLET</span>
+                        <span class="box-value mono-sm" id="doc-wallet">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">EST. BALANCE</span>
+                        <span class="box-value highlight" id="doc-balance">---</span>
+                    </div>
+                    <div class="form-box span-4">
+                        <span class="box-label">SECONDARY CRYPTO ASSET (LAUNDERED)</span>
+                        <span class="box-value mono-sm" id="doc-altcoin">---</span>
+                    </div>
+                    
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION V: ASSETS & TECH FINGERPRINT</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">REGISTERED VEHICLE</span>
+                        <span class="box-value" id="doc-vehicle">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">VIN NUMBER</span>
+                        <span class="box-value mono-sm" id="doc-vin">---</span>
+                    </div>
+                    <div class="form-box span-4">
+                        <span class="box-label">LAST KNOWN USER AGENT</span>
+                        <span class="box-value mono-sm" style="font-size: 10px;" id="doc-ua">---</span>
+                    </div>
+                    <!-- NUEVA: Hardware -->
+                    <div class="form-box span-4">
+                        <span class="box-label">PRIMARY WORKSTATION CONFIG</span>
+                        <span class="box-value mono-sm" id="doc-hardware">---</span>
+                    </div>
+                    
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION VI: MISSION STATUS</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">OPERATION CODENAME</span>
+                        <span class="box-value highlight" id="doc-op-name">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">ASSIGNED EQUIPMENT</span>
+                        <span class="box-value" id="doc-equipment">---</span>
+                    </div>
+                    
+                    <!-- NUEVA SECCION VII: SUPPLEMENTARY DATA (NUEVAS APIS) -->
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION VII: SUPPLEMENTARY DATA</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">MEDICAL STRAIN / SUBSTANCE</span>
+                        <span class="box-value" id="doc-medical">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">NETWORK PLAN ID</span>
+                        <span class="box-value mono-sm" id="doc-sub">---</span>
+                    </div>
+                    
+                    <!-- NUEVA SECCION VIII: PSYCHOLOGICAL & LIFESTYLE -->
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION VIII: PSYCHOLOGICAL PROFILE</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">SIGNATURE DRINK</span>
+                        <span class="box-value" id="doc-drink">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">CAFFEINE INTAKE SOURCE</span>
+                        <span class="box-value" id="doc-coffee">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">PSYCH-AUDIO PROFILE</span>
+                        <span class="box-value" id="doc-music">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">KNOWN WEAKNESS</span>
+                        <span class="box-value highlight" id="doc-weakness">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">EXTRACTION POINT (NATION)</span>
+                        <span class="box-value" id="doc-nation">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">SECURITY CLEARANCE HEX</span>
+                        <span class="box-value mono-sm" id="doc-color">---</span>
+                    </div>
+                    
+                    <!-- NUEVA SECCION IX: BACKGROUND & SITUATION (NUEVAS APIS SERIAS) -->
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION IX: ACADEMIC & SITUATIONAL AWARENESS</span>
+                    </div>
+                    <div class="form-box span-4">
+                        <span class="box-label">ALMA MATER / ACADEMIC ORIGIN</span>
+                        <span class="box-value" id="doc-university">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">ORIGIN METADATA (COUNTRY)</span>
+                        <span class="box-value" id="doc-origin-meta">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">CURRENT ZONE TEMP (EXT. POINT)</span>
+                        <span class="box-value highlight" id="doc-temp">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">WIND CONDITIONS</span>
+                        <span class="box-value mono-sm" id="doc-wind">---</span>
+                    </div>
+
+                    <!-- NUEVA SECCION X: MEDICAL & CRIMINAL BACKGROUND (NUEVAS APIS GOV) -->
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION X: MEDICAL & CRIMINAL BACKGROUND</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">KNOWN ALLERGIES / MEDICATION (FDA RECORD)</span>
+                        <span class="box-value text-red-700" id="doc-fda-med">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">PRIOR OFFENSE / WARRANT ISSUED BY (FBI)</span>
+                        <span class="box-value highlight text-red-700" id="doc-fbi-record">---</span>
+                    </div>
+                    
+                    <!-- NUEVA SECCION XI: HARDWARE (NUEVA API) -->
+                     <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION XI: HARDWARE & GEOPOLITICS</span>
+                    </div>
+                    
+                    <!-- NUEVA SECCION XII: COVER & TECH (NUEVAS APIS 13 Y 14) -->
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION XII: COVER IDENTITY & TECH SKILLS</span>
+                    </div>
+                    <div class="form-box span-4">
+                        <span class="box-label">COVER ASSIGNMENT MISSION</span>
+                        <span class="box-value highlight" id="doc-cover-mission">---</span>
+                    </div>
+                    <div class="form-box span-4">
+                        <span class="box-label">TECHNICAL APTITUDE / SKILLSET</span>
+                        <span class="box-value mono-sm" id="doc-tech-skill">---</span>
+                    </div>
+                    
+                    <!-- NUEVA SECCION XIII: AI PREDICTIVE ANALYTICS & ENV. (NUEVAS APIS) -->
+                    <div class="form-box span-4" style="background: #222; color: #fff; margin-top: 10px;">
+                        <span class="box-label" style="color: #aaa; border-color: #555;">SECTION XIII: AI PREDICTIVE ANALYTICS & ENV.</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">AI ESTIMATED BIOLOGICAL AGE</span>
+                        <span class="box-value highlight" id="doc-ai-age">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">ETHNIC ORIGIN PROBABILITY</span>
+                        <span class="box-value" id="doc-ai-eth">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">ASSIGNED K-9 UNIT (BREED)</span>
+                        <span class="box-value" id="doc-k9">---</span>
+                    </div>
+                    <div class="form-box span-2">
+                        <span class="box-label">STRESS TEST RESPONSE</span>
+                        <span class="box-value italic" id="doc-insult" style="font-size: 10px;">---</span>
+                    </div>
+                    <div class="form-box span-4">
+                        <span class="box-label">DAYLIGHT OPERATIONAL WINDOW</span>
+                        <span class="box-value mono-sm" id="doc-sun">---</span>
+                    </div>
+                </div>
+
+                 <div class="paper-section mt-6">
+                     <div class="paper-title" style="background: #b00;">XIV. INTERCEPTED COMMUNICATION FRAGMENT</div>
+                     <div class="comms-box">
+                        "<span id="doc-quote">---</span>"
+                    </div>
+                </div>
+                
+                <div class="dossier-footer">
+                    WARNING: THIS DOCUMENT CONTAINS CLASSIFIED INFORMATION PROPERTY OF LEVIATHAM. 
+                    <br>UNAUTHORIZED DISCLOSURE IS PUNISHABLE BY TERMINATION.
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER MEJORADO -->
+        <footer class="relative bg-black border-t-2 border-green-900 py-12 mt-20 overflow-hidden">
+            <div class="absolute inset-0 opacity-5" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%2300ff00\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            <div class="relative z-10 container mx-auto px-4 text-center font-mono">
+                <div class="mb-6 animate-pulse"><i class="fas fa-biohazard text-5xl text-green-700 filter drop-shadow-[0_0_10px_rgba(0,255,0,0.5)]"></i></div>
+                <h2 class="text-3xl md:text-5xl font-bold text-white mb-2 tracking-[0.2em] uppercase glitch" data-text="INDUSTRIAS LEVIATHAM" style="font-family: 'Rajdhani', sans-serif;">INDUSTRIAS LEVIATHAM</h2>
+                <p class="text-green-500 text-sm md:text-lg tracking-[0.5em] mb-8 font-bold glitch-sm" data-text="EST. 2018 - 2025 // CIBERINTELIGENCIA GLOBAL">EST. 2018 - 2025 // CIBERINTELIGENCIA GLOBAL</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-[10px] md:text-xs text-gray-500 border-t border-green-900/50 pt-6">
+                    <div class="border-r border-green-900/30"><span class="block text-green-700 mb-1">UBICACIÓN DEL NODO</span><span class="text-white">SECTOR 7G [ARG]</span></div>
+                    <div class="border-r border-green-900/30"><span class="block text-green-700 mb-1">ESTADO DE RED</span><span class="text-white animate-pulse">ENCRIPTADO (AES-256)</span></div>
+                    <div class="border-r border-green-900/30"><span class="block text-green-700 mb-1">OPERADORES ACTIVOS</span><span class="text-red-500 font-bold glitch" data-text="CLASIFICADO">CLASIFICADO</span></div>
+                    <div><span class="block text-green-700 mb-1">ÚLTIMA COMPILACIÓN</span><span class="text-white">KERNEL V11.1.0</span></div>
+                </div>
+                <div class="mt-10 text-[10px] text-red-900 uppercase tracking-widest">&copy; TODOS LOS DERECHOS RESERVADOS. EL ACCESO NO AUTORIZADO SERÁ PERSEGUIDO BAJO LA LEY 26.388.</div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- GENERADORES LOCALES ---
+        function genCC() { let num = "4"; for(let i=0; i<15; i++) num += Math.floor(Math.random()*10); return num.match(/.{1,4}/g).join(" "); }
+        function genExp() { return `202${Math.floor(Math.random()*5)+5}-${Math.floor(Math.random()*12)+1}`; }
+        function genCVV() { return Math.floor(Math.random() * (999 - 100) + 100); }
+        function genIBAN(country) { return `${country.toUpperCase()}89 ${Math.floor(Math.random()*1000)} ${Math.floor(Math.random()*1000)} ${Math.floor(Math.random()*1000)}`.replace(/ /g, ''); }
+        function genSwift() { return "LVTH" + Math.random().toString(36).substring(2, 6).toUpperCase(); }
+        function genIP() { return `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`; }
+        function genMAC() { return "XX:XX:XX:XX:XX:XX".replace(/X/g, () => "0123456789ABCDEF".charAt(Math.floor(Math.random() * 16))); }
+        function genUser(name) { return name.toLowerCase() + Math.floor(Math.random()*999); }
+        function genPass() { return Math.random().toString(36).slice(-10); }
+        function genBlood() { const b = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']; return b[Math.floor(Math.random() * b.length)]; }
+        function genBank() { const b = ['LEVIATHAM UNION', 'CYBERCORP BANK', 'NEO-TOKYO TRUST', 'SILICON VALLEY SECURE']; return b[Math.floor(Math.random() * b.length)]; }
+        function genVehicle() { const v = ['BLACK SUV - FORD EXPLORER', 'GREY SEDAN - TOYOTA CAMRY', 'MOTORCYCLE - KAWASAKI NINJA', 'VAN - MERCEDES SPRINTER']; return v[Math.floor(Math.random() * v.length)]; }
+        function genVin() { return Math.random().toString(36).substring(2, 17).toUpperCase(); }
+        function genUA() { const u = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15', 'Mozilla/5.0 (Linux; Android 10; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Mobile Safari/537.36']; return u[Math.floor(Math.random() * u.length)]; }
+        function genAddress() { return "UNKNOWN SAFE HOUSE #8492, SECTOR 7"; }
+        function genDept() { return "FIELD OPS"; }
+        function genBeer() { return "PROJECT CHAOS"; }
+        function genAppliance() { return "TACTICAL SCANNER"; }
+        function genMedical() { return "STIMULANT - ADRENALINE (SYNTH)"; }
+        function genSub() { return "SAT-UPLINK-PLAN-ALPHA"; }
+        function genDrink() { return "VESPER MARTINI"; }
+        function genCoffee() { return "ARABICA DARK ROAST"; }
+        function genGenre() { return "DARK SYNTHWAVE"; }
+        function genColor() { return "#00FF00"; }
+        function genDessert() { return "DARK CHOCOLATE"; }
+        function genNation() { return "CLASSIFIED LOCATION"; }
+        function genUniversity() { return "MIT - MASS. INSTITUTE OF TECH."; }
+        function genWeather() { return "18°C (CLEAR SKY)"; }
+        function genHardware() { return "CUSTOM LINUX TERMINAL / ENCRYPTED"; }
+        function genOriginMeta() { return "UNKNOWN ORIGIN"; }
+        function genCoverMission() { return "INFILTRATE AND DISRUPT"; }
+        function genTechSkill() { return "ADVANCED CRYPTOGRAPHY / NETWORKING"; }
+        function genK9() { return "MALINOIS - 'REX'"; }
+        function genInsult() { return "You fight like a dairy farmer."; }
+        
+        function genDNI(age) {
+            let base, range;
+            if (age < 20) { base = 50000000; range = 10000000; }
+            else if (age < 30) { base = 40000000; range = 10000000; }
+            else if (age < 40) { base = 30000000; range = 10000000; }
+            else if (age < 50) { base = 23000000; range = 7000000; }
+            else if (age < 60) { base = 16000000; range = 7000000; }
+            else if (age < 70) { base = 10000000; range = 6000000; }
+            else { base = 1000000; range = 9000000; }
+            return Math.floor(base + Math.random() * range);
+        }
+        function genHeight() { return (Math.random() * (2.00 - 1.55) + 1.55).toFixed(2); }
+        function genEyes() { const e = ['BROWN', 'BLUE', 'GREEN', 'HAZEL', 'GRAY']; return e[Math.floor(Math.random() * e.length)]; }
+        function genCompany() { const c = ['OMEGA SOLUTIONS', 'GLOBAL DYNAMICS', 'MASSIVE DYNAMIC', 'CYBERDYNE SYSTEMS', 'ACME CORP']; return c[Math.floor(Math.random() * c.length)]; }
+        function genCrypto() { return { coin_name: "Monero", symbol: "XMR" }; }
+
+        // GENERADOR LOCAL DE IDENTIDAD (FALLBACK)
+        // Se usa SOLO si falla la API principal o si no devuelve datos.
+        function genFallbackUser(gender, region) {
+            const firstNamesM = ["John", "David", "Michael", "Chris", "James", "Robert", "William", "Joseph"];
+            const firstNamesF = ["Mary", "Jennifer", "Lisa", "Sarah", "Jessica", "Emily", "Ashley", "Amanda"];
+            const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Miller", "Davis", "Garcia"];
+            
+            const first = (gender === 'male') ? firstNamesM[Math.floor(Math.random()*firstNamesM.length)] : firstNamesF[Math.floor(Math.random()*firstNamesF.length)];
+            const last = lastNames[Math.floor(Math.random()*lastNames.length)];
+            
+            // Fecha aleatoria entre 18 y 60 años
+            const age = Math.floor(Math.random() * 42) + 18;
+            const year = new Date().getFullYear() - age;
+            const month = Math.floor(Math.random() * 12) + 1;
+            const day = Math.floor(Math.random() * 28) + 1;
+
+            return {
+                name: { first: first, last: last },
+                location: { country: region.toUpperCase(), city: "Unknown City" },
+                dob: { date: `${year}-${month}-${day}`, age: age },
+                login: { uuid: crypto.randomUUID(), username: (first+last).toLowerCase(), password: "password123", md5: "hashed_pass", sha256: "hashed_pass_sha" },
+                picture: { large: "https://robohash.org/" + first + last + "?set=set1" }, // Fallback image
+                nat: region.toUpperCase(),
+                gender: gender
+            };
+        }
+
+        let ghostData = {};
+
+        // --- SECUENCIA DE INICIO ---
+        function startSequence() {
+            const terminal = document.getElementById('hack-terminal');
+            const logOutput = document.getElementById('boot-log');
+            
+            terminal.style.display = 'flex';
+            document.getElementById('config-panel').style.display = 'none';
+            document.getElementById('results-container').classList.add('hidden'); 
+            logOutput.innerHTML = '';
+            
+            fetchData();
+
+            const bootMsgs = [
+                { msg: "Loading Linux 5.15.0-kali3-amd64...", status: "" },
+                { msg: "Loading initial ramdisk...", status: "" },
+                { msg: "Starting version 247.3-7.", status: "" },
+                { msg: "Mounted /dev/sdb1 as /boot.", status: "OK" },
+                { msg: "Finished File System Check on /dev/disk/by-uuid/0000-0000.", status: "OK" },
+                { msg: "Started udev Kernel Device Manager.", status: "OK" },
+                { msg: "Found device LEVIATHAM_CRYPT_V2.", status: "OK" },
+                { msg: "Starting Network Manager...", status: "..." },
+                { msg: "Started Network Manager.", status: "OK" },
+                { msg: "Reached target Network.", status: "OK" },
+                { msg: "Starting Leviatham Ghost ID Generator Service...", status: "..." },
+                { msg: "Started Leviatham Ghost ID Generator Service.", status: "OK" },
+                { msg: "Checking encryption keys...", status: "OK" },
+                { msg: "[WARNING] Connection attempt intercepted by Firewall.", status: "WARN" },
+                { msg: "Bypassing firewall rules...", status: "OK" },
+                { msg: "Connecting to TOR network relay...", status: "OK" },
+                { msg: "Accessing Dark Web Database [Alpha]...", status: "OK" },
+                { msg: "Injecting payload into remote server...", status: "OK" },
+                { msg: "Retrieving synthetic biological assets...", status: "OK" },
+                { msg: "Fetching secure financial data routes...", status: "OK" },
+                { msg: "Accessing vehicle registry database...", status: "OK" },
+                { msg: "Tracing digital fingerprint...", status: "OK" },
+                { msg: "Locating safe house coordinates...", status: "OK" },
+                { msg: "Assigning tactical equipment inventory...", status: "OK" },
+                { msg: "Establishing operation codename...", status: "OK" },
+                { msg: "Establishing shell company cover...", status: "OK" },
+                { msg: "Diversifying crypto assets...", status: "OK" },
+                { msg: "Fetching medical & subscription data...", status: "OK" },
+                { msg: "Profiling psychological triggers...", status: "OK" },
+                { msg: "Calculating extraction points...", status: "OK" },
+                { msg: "Querying academic databases...", status: "OK" },
+                { msg: "Synching weather satellite telemetry...", status: "OK" },
+                { msg: "Cross-referencing FBI & FDA records...", status: "OK" },
+                { msg: "Scanning Global Hardware Registry...", status: "OK" },
+                { msg: "Accessing Geopolitical Metadata...", status: "OK" },
+                { msg: "Constructing Corporate Cover Identity...", status: "OK" },
+                { msg: "Evaluating Technical Skillset...", status: "OK" },
+                { msg: "Querying AI Predictive Biometrics...", status: "OK" },
+                { msg: "Analyzing Ethnic Origin Probabilities...", status: "OK" },
+                { msg: "Calculating Daylight Operational Windows...", status: "OK" },
+                { msg: "Finalizing dossier composition...", status: "OK" },
+                { msg: "Starting X11 server...", status: "OK" },
+                { msg: "Reached target Graphical Interface.", status: "OK" }
+            ];
+            
+            let cmdIndex = 0;
+            const logInterval = setInterval(() => {
+                if(cmdIndex < bootMsgs.length) {
+                    const item = bootMsgs[cmdIndex];
+                    let statusHtml = '';
+                    if (item.status === 'OK') statusHtml = '<span class="log-status status-ok">[  OK  ]</span>';
+                    else if (item.status === 'FAIL') statusHtml = '<span class="log-status status-fail">[ FAIL ]</span>';
+                    else if (item.status === 'WARN') statusHtml = '<span class="log-status status-warn">[ WARN ]</span>';
+                    else if (item.status === '...') statusHtml = '<span class="log-status">[ INFO ]</span>';
+                    else statusHtml = '<span class="log-status">        </span>';
+
+                    const time = (Math.random() * 10).toFixed(6);
+                    logOutput.innerHTML += `<div class="log-line"><span class="log-time">[    ${time}]</span>${statusHtml}<span class="log-msg">${item.msg}</span></div>`;
+                    const bootLog = document.getElementById('boot-log');
+                    bootLog.scrollTop = bootLog.scrollHeight;
+                    cmdIndex++;
+                } else {
+                    clearInterval(logInterval);
+                    logOutput.innerHTML += `
+                        <div class="prompt-line">
+                            <span class="prompt-user">root@leviatham</span><span class="prompt-host">:~#</span>&nbsp;./launch_gui.sh<span class="cursor-blink"></span>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        terminal.style.display = 'none';
+                        renderResults();
+                    }, 1500);
+                }
+            }, 100); // Velocidad aumentada para no aburrir
+        }
+
+        function resetApp() {
+            document.getElementById('results-container').classList.add('hidden');
+            document.getElementById('config-panel').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        async function fetchData() {
+            const gender = document.getElementById('gender').value;
+            const regionSelect = document.getElementById('region').value;
+            
+            // LOGICA PURA: Se pide a la API la nacionalidad exacta. Si la API no la soporta,
+            // la API misma decidirá qué devolver (normalmente un fallback interno).
+            // Solo si fetch falla por red (catch), usamos nuestro generador local.
+            try {
+                const res = await fetch(`https://randomuser.me/api/?results=1&gender=${gender}&nat=${regionSelect}`);
+                if (!res.ok) throw new Error("API Error");
+                const data = await res.json();
+                if (data.results && data.results.length > 0) {
+                    ghostData.user = data.results[0];
+                } else {
+                    throw new Error("No results");
+                }
+            } catch (e) {
+                console.log("Main API failed, engaging fallback protocol.");
+                ghostData.user = genFallbackUser(gender, regionSelect);
+            }
+
+            ghostData.finance = { cc: genCC(), exp: genExp(), cvv: genCVV(), iban: genIBAN(regionSelect), swift: genSwift() };
+            ghostData.net = { ip: genIP(), mac: genMAC() };
+
+            try { const res = await fetch('https://api.adviceslip.com/advice'); const data = await res.json(); ghostData.quote = data.slip.advice; } catch(e) { ghostData.quote = "System failure. Proceed with caution."; }
+            try { const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd'); const data = await res.json(); ghostData.btcPrice = data.bitcoin.usd; } catch(e) { ghostData.btcPrice = 60000; }
+            try { const res = await fetch('https://random-data-api.com/api/v2/blood_types'); const data = await res.json(); ghostData.blood = data.group; } catch(e) { ghostData.blood = genBlood(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/banks'); const data = await res.json(); ghostData.bankName = data.bank_name; } catch(e) { ghostData.bankName = genBank(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/vehicles'); const data = await res.json(); ghostData.vehicle = `${data.make_and_model} (${data.color})`; ghostData.vin = data.vin; } catch(e) { ghostData.vehicle = genVehicle(); ghostData.vin = genVin(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/user_agents'); const data = await res.json(); ghostData.ua = data.user_agent; } catch(e) { ghostData.ua = genUA(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/addresses'); const data = await res.json(); ghostData.address = `${data.street_address}, ${data.city_name}, ${data.country}`; } catch(e) { ghostData.address = genAddress(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/commerce'); const data = await res.json(); ghostData.dept = data.department; } catch(e) { ghostData.dept = genDept(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/beers'); const data = await res.json(); ghostData.opName = data.name; } catch(e) { ghostData.opName = genBeer(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/appliances'); const data = await res.json(); ghostData.equipment = data.equipment; } catch(e) { ghostData.equipment = genAppliance(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/company'); const data = await res.json(); ghostData.company = data.business_name; } catch(e) { ghostData.company = genCompany(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/crypto_coin'); const data = await res.json(); ghostData.altcoin = `${data.coin_name} (${data.symbol})`; } catch(e) { const c = genCrypto(); ghostData.altcoin = `${c.coin_name} (${c.symbol})`; }
+            try { const res = await fetch('https://random-data-api.com/api/v2/cannabis'); const data = await res.json(); ghostData.medical = `${data.strain} (${data.type})`; } catch(e) { ghostData.medical = genMedical(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/subscription'); const data = await res.json(); ghostData.sub = `${data.plan} - ${data.status}`; } catch(e) { ghostData.sub = genSub(); }
+            
+            // SECCIÓN VIII: NUEVAS APIS
+            try { const res = await fetch('https://www.thecocktaildb.com/api/json/v1/1/random.php'); const data = await res.json(); ghostData.drink = data.drinks[0].strDrink; } catch(e) { ghostData.drink = genDrink(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/coffee'); const data = await res.json(); ghostData.coffee = data.blend_name; } catch(e) { ghostData.coffee = genCoffee(); }
+            try { const res = await fetch('https://binaryjazz.us/wp-json/genrenator/v1/genre/'); const data = await res.json(); ghostData.genre = data; } catch(e) { ghostData.genre = genGenre(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/color'); const data = await res.json(); ghostData.color = `${data.color_name.toUpperCase()} (${data.hex_value})`; } catch(e) { ghostData.color = genColor(); }
+            
+            // NUEVAS ADICIONES: DESSERT & NATION
+            try { const res = await fetch('https://random-data-api.com/api/v2/desserts'); const data = await res.json(); ghostData.weakness = `${data.variety} (${data.topping})`; } catch(e) { ghostData.weakness = genDessert(); }
+            try { const res = await fetch('https://random-data-api.com/api/v2/nation'); const data = await res.json(); ghostData.nation = `${data.nationality} - ${data.capital}`; } catch(e) { ghostData.nation = genNation(); }
+
+            // SECCIÓN IX: NUEVAS APIS SERIAS (Universidades & Clima)
+            try { 
+                let countryParam = 'United+States';
+                if (regionSelect === 'ar') countryParam = 'Argentina';
+                else if (regionSelect === 'gb') countryParam = 'United+Kingdom';
+                else if (regionSelect === 'fr') countryParam = 'France';
+                else if (regionSelect === 'de') countryParam = 'Germany';
+                else if (regionSelect === 'es') countryParam = 'Spain';
+                else if (regionSelect === 'br') countryParam = 'Brazil';
+                else if (regionSelect === 'mx') countryParam = 'Mexico';
+                else if (regionSelect === 'ru') countryParam = 'Russian+Federation';
+                else if (regionSelect === 'cn') countryParam = 'China';
+                else if (regionSelect === 'jp') countryParam = 'Japan';
+                else if (regionSelect === 'it') countryParam = 'Italy';
+                else if (regionSelect === 'ua') countryParam = 'Ukraine';
+                else if (regionSelect === 'il') countryParam = 'Israel';
+
+                const res = await fetch(`http://universities.hipolabs.com/search?country=${countryParam}`); 
+                const data = await res.json(); 
+                if (data.length > 0) {
+                     const randUni = data[Math.floor(Math.random() * data.length)];
+                     ghostData.university = randUni.name;
+                } else {
+                    ghostData.university = genUniversity();
+                }
+            } catch(e) { ghostData.university = genUniversity(); }
+
+            try {
+                const lat = (Math.random() * 180 - 90).toFixed(2);
+                const lon = (Math.random() * 360 - 180).toFixed(2);
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const data = await res.json();
+                ghostData.weather = `${data.current_weather.temperature}°C`;
+                ghostData.wind = `${data.current_weather.windspeed} km/h`;
+            } catch(e) {
+                ghostData.weather = genWeather();
+                ghostData.wind = "UNKNOWN";
+            }
+
+            // SECCIÓN X: NUEVAS APIS GOV (openFDA & FBI)
+            try {
+                const skip = Math.floor(Math.random() * 500);
+                const res = await fetch(`https://api.fda.gov/drug/label.json?limit=1&skip=${skip}`);
+                const data = await res.json();
+                const drug = data.results[0];
+                const brand = drug.openfda.brand_name ? drug.openfda.brand_name[0] : "CLASSIFIED MED";
+                const substance = drug.openfda.substance_name ? drug.openfda.substance_name[0] : "UNKNOWN AGENT";
+                ghostData.fdaMed = `${brand} (${substance})`;
+            } catch(e) {
+                ghostData.fdaMed = "IBUPROFEN 800MG";
+            }
+
+            try {
+                const page = Math.floor(Math.random() * 10) + 1;
+                const res = await fetch(`https://api.fbi.gov/wanted/v1/list?page=${page}`);
+                const data = await res.json();
+                const item = data.items[0];
+                const office = item.field_offices ? item.field_offices[0] : "INTERPOL HQ";
+                const subject = item.subjects ? item.subjects[0] : "ESPIONAGE";
+                ghostData.fbiRecord = `${subject} // OFFICE: ${office}`;
+            } catch(e) {
+                ghostData.fbiRecord = "CYBERCRIME // OFFICE: WASHINGTON D.C.";
+            }
+
+            // SECCIÓN XI: NUEVAS APIS TÉCNICAS (RestCountries & Computers)
+            try {
+                let countryCode = regionSelect;
+                if (countryCode === 'en') countryCode = 'us'; 
+                const res = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`);
+                const data = await res.json();
+                const c = data[0];
+                ghostData.originMeta = `CAP: ${c.capital ? c.capital[0] : 'UNK'} | TZ: ${c.timezones ? c.timezones[0] : 'UTC'}`;
+            } catch(e) {
+                ghostData.originMeta = genOriginMeta();
+            }
+
+            try {
+                const res = await fetch('https://random-data-api.com/api/v2/computers');
+                const data = await res.json();
+                ghostData.hardware = `${data.platform} / ${data.os} / ${data.type}`;
+            } catch(e) {
+                ghostData.hardware = genHardware();
+            }
+            
+            // SECCIÓN XII: CORPORATE BS & TECHY
+            try {
+                const res = await fetch('https://corporatebs-generator.sameerkumar.website/');
+                const data = await res.json();
+                ghostData.coverMission = data.phrase;
+            } catch(e) {
+                ghostData.coverMission = genCoverMission();
+            }
+            
+            try {
+                const res = await fetch('https://techy-api.vercel.app/api/json');
+                const data = await res.json();
+                ghostData.techSkill = data.message;
+            } catch(e) {
+                ghostData.techSkill = genTechSkill();
+            }
+
+            // SECCIÓN XIII: AI PREDICTIVE ANALYTICS & ENV (NUEVAS: AGIFY, NATIONALIZE, SUNRISE-SUNSET, DOG, EVIL INSULT)
+            // Necesitamos el nombre para las APIs de predicción
+            const firstName = ghostData.user.name.first;
+            
+            try {
+                const res = await fetch(`https://api.agify.io?name=${firstName}`);
+                const data = await res.json();
+                ghostData.aiAge = `${data.age} YEARS (${(data.count/1000).toFixed(1)}K CONF)`;
+            } catch(e) {
+                ghostData.aiAge = "UNABLE TO PREDICT";
+            }
+
+            try {
+                const res = await fetch(`https://api.nationalize.io?name=${firstName}`);
+                const data = await res.json();
+                if(data.country && data.country.length > 0) {
+                    const c = data.country[0];
+                    ghostData.aiEth = `${c.country_id} (${(c.probability*100).toFixed(1)}%)`;
+                } else {
+                    ghostData.aiEth = "UNKNOWN ORIGIN";
+                }
+            } catch(e) {
+                ghostData.aiEth = "DATA CORRUPTED";
+            }
+
+            try {
+                // Lat/Lon from previous step or random
+                const lat = 36.7201600; const lng = -4.4203400; // Default coords
+                const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}`);
+                const data = await res.json();
+                ghostData.sun = `${data.results.sunrise} - ${data.results.sunset} UTC`;
+            } catch(e) {
+                ghostData.sun = "06:00 AM - 18:00 PM";
+            }
+
+            try {
+                const res = await fetch('https://dog.ceo/api/breeds/image/random');
+                const data = await res.json();
+                // Extraer raza de la URL
+                const breed = data.message.split('/')[4].toUpperCase();
+                ghostData.k9 = breed;
+            } catch(e) {
+                ghostData.k9 = genK9();
+            }
+
+            try {
+                // Evil Insult Generator (HTTPS, JSON)
+                const res = await fetch('https://evilinsult.com/generate_insult.php?lang=en&type=json');
+                const data = await res.json();
+                ghostData.insult = data.insult;
+            } catch(e) {
+                ghostData.insult = genInsult();
+            }
+        }
+
+        // --- SAFE SETTER ---
+        function setVal(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val;
+        }
+
+        function renderResults() {
+            const u = ghostData.user;
+            const age = u.dob.age;
+            const regionSelect = document.getElementById('region').value; // Obtener el valor seleccionado para mostrar en DNI
+            
+            const userPic = document.getElementById('card-photo'); if(userPic) userPic.src = u.picture.large;
+            const ghostPic = document.getElementById('card-ghost-photo'); if(ghostPic) ghostPic.src = u.picture.large;
+            
+            const qrData = `ID:${u.login.uuid}|${u.name.last},${u.name.first}|OP:${ghostData.opName}`;
+            const qrImg = document.getElementById('card-qr');
+            if(qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrData)}`;
+
+            setVal('card-surname', u.name.last.toUpperCase());
+            setVal('card-firstname', u.name.first.toUpperCase());
+            
+            const sig = `${u.name.first} ${u.name.last}`;
+            setVal('card-signature', sig);
+            setVal('card-signature-back', sig);
+            
+            // Mostrar la nacionalidad seleccionada
+            setVal('card-nat', regionSelect.toUpperCase());
+            
+            const dob = new Date(u.dob.date);
+            setVal('card-dob', dob.toLocaleDateString());
+            setVal('card-sex', (u.gender === 'male') ? 'M' : 'F');
+            setVal('card-uuid', u.login.uuid);
+            
+            setVal('card-blood', ghostData.blood || genBlood());
+            setVal('card-dept', (ghostData.dept || genDept()).toUpperCase());
+            setVal('card-doc-no', genDNI(age));
+            setVal('card-height', genHeight() + " M");
+            setVal('card-eyes', genEyes());
+
+            const issued = new Date(); issued.setFullYear(issued.getFullYear() - 1);
+            setVal('card-dates', `${issued.toLocaleDateString()} / PERM`);
+
+            const mrz1 = `P<LVT${u.name.last.toUpperCase()}<<${u.name.first.toUpperCase()}`;
+            const rnd = Math.floor(Math.random() * 9999999);
+            const mrz2 = `${u.login.uuid.substring(0,9).toUpperCase()}${regionSelect.toUpperCase()}000000${u.gender==='male'?'M':'F'}${rnd}`;
+            const mrzEl = document.getElementById('card-mrz');
+            if(mrzEl) mrzEl.innerHTML = `${mrz1.substring(0,44)}<br>${mrz2.substring(0,44)}`;
+
+            // EXPEDIENTE
+            setVal('doc-header-name', `${u.name.last}, ${u.name.first}`.toUpperCase());
+            setVal('doc-full-name', `${u.name.first} ${u.name.last}`.toUpperCase());
+            setVal('doc-dob', dob.toLocaleDateString());
+            setVal('doc-blood', ghostData.blood || genBlood());
+            setVal('doc-address', (ghostData.address || genAddress()).toUpperCase());
+            setVal('doc-company', (ghostData.company || genCompany()).toUpperCase());
+            setVal('doc-cc', ghostData.finance.cc);
+            setVal('doc-cc-exp', `${ghostData.finance.exp} / CVV: ${ghostData.finance.cvv}`);
+            setVal('doc-iban', ghostData.finance.iban);
+            setVal('doc-swift', ghostData.finance.swift);
+            setVal('doc-ip', ghostData.net.ip);
+            setVal('doc-mac', ghostData.net.mac);
+            setVal('doc-user', u.login.username);
+            setVal('doc-pass', u.login.sha256.substring(0, 32)); 
+            const btcAmt = (Math.random() * 2.5).toFixed(4);
+            const btcVal = (btcAmt * ghostData.btcPrice).toLocaleString('en-US', {style:'currency', currency:'USD'});
+            setVal('doc-wallet', "bc1q" + u.login.sha256.substring(0, 34));
+            setVal('doc-balance', `${btcAmt} BTC (${btcVal})`);
+            setVal('doc-altcoin', (ghostData.altcoin || "XMR (Monero)").toUpperCase());
+            setVal('doc-vehicle', (ghostData.vehicle || genVehicle()).toUpperCase());
+            setVal('doc-vin', ghostData.vin || genVin());
+            setVal('doc-ua', ghostData.ua || genUA());
+            setVal('doc-op-name', `OPERATION: ${(ghostData.opName || genBeer()).toUpperCase()}`);
+            setVal('doc-equipment', (ghostData.equipment || genAppliance()).toUpperCase());
+            setVal('doc-medical', (ghostData.medical || genMedical()).toUpperCase());
+            setVal('doc-sub', (ghostData.sub || genSub()).toUpperCase());
+            
+            // SECCIÓN VIII
+            setVal('doc-drink', (ghostData.drink || genDrink()).toUpperCase());
+            setVal('doc-coffee', (ghostData.coffee || genCoffee()).toUpperCase());
+            setVal('doc-music', (ghostData.genre || genGenre()).toUpperCase());
+            setVal('doc-color', ghostData.color || genColor());
+            setVal('doc-weakness', (ghostData.weakness || genDessert()).toUpperCase());
+            setVal('doc-nation', (ghostData.nation || genNation()).toUpperCase());
+
+            // SECCIÓN IX
+            setVal('doc-university', (ghostData.university || genUniversity()).toUpperCase());
+            setVal('doc-temp', ghostData.weather || "N/A");
+            setVal('doc-wind', ghostData.wind || "N/A");
+            
+            // SECCIÓN X
+            setVal('doc-fda-med', (ghostData.fdaMed || "CLASSIFIED MEDICAL RECORD").toUpperCase());
+            setVal('doc-fbi-record', (ghostData.fbiRecord || "NO ACTIVE WARRANTS").toUpperCase());
+            
+            // SECCIÓN XI
+            setVal('doc-origin-meta', (ghostData.originMeta || genOriginMeta()).toUpperCase());
+            setVal('doc-hardware', (ghostData.hardware || genHardware()).toUpperCase());
+            
+            // SECCIÓN XII
+            setVal('doc-cover-mission', (ghostData.coverMission || genCoverMission()).toUpperCase());
+            setVal('doc-tech-skill', (ghostData.techSkill || genTechSkill()).toUpperCase());
+
+            // SECCIÓN XIII
+            setVal('doc-ai-age', ghostData.aiAge || "CALCULATING...");
+            setVal('doc-ai-eth', ghostData.aiEth ? ghostData.aiEth.toUpperCase() : "UNKNOWN");
+            setVal('doc-k9', (ghostData.k9 || genK9()).toUpperCase());
+            setVal('doc-insult', `"${ghostData.insult || genInsult()}"`);
+            setVal('doc-sun', ghostData.sun || "06:00 - 18:00 UTC");
+
+            setVal('doc-quote', `${ghostData.quote}`);
+
+            document.getElementById('results-container').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // --- SCRIPT 3D INTERACTIVO DRAG-TO-ROTATE ---
+        (function() {
+            const cardObject = document.querySelector('.card-object');
+            const scene = document.querySelector('.scene-3d');
+            const glare = document.querySelector('.glare');
+
+            let isDragging = false;
+            let startX, startY;
+            let currentX = 0, currentY = 0;
+            let rotationX = 0, rotationY = 0;
+
+            const startDrag = (e) => {
+                isDragging = true;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startX = clientX - currentX;
+                startY = clientY - currentY;
+                scene.style.cursor = 'grabbing';
+            };
+
+            const drag = (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                currentX = clientX - startX;
+                currentY = clientY - startY;
+
+                rotationY = currentX * 0.5; 
+                rotationX = -(currentY * 0.5); 
+
+                if(rotationX > 90) rotationX = 90;
+                if(rotationX < -90) rotationX = -90;
+
+                updateTransform();
+            };
+
+            const endDrag = () => {
+                isDragging = false;
+                scene.style.cursor = 'grab';
+            };
+            
+            const updateTransform = () => {
+                cardObject.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+                
+                const gX = 50 + (rotationY % 360) / 3;
+                const gY = 50 - (rotationX) / 2;
+                if(glare) {
+                    glare.style.background = `radial-gradient(circle at ${gX}% ${gY}%, rgba(255,255,255,0.4), transparent 50%)`;
+                    let normalizedY = Math.abs(rotationY % 360);
+                    if (normalizedY > 90 && normalizedY < 270) {
+                         glare.style.opacity = 0; 
+                    } else {
+                         glare.style.opacity = Math.max(0, 0.5 - (Math.abs(rotationY%180)/180));
+                    }
+                }
+            };
+
+            const resetRotation = () => {
+                currentX = 0; currentY = 0;
+                rotationX = 0; rotationY = 0;
+                cardObject.style.transition = 'transform 0.5s ease-out';
+                updateTransform();
+                setTimeout(() => { cardObject.style.transition = 'transform 0.1s'; }, 500); 
+            };
+
+            scene.addEventListener('mousedown', startDrag);
+            window.addEventListener('mousemove', drag); 
+            window.addEventListener('mouseup', endDrag);
+            scene.addEventListener('dblclick', resetRotation);
+
+            scene.addEventListener('touchstart', startDrag, {passive: false});
+            window.addEventListener('touchmove', drag, {passive: false});
+            window.addEventListener('touchend', endDrag);
+            
+            updateTransform();
+        })();
+
+        // --- ANIMACIÓN DE FONDO ---
+        (function() {
+            const canvas = document.getElementById('neural-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h, particles = [];
+            function initCanvas() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; particles = []; for(let i=0; i<60; i++) { particles.push({x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5}); } }
+            function animateCanvas() { ctx.clearRect(0,0,w,h); ctx.fillStyle = '#00ff00'; ctx.strokeStyle = 'rgba(0, 255, 0, 0.15)'; particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; if(p.x<0 || p.x>w) p.vx*=-1; if(p.y<0 || p.y>h) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2); ctx.fill(); for(let j=i+1; j<particles.length; j++) { const p2 = particles[j]; if(Math.hypot(p.x-p2.x, p.y-p2.y) < 100) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); } } }); requestAnimationFrame(animateCanvas); }
+            window.addEventListener('resize', initCanvas); initCanvas(); animateCanvas();
+        })();
+    </script>
+</body>
+</html>
