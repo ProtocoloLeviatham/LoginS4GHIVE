@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BruteForce</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #00ff00;
+            --secondary: #003300;
+            --danger: #ff0000;
+            --dark: #020202;
+            --glass: rgba(0, 15, 0, 0.95);
+            
+            /* Colores de Terminal Realista */
+            --term-bg: #0a0a0a;
+            --term-text: #cccccc;
+            --term-green: #22c55e;
+            --term-red: #ef4444;
+            --term-yellow: #eab308;
+            --term-blue: #3b82f6;
+            --term-gray: #6b7280;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- FONDO RED NEURONAL --- */
+        #neural-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.2; pointer-events: none;
+        }
+
+        /* --- EFECTO CRT --- */
+        .crt::before {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
+        .scanline {
+            width: 100%; height: 100px; z-index: 51;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0, 255, 0, 0.2) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1; position: absolute; bottom: 100%;
+            animation: scanline 10s linear infinite; pointer-events: none;
+        }
+        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100%; } }
+
+        /* --- CONTENEDORES --- */
+        .container-main {
+            max-width: 1000px; margin: 0 auto; width: 100%; padding: 20px;
+            position: relative; z-index: 60; flex-grow: 1; display: flex; flex-direction: column; gap: 1.5rem;
+        }
+
+        .cyber-panel {
+            background: var(--glass);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.1);
+            position: relative; overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .cyber-panel::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* BOTÓN VOLVER */
+        .close-btn {
+            position: absolute; top: 10px; right: 10px;
+            color: #666; font-family: 'Fira Code', monospace; font-weight: bold;
+            cursor: pointer; transition: color 0.2s; font-size: 1.2rem;
+            z-index: 70; padding: 5px 10px; border: 1px solid transparent;
+        }
+        .close-btn:hover { color: var(--danger); border-color: var(--danger); background: rgba(255,0,0,0.1); }
+
+        /* --- BOTONES & OPCIONES --- */
+        .btn-option {
+            border: 1px solid #333; background: rgba(0, 20, 0, 0.6);
+            color: #999; padding: 1rem; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: space-between;
+            font-family: 'Fira Code', monospace; text-transform: uppercase; font-size: 0.85rem;
+        }
+        .btn-option:hover {
+            border-color: var(--primary); color: var(--primary);
+            background: rgba(0, 50, 0, 0.8); transform: translateX(3px);
+            box-shadow: -5px 0 10px rgba(0,255,0,0.1);
+        }
+        .btn-option.selected {
+            background: var(--primary); color: black; font-weight: bold;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        /* --- TERMINAL REALISTA KALI LINUX --- */
+        .terminal-window {
+            font-family: 'Fira Code', monospace; 
+            background-color: var(--term-bg);
+            border: 1px solid #30363d; 
+            height: 450px; 
+            overflow-y: auto;
+            padding: 12px; 
+            font-size: 11px; 
+            color: var(--term-text);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            line-height: 1.5;
+            position: relative;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* LOGO CENTRAL LEVIATHAN */
+        .terminal-watermark {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.04);
+            pointer-events: none;
+            z-index: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        .terminal-watermark i {
+            font-size: 10rem;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 0, 0.1));
+        }
+        .terminal-watermark span {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        /* ESTILOS DE LOG (PROFESIONAL / SOBRIO) */
+        .log-line {
+            position: relative; z-index: 1;
+            margin-bottom: 1px; 
+            display: flex; 
+            gap: 8px; 
+            align-items: flex-start; /* Alineación superior para multilínea */
+            flex-wrap: wrap;
+            opacity: 0;
+            font-size: 10px;
+            animation: slideIn 0.05s forwards; /* Muy rápido para soportar la velocidad */
+            color: #bbb;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            /* Manejo de texto largo mejorado */
+            overflow-wrap: anywhere; 
+            word-break: break-all;
+            width: 100%;
+        }
+        @keyframes slideIn { 
+            from { opacity: 0; transform: translateX(-5px); }
+            to { opacity: 1; transform: translateX(0); } 
+        }
+        
+        .t-time { color: #555; font-size: 0.9em; flex-shrink: 0; font-family: 'Fira Code', monospace; white-space: nowrap; }
+        .t-pass { color: #e6e6e6; font-weight: normal; flex-shrink: 1; }
+        .t-msg  { color: #777; font-style: italic; white-space: nowrap; }
+        .t-dict { color: #444; white-space: nowrap; }
+        .t-user { color: #999; flex-shrink: 1; } /* El usuario puede contraerse si es largo */
+        
+        .t-denied { 
+            color: #ff0000; 
+            font-weight: 900; 
+            margin-left: auto; /* Empuja al final */
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        /* Cursor */
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background-color: var(--term-text);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* --- GLITCH TITLE --- */
+        .glitch {
+            font-size: 3rem; font-weight: 900; text-transform: uppercase; position: relative;
+            text-shadow: 2px 2px 0px #ff0000, -2px -2px 0px #0000ff;
+            animation: glitch-anim 3s infinite alternate;
+        }
+        @media(max-width: 768px) { .glitch { font-size: 1.8rem; } }
+        @keyframes glitch-anim {
+            0% { text-shadow: 2px 2px 0px #ff0000, -2px -2px 0px #0000ff; }
+            50% { text-shadow: -2px -2px 0px #ff0000, 2px 2px 0px #0000ff; }
+            100% { text-shadow: 2px -2px 0px #ff0000, -2px 2px 0px #0000ff; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 0; border: 1px solid #1c2128; }
+        ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+
+        /* Footer Ticker */
+        .ticker-wrap { width: 100%; overflow: hidden; white-space: nowrap; background: #050505; color: var(--term-green); border-top: 1px solid #30363d; border-bottom: 1px solid #30363d; font-size: 0.75rem; font-family: 'Fira Code', monospace; padding: 4px 0; }
+        .ticker { display: inline-block; padding-left: 100%; animation: ticker 30s linear infinite; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        
+        /* Animación Carga Manual */
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+    </style>
+</head>
+<body class="crt">
+    <canvas id="neural-canvas"></canvas>
+    
+    <div class="container-main">
+        
+        <!-- HEADER -->
+        <header class="text-center border-b-4 border-green-900 pb-6 mb-2 bg-black/50 pt-6">
+            <h1 class="glitch tracking-widest text-white">LEVIATHAN BRUTE FORCE</h1>
+            <div class="flex justify-center gap-8 mt-2 text-xs font-bold tracking-widest font-mono">
+                <span class="text-green-600">UNIT: <span class="text-white">S4G</span></span>
+                <span class="text-green-600">STATUS: <span class="text-primary animate-pulse">ACTIVE</span></span>
+                <span class="text-green-600">KERNEL: <span class="text-gray-400">v1.0.0</span></span>
+            </div>
+        </header>
+
+        <!-- PROTOCOLO REESCRITO V3 -->
+        <div class="cyber-panel p-6 border-t border-green-500">
+            <h2 class="text-sm font-bold text-green-400 border-b border-green-800 mb-4 pb-2 flex justify-between font-mono">
+                <span>MANUAL DE OPERADOR DE CAMPO</span>
+                <i class="fas fa-book-dead animate-pulse"></i>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-[10px] md:text-xs text-gray-400 font-mono">
+                <div>
+                    <div class="mb-3">
+                        <strong class="text-white block mb-1">SINOPSIS TÉCNICA:</strong>
+                        La unidad LEVIATHAN es un motor de auditoría de credenciales. Emplea ataques de diccionario híbridos combinados con un generador de mutaciones infinitas para intrusiones de fuerza bruta sostenidas contra objetivos endurecidos.
+                    </div>
+                    <div class="mb-3 border-l-2 border-blue-500 pl-2">
+                        <strong class="text-blue-400">PROCEDIMIENTO DE ACTIVACIÓN:</strong>
+                        1. <span class="text-white">Selección de Vector:</span> Identifique el entorno digital.<br>
+                        2. <span class="text-white">Designación de Objetivo:</span> Ingrese identificadores únicos.<br>
+                        3. <span class="text-white">Configuración de Carga:</span> Elija el algoritmo de ataque.<br>
+                        4. <span class="text-white">Despliegue:</span> Inicie la secuencia de inyección.
+                    </div>
+                </div>
+                <div>
+                    <strong class="text-white block mb-2">VECTORES DE ATAQUE SOPORTADOS:</strong>
+                    <ul class="space-y-1">
+                        <li><strong class="text-red-400">[EMAIL]</strong> Ataque a servicios SMTP/IMAP (Gmail, Outlook, Corp).</li>
+                        <li><strong class="text-blue-400">[WIFI]</strong> Captura y cracking de WPA/WPA2 Handshakes.</li>
+                        <li><strong class="text-yellow-400">[CRYPTO]</strong> Recuperación de claves Hashcat/John The Ripper.</li>
+                        <li><strong class="text-purple-400">[SOCIAL]</strong> Auditoría de APIs de redes sociales (FB/IG/X).</li>
+                        <li><strong class="text-cyan-400">[WEB]</strong> Inyección HTTP POST contra paneles de administración.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 1: CATEGORIA -->
+        <div id="step-1" class="cyber-panel p-6">
+            <div class="flex justify-between items-center mb-4 border-b border-gray-800 pb-2">
+                <h3 class="text-xl font-bold text-white font-mono">1. SELECCIONAR VECTOR DE INTRUSIÓN</h3>
+                <i class="fas fa-network-wired text-green-600"></i>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- EMAIL -->
+                <div class="btn-option group" onclick="selectCategory('email')">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-envelope-open-text text-red-500 text-xl"></i>
+                        <div>
+                            <div class="font-bold text-white">SERVICIOS EMAIL</div>
+                            <div class="text-[9px] text-gray-500">IMAP / SMTP / POP3</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- WIFI -->
+                <div class="btn-option group" onclick="selectCategory('wifi')">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-wifi text-blue-500 text-xl"></i>
+                        <div>
+                            <div class="font-bold text-white">REDES WIFI</div>
+                            <div class="text-[9px] text-gray-500">HANDSHAKE / PMKID</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- CRYPTO -->
+                <div class="btn-option group" onclick="selectCategory('crypto')">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-fingerprint text-yellow-500 text-xl"></i>
+                        <div>
+                            <div class="font-bold text-white">CLAVES CIFRADO</div>
+                            <div class="text-[9px] text-gray-500">HASHCAT / JOHN</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- SOCIAL -->
+                <div class="btn-option group" onclick="selectCategory('social')">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-share-alt text-purple-500 text-xl"></i>
+                        <div>
+                            <div class="font-bold text-white">REDES SOCIALES</div>
+                            <div class="text-[9px] text-gray-500">API ENDPOINTS</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- URL -->
+                <div class="btn-option group" onclick="selectCategory('url')">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-globe text-cyan-500 text-xl"></i>
+                        <div>
+                            <div class="font-bold text-white">WEB ENDPOINT</div>
+                            <div class="text-[9px] text-gray-500">HTTP FORM / LOGIN</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: OBJETIVO ESPECIFICO -->
+        <div id="step-2" class="hidden cyber-panel p-6 animate-[fadeIn_0.5s]">
+            <div class="close-btn" onclick="goBack(2)">X</div>
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-white font-mono">
+                <span class="text-green-500">2.</span> CONFIGURAR OBJETIVO: <span id="cat-display" class="text-primary uppercase">---</span>
+            </h3>
+            
+            <div id="sub-options-container" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6"></div>
+
+            <div id="primary-target-box" class="relative group mb-4">
+                <label id="target-label" class="text-[10px] font-bold text-green-800 mb-1 block uppercase">Target Identifier</label>
+                <div class="flex items-center bg-black border border-green-800 group-hover:border-green-500 transition-colors">
+                    <span class="p-3 bg-green-900/20 text-green-500 font-bold select-none font-mono">></span>
+                    <input type="text" id="target-input" class="w-full bg-transparent text-white p-3 outline-none font-mono" placeholder="...">
+                </div>
+            </div>
+
+            <div id="manual-html-panel" class="hidden mb-4">
+                <div class="bg-yellow-900/10 border border-yellow-600/50 p-3 mb-2 text-yellow-500 text-xs font-mono">
+                    <i class="fas fa-info-circle"></i> <strong>MODO MANUAL:</strong> Pega el código fuente HTML del formulario de login para un parsing exacto de los campos input.
+                </div>
+                <textarea id="html-input" class="w-full h-32 bg-black border border-yellow-800 text-yellow-500 text-xs p-2 font-mono outline-none" placeholder="<!-- Paste HTML Here -->"></textarea>
+            </div>
+
+            <div id="username-box" class="relative group hidden">
+                <label class="text-[10px] font-bold text-blue-800 mb-1 block uppercase">USUARIO OBJETIVO</label>
+                <div class="flex items-center bg-black border border-blue-800 group-hover:border-blue-500 transition-colors">
+                    <span class="p-3 bg-blue-900/20 text-blue-500 font-bold select-none font-mono">USER:</span>
+                    <input type="text" id="username-input" class="w-full bg-transparent text-white p-3 outline-none font-mono" placeholder="admin / user@target.com">
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-6">
+                <button onclick="confirmStep2()" class="bg-green-900/80 border-b-4 border-green-600 text-white px-8 py-3 font-bold hover:bg-green-600 hover:text-black transition-all uppercase tracking-widest font-mono">
+                    CONFIRMAR OBJETIVO
+                </button>
+            </div>
+        </div>
+
+        <!-- LOADING SCREEN -->
+        <div id="url-scanner" class="hidden cyber-panel p-10 flex flex-col items-center justify-center text-center">
+            <i class="fas fa-terminal text-4xl text-cyan-500 mb-4 animate-pulse"></i>
+            <h3 class="text-xl font-bold text-white mb-2 font-mono">ANALIZANDO ENDPOINT...</h3>
+            <div class="font-mono text-xs text-cyan-400 mb-4 h-20 overflow-hidden w-full max-w-md text-left bg-black p-2 border border-cyan-900" id="scan-logs"></div>
+            <div class="w-full max-w-md bg-gray-900 h-1">
+                <div class="h-full bg-cyan-500 animate-[width_3s_ease-in-out] w-full"></div>
+            </div>
+        </div>
+
+        <!-- MANUAL PARSER -->
+        <div id="manual-parser" class="hidden cyber-panel p-10 flex flex-col items-center justify-center text-center">
+            <i class="fas fa-code text-4xl text-yellow-500 mb-4 animate-spin"></i>
+            <h3 class="text-xl font-bold text-white mb-2 font-mono">PARSING HTML SOURCE...</h3>
+            <div class="font-mono text-xs text-yellow-400 mb-4 w-full max-w-md text-left bg-black p-2 border border-yellow-900 h-24 overflow-hidden" id="parser-logs"></div>
+            <div class="w-full max-w-md bg-gray-900 h-1">
+                <div class="h-full bg-yellow-500 animate-[width_3s_ease-in-out] w-full"></div>
+            </div>
+        </div>
+
+        <!-- STEP 3: METODO -->
+        <div id="step-3" class="hidden cyber-panel p-6 animate-[fadeIn_0.5s]">
+            <div class="close-btn" onclick="goBack(3)">X</div>
+            <h3 class="text-xl font-bold mb-6 text-white font-mono">3. SELECCIONAR ALGORITMO</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div onclick="selectAttack('SIMPLE')" class="btn-option group">
+                    <div class="flex justify-between w-full items-center">
+                        <span class="text-white font-bold font-mono group-hover:text-green-400"><i class="fas fa-bolt text-yellow-400 mr-2"></i> SIMPLE</span> 
+                        <span class="text-[9px] border border-gray-600 px-1 text-gray-500">LENTO</span>
+                    </div>
+                </div>
+                <div onclick="selectAttack('DICCIONARIO')" class="btn-option group">
+                    <div class="flex justify-between w-full items-center">
+                        <span class="text-white font-bold font-mono group-hover:text-green-400"><i class="fas fa-book text-blue-400 mr-2"></i> DICCIONARIO</span> 
+                        <span class="text-[9px] border border-blue-600 px-1 text-blue-400">ESTÁNDAR</span>
+                    </div>
+                </div>
+                <div onclick="selectAttack('HIBRIDO')" class="btn-option group">
+                    <div class="flex justify-between w-full items-center">
+                        <span class="text-white font-bold font-mono group-hover:text-green-400"><i class="fas fa-random text-purple-400 mr-2"></i> HÍBRIDO</span> 
+                        <span class="text-[9px] border border-purple-600 px-1 text-purple-400">AVANZADO</span>
+                    </div>
+                </div>
+                <div onclick="selectAttack('AI')" class="btn-option group border-green-500 bg-green-900/10">
+                    <div class="flex justify-between w-full items-center">
+                        <span class="text-white font-bold font-mono group-hover:text-green-400"><i class="fas fa-brain text-green-400 animate-pulse mr-2"></i> IA LEVIATHAM</span> 
+                        <span class="text-[9px] bg-green-500 text-black px-1 font-bold">PREMIUM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4: DICCIONARIO -->
+        <div id="step-4" class="hidden cyber-panel p-6 animate-[fadeIn_0.5s]">
+            <div class="close-btn" onclick="goBack(4)">X</div>
+            <h3 class="text-xl font-bold mb-4 text-white font-mono">4. CARGAR WORDLIST</h3>
+            <div id="dictionary-list" class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2"></div>
+        </div>
+
+        <!-- STEP 5: CONSOLA -->
+        <div id="step-5" class="hidden cyber-panel p-1 border-t-2 border-gray-700 h-full flex flex-col bg-[#0d1117]">
+            <!-- Info Bar Style Linux -->
+            <div class="flex justify-between items-center border-b border-gray-700 pb-2 bg-[#161b22] p-2 font-mono text-xs">
+                <div class="flex gap-3 items-center">
+                    <div class="w-3 h-3 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]"></div>
+                    <span class="text-green-400 font-bold">root@leviatham</span>
+                    <span class="text-gray-400">/bin/bruteforce_ng</span>
+                </div>
+                <div class="text-right text-gray-300">
+                    <span id="attempt-counter">0 / 0</span>
+                </div>
+            </div>
+            
+            <div class="px-2 pb-1 bg-[#0d1117] text-[10px] font-mono flex gap-4 border-b border-gray-800 pt-1">
+                 <span class="text-gray-500">TARGET: <span id="term-target" class="text-white">---</span></span>
+                 <span class="text-gray-500">DICT: <span id="term-dict" class="text-green-500">---</span></span>
+                 <span class="text-gray-500">METHOD: <span id="term-method" class="text-blue-400 font-bold">---</span></span>
+            </div>
+
+            <!-- Terminal Window -->
+            <div id="terminal" class="terminal-window flex-grow mb-0 border-none">
+                <!-- Marca de Agua -->
+                <div class="terminal-watermark">
+                    <i class="fas fa-dragon"></i>
+                    <span>LEVIATHAN</span>
+                </div>
+            </div>
+
+            <!-- ProgressBar -->
+            <div class="w-full h-1 bg-gray-800"><div id="progress-bar" class="h-full bg-green-500 w-0"></div></div>
+
+            <!-- Abort Btn -->
+            <div class="p-2 bg-[#161b22] border-t border-gray-800">
+                <button id="abort-btn" onclick="abortAttack()" class="w-full bg-red-900/20 text-red-500 py-2 font-bold border border-red-900 hover:bg-red-900 hover:text-white transition-all font-mono text-sm flex items-center justify-center gap-2">
+                    <span>[CTRL+C]</span> INTERRUMPIR PROCESO
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER MEJORADO -->
+    <footer class="w-full border-t border-green-900 bg-black/90 p-2 text-[10px] md:text-xs font-mono relative z-50 mt-auto">
+        <div class="ticker-wrap">
+            <div class="ticker">+++ SYSTEM ALERT: LEVIATHAN CORE ACTIVE +++ ENCRYPTION: AES-256-GCM +++ BRUTEFORCE ENGINE V1.0.0 +++ THREADS: 256 +++ CONNECTED TO NODE: ALPHA-9 +++ NETWORK STATUS: SECURE +++</div>
+        </div>
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center opacity-80 gap-2 text-center p-2">
+            <div class="flex flex-col items-start">
+                <span class="font-bold tracking-[0.2em] text-green-500 text-sm glitch" style="font-size: 1rem;">INDUSTRIAS LEVIATHAM © 2018-2025</span>
+                <span class="text-[9px] text-gray-500 uppercase">Potenciada Por BotNet S4G</span>
+            </div>
+            
+            <!-- Telemetría -->
+            <div class="flex flex-wrap justify-center gap-4 text-gray-400 font-bold border border-gray-800 bg-[#0d1117] p-1 px-3 rounded">
+                <span class="flex items-center gap-1"><i class="fas fa-microchip text-green-500"></i> CPU: <span class="text-white">??</span></span>
+                <span class="flex items-center gap-1"><i class="fas fa-memory text-green-500"></i> RAM: <span class="text-white">??</span></span>
+                <span class="flex items-center gap-1"><i class="fas fa-network-wired text-green-500"></i> PING: <span class="text-white">??</span></span>
+                <span class="flex items-center gap-1"><i class="fas fa-clock text-green-500"></i> <span id="utc-clock" class="text-white">00:00:00</span></span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ==================================================================================================
+        // === MOTOR DE GENERACIÓN INFINITA (INFINITE PASSWORD ENGINE v3.0) ===
+        // ==================================================================================================
+        
+        // 1. PALABRAS RAÍZ EXPANDIDAS (1000+ Entradas)
+        const commonRoots = [
+            // Originales & Comunes
+            "admin", "pass", "dragon", "football", "baseball", "master", "monkey", "shadow", "princess", "charlie",
+            "michael", "jordan", "superman", "batman", "welcome", "sunshine", "mustang", "joshua", "secret", "killer",
+            "daniel", "jessica", "michelle", "hunter", "ashley", "matthew", "andrew", "access", "liverpool", "arsenal",
+            "chelsea", "matrix", "pokemon", "starwars", "harley", "joker", "justin", "scotland", "ireland", "williams",
+            "thomas", "robert", "nicole", "jennifer", "stephanie", "melissa", "anthony", "elizabeth", "brandon", "rebecca",
+            // Mas Nombres
+            "brittany", "samuel", "christopher", "alexander", "joseph", "benjamin", "katherine", "jonathan", "christian",
+            "kimberly", "patricia", "stephen", "patrick", "richard", "tiffany", "charles", "shannon", "danielle", "george",
+            "courtney", "heather", "amber", "laura", "sarah", "jamie", "mary", "megan", "rachel", "kelly", "sandra",
+            "crystal", "andrea", "amy", "victoria", "maria", "ryan", 
+            // Tecnología
+            "cisco", "oracle", "system", "server", "manager", "network", "support", "hacker", "security", "router",
+            "switch", "firewall", "gateway", "protocol", "digital", "cyber", "techno", "logic", "data", "base",
+            "cloud", "azure", "amazon", "google", "fiber", "wifi", "lan", "wan", "proxy", "vpn", "host",
+            // Deportes
+            "lakers", "bulls", "warriors", "celtics", "knicks", "yankees", "redsox", "dodgers", "cowboys", "patriots",
+            "messi", "ronaldo", "neymar", "mbappe", "haland", "lebron", "kobe", "shaq", "curry", "durant",
+            "tennis", "golf", "soccer", "hockey", "rugby", "cricket", "racing", "boxing", "mma", "ufc",
+            // Marcas y Coches
+            "toyota", "honda", "ford", "chevy", "bmw", "mercedes", "audi", "ferrari", "porsche", "tesla",
+            "mustang", "camaro", "corvette", "charger", "challenger", "viper", "civic", "accord", "camry", "corolla",
+            "nike", "adidas", "puma", "gucci", "prada", "apple", "samsung", "sony", "xbox", "playstation",
+            // Naturaleza y Colores
+            "red", "blue", "green", "yellow", "orange", "purple", "pink", "black", "white", "gray",
+            "sun", "moon", "star", "sky", "cloud", "rain", "snow", "wind", "fire", "water",
+            "ocean", "river", "mountain", "forest", "tree", "flower", "rose", "lily", "daisy", "tulip",
+            "dog", "cat", "bird", "fish", "lion", "tiger", "bear", "wolf", "fox", "eagle",
+            // Conceptos Abstractos
+            "love", "hate", "hope", "dream", "faith", "peace", "war", "power", "money", "cash",
+            "happy", "sad", "angry", "funny", "cool", "hot", "cold", "good", "bad", "nice",
+            "fast", "slow", "hard", "soft", "loud", "quiet", "high", "low", "big", "small",
+            // Diccionario Español Ampliado
+            "abogado", "actor", "adulto", "agente", "aire", "alcalde", "alcohol", "aldea", "alerta", "algo",
+            "alma", "alto", "altura", "alumno", "amado", "amante", "amiga", "amigo", "anillo", "animal",
+            "antes", "antiguo", "anual", "apoyo", "aquel", "arbol", "arena", "arma", "arroz", "arte",
+            "autor", "avion", "aviso", "ayuda", "azul", "baile", "banco", "banda", "baño", "barco",
+            "barrio", "base", "basura", "bebe", "bebida", "bello", "beso", "bestia", "bicho", "bien",
+            "bolsa", "bomba", "borde", "bosque", "brazo", "breve", "broma", "bruto", "bueno", "burro",
+            "buscar", "cable", "cabo", "cabra", "cacao", "cafe", "caida", "caja", "calle", "cama",
+            "campo", "canal", "canto", "caos", "capa", "cara", "carga", "carne", "carro", "carta",
+            "casco", "caso", "causa", "caza", "celda", "cena", "cero", "cerro", "cesto", "chico",
+            "chino", "cielo", "cien", "cine", "cinta", "cita", "civil", "clase", "clave", "clima",
+            "club", "cobre", "coche", "coco", "cola", "color", "coma", "comer", "comun", "copa",
+            "copia", "coro", "corto", "cosa", "costa", "crema", "cruce", "crudo", "cruz", "cuadro",
+            "cuarto", "cubo", "cuello", "cuento", "cuero", "cuerpo", "cueva", "culpa", "culto", "cumbre",
+            "cuota", "curso", "curva", "dama", "daño", "dato", "deber", "dedo", "delta", "demo",
+            "denso", "diente", "dieta", "diez", "digno", "dinero", "disco", "divino", "doble", "doce",
+            "dolor", "dosis", "duda", "dueño", "dulce", "duro", "eje", "elite", "ella", "ello",
+            "enero", "enfermo", "enlace", "enorme", "entero", "envio", "epoca", "equipo", "error", "escala",
+            "escape", "esfera", "espada", "espejo", "espia", "esposa", "esposo", "estado", "este", "estilo",
+            "etapa", "eterno", "etica", "etnia", "exito", "extra", "fama", "fango", "fase", "fauna",
+            "favor", "fecha", "feria", "fibra", "ficha", "fiel", "fiera", "fiesta", "figura", "fila",
+            "filme", "filo", "final", "finca", "fino", "firma", "firme", "flaco", "flecha", "flora",
+            "flota", "flujo", "foco", "folio", "fondo", "forma", "foro", "foto", "frase", "freno",
+            "frente", "fresco", "frio", "fruta", "fruto", "fuego", "fuente", "fuerte", "fuerza", "fuga",
+            "fumar", "furia", "futbol", "futuro", "gama", "ganar", "gato", "gente", "gesto", "gira",
+            "globo", "gloria", "golpe", "gordo", "goma", "gota", "gozo", "grado", "gramo", "grande",
+            "grano", "grasa", "grave", "grieta", "gris", "grito", "grupo", "guante", "guapo", "guerra",
+            "guia", "guion", "gusto", "habil", "habla", "hacer", "hacha", "hambre", "harina", "hasta",
+            "hecho", "helado", "heroe", "hielo", "hierba", "hierro", "higa", "hijo", "hilo", "himno",
+            "huevo", "huida", "humano", "humo", "humor", "icono", "idea", "ideal", "igual", "imagen",
+            "iman", "impar", "inicio", "isla", "jabon", "jardin", "jarra", "jaula", "jefe", "joven",
+            "joya", "juego", "juez", "jugo", "julio", "junio", "junta", "junto", "justo", "kilo",
+            "labor", "lado", "lago", "lana", "lanza", "lapiz", "largo", "larva", "laser", "latigo",
+            "latino", "lavar", "lazo", "leche", "lecho", "legal", "lejos", "lento", "leña", "leon",
+            "letra", "leve", "ley", "libra", "libre", "libro", "lider", "liga", "lima", "limon",
+            "linea", "lino", "lista", "listo", "litro", "llave", "lleno", "lluvia", "lobo", "loco",
+            "lodo", "logro", "loma", "lona", "lote", "lucha", "luego", "lugar", "lujo", "luna",
+            "lunes", "luz", "macho", "madera", "madre", "maestro", "magia", "mago", "maiz", "malla",
+            "malo", "mama", "mando", "manejo", "manga", "mano", "manta", "manto", "mapa", "marca",
+            "marco", "marea", "mareo", "marfil", "margen", "marido", "marino", "masa", "matar", "mate",
+            "mayo", "mayor", "mecha", "medio", "miedo", "miel", "miembro", "mesa", "meta", "metro",
+            "mezcla", "miedo", "miel", "miembro", "miga", "mil", "milla", "mina", "minero", "minimo",
+            "mirada", "misa", "misil", "mismo", "mitad", "mito", "moda", "modo", "moho", "molde",
+            "moneda", "monje", "mono", "monte", "monto", "moral", "morir", "moro", "mosca", "moto",
+            "motor", "movil", "mozo", "mucho", "mueble", "muelle", "muerte", "muerto", "mujer", "mula",
+            "multa", "mundo", "muno", "muro", "museo", "musgo", "musica", "muslo", "mutuo", "nacer",
+            "nacion", "nada", "nadar", "naipes", "naranja", "nariz", "natal", "nave", "negar", "negro",
+            "nervio", "nexo", "nicho", "nido", "niebla", "nieta", "nieto", "nieve", "niña", "niño",
+            "nivel", "noble", "noche", "nodo", "nombre", "norma", "norte", "nota", "notar", "novela",
+            "novia", "novio", "nube", "nuca", "nucleo", "nudo", "nuera", "nuevo", "nuez", "numero",
+            "nunca", "obispo", "obra", "obrero", "ocaso", "oceano", "ocio", "ocupar", "oeste", "oferta",
+            "oficio", "oido", "ojo", "ola", "oleo", "olor", "olla", "olmo", "onda", "once",
+            "opera", "opinar", "optar", "orden", "oreja", "organo", "orgullo", "origen", "orilla", "oro",
+            "osado", "oscuro", "oso", "ostra", "otoño", "otro", "oveja", "ovulo", "oxido", "pacto",
+            "padre", "paga", "pagar", "pagina", "pago", "pais", "paja", "pajaro", "pala", "palma",
+            "palo", "pan", "pana", "panel", "panico", "paño", "papa", "papel", "par", "parar",
+            "pared", "pareja", "paro", "parque", "parte", "parto", "pasado", "pasar", "paseo", "pasion",
+            "paso", "pasta", "pata", "patio", "pato", "patria", "pausa", "pauta", "pava", "pavo",
+            "paz", "pecho", "pedazo", "pedido", "pedir", "pegar", "peine", "pelo", "pelota", "pena",
+            "peña", "peon", "peor", "pepino", "peque", "pera", "perder", "perfil", "perla", "perro",
+            "pesar", "pesca", "peso", "peste", "petalo", "pez", "piano", "picar", "pico", "pie",
+            "piedra", "piel", "pieza", "pila", "pilar", "piloto", "pino", "pintar", "pintor", "piña",
+            "piojo", "pipa", "piso", "pista", "pito", "placa", "placer", "plaga", "plan", "plana",
+            "plano", "planta", "plata", "plato", "playa", "plaza", "plazo", "pleno", "plomo", "pluma",
+            "pobre", "poco", "poder", "podio", "poema", "poeta", "polo", "polvo", "pomo", "poner",
+            "popa", "popular", "poro", "porra", "porta", "porte", "posar", "pose", "postre", "pozo",
+            "prado", "precio", "premio", "prensa", "preso", "prima", "primo", "prisa", "proa", "probar",
+            "problema", "proceso", "producto", "profeta", "profundo", "programa", "pronto", "propio", "prueba", "pueblo",
+            "puente", "puerta", "puerto", "puesto", "pulga", "pulmon", "pulpo", "pulso", "puma", "punta",
+            "punto", "puño", "puro", "queja", "quemar", "querer", "queso", "quien", "quieto", "quimica",
+            "quinto", "quitar", "rabia", "rabo", "radar", "radio", "raiz", "rama", "ramo", "rana",
+            "rango", "rapido", "rapto", "raro", "rasgo", "rata", "rato", "raton", "raya", "raza",
+            "razon", "real", "receta", "recibo", "recto", "red", "refugio", "regalo", "regim", "regla",
+            "reina", "reino", "reir", "reja", "relato", "relevo", "reloj", "remo", "rencor", "renta",
+            "repaso", "reposo", "reptil", "res", "resina", "respeto", "resto", "reto", "reunion", "reves",
+            "rey", "rezar", "rico", "riego", "riesgo", "rifa", "rifle", "rigido", "rigor", "rima",
+            "rincon", "riñon", "rio", "riqueza", "risa", "ritmo", "rito", "rival", "rizado", "roble",
+            "robo", "robot", "robusto", "roca", "rocio", "rodaja", "rodar", "rodeo", "rodilla", "rojo",
+            "rollo", "romano", "romper", "ropa", "rosa", "rostro", "roto", "rubio", "rubor", "rudo",
+            "rueda", "ruego", "ruido", "ruina", "rulo", "rumbo", "rumor", "ruta", "rutina", "saber",
+            "sabio", "sabor", "saco", "sacro", "saeta", "sagaz", "saldo", "salida", "salir", "salmon",
+            "salon", "salsa", "salto", "salud", "saludo", "salvia", "sangre", "santo", "sapo", "saque",
+            "saten", "satelite", "sauce", "sauna", "savia", "sazon", "secar", "seco", "secreto", "secta",
+            "sector", "seda", "sede", "sello", "selva", "semana", "semilla", "senda", "seno", "señal",
+            "señor", "señora", "seña", "sepalo", "sepia", "septimo", "sequia", "ser", "serie", "serio",
+            "servir", "sesion", "seta", "seto", "sexo", "sexto", "short", "show", "sidra", "siempre",
+            "sierra", "siesta", "siglo", "signo", "silba", "silla", "sillon", "sima", "simbolo", "simio",
+            "simple", "sincero", "sino", "sintoma", "sirena", "sitio", "sobra", "sobre", "socio", "sodio",
+            "sofa", "soga", "soja", "sol", "sola", "solar", "soldado", "soledad", "solido", "solito",
+            "solo", "sombra", "sombrero", "son", "sonar", "sonda", "sonido", "sopa", "soplo", "sordo",
+            "sorna", "sorteo", "soso", "sosten", "sotana", "sotano", "suave", "subir", "sucio", "sudor",
+            "suegra", "suegro", "suela", "suelo", "suelto", "sueño", "suerte", "sujeto", "suma", "sumo",
+            "super", "sur", "surco", "susto", "sutil", "tabla", "tabaco", "tabique", "tableta", "taco",
+            "tacto", "tajo", "tala", "talco", "taller", "tallo", "talon", "tamano", "tambor", "tango",
+            "tanque", "tapa", "tapiz", "tapara", "tapera", "tapia", "tapiz", "tapon", "taquilla", "tarde",
+            "tarea", "tarifa", "tarjeta", "tarro", "tarta", "tasa", "taxi", "taza", "teatro", "techo",
+            "tecla", "tecnica", "tejado", "tejido", "tela", "telar", "tele", "tema", "temer", "temor",
+            "templo", "tenaz", "tendedero", "tenedor", "tener", "tenis", "tenso", "teoria", "terapia", "terco",
+            "termino", "ternero", "terreno", "terror", "tesis", "tesoro", "testigo", "texto", "tez", "ti",
+            "tia", "tibio", "tiburon", "tiempo", "tienda", "tierno", "tierra", "tigre", "tijera", "tilo",
+            "timbre", "timido", "timo", "timon", "tinta", "tinte", "tinto", "tio", "tipo", "tira",
+            "tiran", "tiro", "tiron", "titere", "titulo", "tiza", "toalla", "tobillo", "tocar", "tocino",
+            "todo", "toga", "toldo", "toma", "tomar", "tomate", "tono", "onto", "topacio", "tope",
+            "topo", "toque", "torax", "torero", "tormenta", "torneo", "toro", "torpe", "torre", "torta",
+            "tortuga", "tos", "tosco", "toser", "total", "toxico", "traba", "trabajo", "tractor", "tradicion",
+            "traer", "trafico", "trago", "traje", "trama", "tramo", "trampa", "trance", "trapo", "trasero",
+            "trasto", "trata", "trato", "trauma", "traza", "trebol", "trece", "tregua", "tren", "trenza",
+            "trepar", "tres", "tribu", "trigo", "trillizo", "trineo", "tripa", "triple", "triste", "triunfo",
+            "trofeo", "trompa", "trono", "tropa", "trote", "trozo", "truco", "trueno", "trucha", "tubo",
+            "tumba", "tumor", "tuna", "tunel", "tupido", "turba", "turbio", "turno", "tutor", "tuya",
+            "tuyo", "ubicar", "ubre", "ujier", "ulcera", "ultimo", "ultra", "umbral", "un", "una",
+            "uncion", "unidad", "unico", "unir", "universo", "uno", "untar", "uña", "uranio", "urbe",
+            "urgencia", "urna", "usar", "uso", "usted", "usual", "usura", "util", "uva", "vaca",
+            "vacio", "vacuno", "vagar", "vago", "vaina", "vajilla", "vale", "valer", "valido", "valle",
+            "valor", "vals", "valvula", "valla", "vampiro", "vapor", "vara", "variar", "vario", "varon",
+            "vaso", "vasto", "vecino", "veda", "vega", "vejez", "vela", "velar", "velero", "velo",
+            "veloz", "vena", "vencer", "venda", "vender", "veneno", "vengar", "venir", "venta", "venus",
+            "ver", "verano", "verbo", "verdad", "verde", "verdura", "verja", "verme", "verso", "vertebra",
+            "vertical", "vestido", "vestir", "veto", "via", "viaje", "vicio", "vida", "video", "vidrio",
+            "viejo", "viento", "vientre", "viernes", "viga", "vigia", "vigor", "vil", "villa", "vinagre",
+            "vino", "viña", "violin", "virgen", "virtud", "virus", "visita", "visper", "vista", "visto",
+            "viuda", "viudo", "vivaz", "vivero", "vivir", "vivo", "vocablo", "vocal", "vocear", "volar",
+            "volcan", "volumen", "volver", "vomito", "voraz", "votar", "voto", "voz", "vuelo", "vuelta",
+            "vulgar", "yate", "yegua", "yema", "yerno", "yeso", "yodo", "yoga", "yogur", "yunque",
+            "zafiro", "zanja", "zapato", "zona", "zorro", "zumo", "zurdo"
+        ];
+
+        // 2. SUFIJOS REALES & LARGOS (30+ Entradas)
+        const suffixes = [
+            "", "1", "12", "123", "1234", "12345", "!", "?", "@", 
+            "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", 
+            "2020", "2021", "2022", "2023", "2024", "2025", "2026",
+            "00", "01", "69", "007", "_", ".", "!", "?", "*", "#",
+            "_123", ".com", ".net", "_secure", "_admin", "_pass", "_user", 
+            "!@#", "123!@#", "!@#$", "1234!", "5678", "0000", "1111",
+            "_2023", "_2024", "_2025", ".v1", ".v2", ".pro", ".dev"
+        ];
+
+        // 3. BASE DE DATOS ESTÁTICA UNIFICADA (TOP 500+ ROCKYOU + COMUNES)
+        const staticPasswords = [
+            "123456", "123456789", "picture1", "password", "12345678", "111111", "123123", "12345", "1234567890", "senha",
+            "qwerty", "1234567", "sunshine", "iloveyou", "dragon", "welcome", "charlie", "princess", "football", "monkey",
+            "michael", "joshua", "letmeinh", "mustang", "shadow", "master", "superman", "jennifer", "baseball", "daniel",
+            "jessica", "camera", "cookie", "chocolate", "michelle", "hannah", "thomas", "lovely", "secret", "ashley",
+            "1234567891", "hunter2", "basket", "american", "matthew", "jordan", "london", "nicole", "222222", "666666",
+            "samantha", "andrew", "barcelona", "amanda", "love", "password123", "melissa", "liverpool", "killer", "server",
+            "chelsea", "justin", "williams", "alexander", "chicago", "sarah", "monkey1", "elizabeth", "brandon", "network",
+            "system", "manager", "princess1", "stephanie", "tiffany", "anthony", "computer", "circle", "daddy", "rebecca",
+            "robert", "fucker", "chicken", "pepper", "katherine", "austin", "flower", "access", "purple", "taylor",
+            "joseph", "spring", "startrek", "bryan", "jonathan", "christopher", "patrick", "scotland", "william", "andrea",
+            "admin", "admin123", "root", "guest", "flash", "butterfly", "shannon", "harley", "monster", "angel",
+            "P@ssword", "P@ssw0rd", "p@ssword", "p@ssw0rd", "P4ssword", "p4ssword", "Pa$$word", "pa$$word",
+            "Adm1n", "@dmin", "@dm1n", "Adm!n", "R00t", "r00t", "T00r", "t00r", "SuP3r", "S3cr3t", "s3cr3t",
+            "H@cker", "H4cker", "h@cker", "h4cker", "L0g1n", "l0g1n", "Acc3ss", "acc3ss", "M@ster", "m@ster",
+            "Dr@g0n", "dr@g0n", "Sh@d0w", "sh@d0w", "M0nk3y", "m0nk3y", "Ch@rl13", "ch@rl13", "Pr1nc3ss",
+            "pr1nc3ss", "B@seb@ll", "b@seb@ll", "F00tb@ll", "f00tb@ll", "Ilov3you", "ilov3you", "Letm31n",
+            "G0ogl3", "g0ogl3", "Faceb00k", "faceb00k", "Tw1tt3r", "tw1tt3r", "Y0utub3", "y0utub3", "Am@z0n",
+            "Micr0s0ft", "micr0s0ft", "W1nd0ws", "w1nd0ws", "L1nux", "l1nux", "Ubuntu", "ubuntu", "K@l1",
+            "thisismypassword", "idontknow", "icanthaveyou", "iwanttobreakfree", "letitbe", "stairwaytoheaven",
+            "sweethomealabama", "hotelcalifornia", "bohemianrhapsody", "smellsliketeenspirit", "rollinginthedeep",
+            "someonelikeyou", "justthewayyouare", "whatmakesyoubeautiful", "babyonemoretime", "oopsididitagain",
+            "mynameisjeff", "lukeyouaremyfather", "maytheforcebewithyou", "houstonwehaveaproblem", "illbeback",
+            "hasta-la-vista", "winter-is-coming", "you-know-nothing", "got-milk", "where-is-the-love",
+            "correct-horse-battery-staple", "security-is-important", "changeme-please", "dont-forget-me",
+            "one-two-three-four", "testing-one-two", "password-is-password", "admin-is-admin", 
+            "qwertyuiop", "asdfghjkl", "zxcvbnm", "1q2w3e4r", "1a2s3d4f", "000000", "121212", "123123", "654321",
+            "0987654321", "102030", "admin", "admin123", "admin1", "root", "toor", "user", "test", "demo", "guest",
+            "pass", "pass1", "pass123", "temp", "temp123", "cisco", "sanfer", "barca", "realmadrid", "madrid",
+            "aaron44", "abigail", "adam123", "aeroplane", "alex123", "alexandra", "alfredo", "alicia", "allison", "always",
+            "amanda", "amber", "amigo", "amore", "andre", "andrea", "angel", "angela", "angelina", "angie",
+            "animal", "anita", "annette", "annie", "anthony", "antonio", "apple", "april", "aquarius", "arizona",
+            "arnold", "arthur", "ashley", "austin", "avatar", "babygirl", "bailey", "bambi", "barbara", "barbie",
+            "barney", "baseball", "basil", "basket", "batman", "bears", "beast", "beautiful", "beauty", "becky",
+            "belinda", "benjamin", "benny", "benson", "bernie", "betty", "beverly", "bianca", "bigboy", "bigdog",
+            "bill", "billy", "biscuit", "bitch", "black", "blackberry", "blink", "blink182", "blonde", "bloody",
+            "blue", "bluebird", "bobby", "bonnie", "boobies", "boobs", "booty", "border", "boss", "boston",
+            "boy", "boys", "brad", "brandon", "brandy", "brenda", "brent", "brian", "bridget", "brittany",
+            "brooklyn", "brother", "brown", "bruce", "bryan", "bubbles", "buffy", "bugs", "bulls", "bumble",
+            "bunny", "buster", "butch", "butter", "butterfly", "button", "buttons", "caitlin", "california", "callie",
+            "calvin", "camel", "camera", "cameron", "camila", "campbell", "cancer", "candy", "cannon", "captain",
+            "carlos", "carly", "carmen", "carol", "caroline", "carolyn", "carrie", "casey", "casper", "cassie",
+            "catherine", "cathy", "cats", "cecilia", "celine", "celtic", "center", "chacha", "chad", "chance",
+            "chanel", "chaos", "charles", "charlie", "charlotte", "charm", "chase", "cheese", "chelsea", "chem",
+            "cherry", "cheryl", "chester", "chevy", "chicago", "chicken", "chief", "child", "china", "chip",
+            "chocolate", "choice", "chris", "christian", "christina", "christine", "christopher", "christy", "chuck", "church",
+            "cindy", "cinnamon", "circle", "cisco", "city", "claire", "clara", "clarence", "clark", "class",
+            "claudia", "clay", "clean", "cleo", "cleveland", "cliff", "clint", "cloud", "clover", "clown",
+            "club", "clyde", "coco", "cocoa", "coffee", "cole", "colin", "college", "color", "colt",
+            "colton", "columbia", "comet", "computer", "connie", "connor", "cookie", "cooper", "copper", "corey",
+            "cork", "corn", "corvette", "cory", "cosmos", "costa", "cotton", "cougar", "count", "country",
+            "courtney", "cowboy", "cowboys", "craig", "crazy", "cream", "create", "creek", "cricket", "crimson",
+            "crystal", "cuba", "cuddle", "curtis", "cute", "cutie", "cycle", "cyndi", "daddy", "daisy",
+            "dakota", "dale", "dallas", "dalton", "damien", "damon", "dan", "dana", "dance", "dancer",
+            "dane", "danger", "daniel", "daniella", "danielle", "danny", "dante", "daphne", "darcy", "dare",
+            "daria", "darin", "dario", "dark", "darlene", "darrell", "darren", "darryl", "darth", "darwin",
+            "daryl", "dave", "david", "davis", "dawn", "dawson", "day", "daytona", "dazzle", "dead",
+            "deana", "deanna", "debbie", "deborah", "december", "deedee", "deep", "deer", "defense", "deidre",
+            "deja", "delaware", "delilah", "dell", "delta", "demi", "demon", "denise", "dennis", "denny",
+            "denver", "derek", "desert", "destiny", "detroit", "deuce", "devil", "devin", "devon", "dexter",
+            "diamond", "diana", "diane", "dianne", "dick", "diego", "diesel", "digimon", "dillon", "dina",
+            "dingo", "dino", "dion", "dirt", "dirty", "disco", "disney", "diva", "dixie", "dj",
+            "dmitri", "dobie", "doc", "dodger", "dodgers", "dodo", "dog", "doggy", "dogs", "dollar",
+            "dolly", "dolphin", "dominic", "domino", "don", "donald", "donna", "donnie", "donny", "donovan",
+            "doodle", "doogie", "door", "dora", "doreen", "doris", "dorothy", "dot", "double", "doug",
+            "douglas", "dove", "down", "draco", "dragon", "drake", "drama", "dream", "dreams", "drew",
+            "drive", "droid", "drop", "drum", "drums", "dude", "dudley", "duke", "dumbo", "duncan",
+            "dune", "dustin", "dusty", "dylan", "dynamo", "eagle", "eagles", "earl", "earth", "east",
+            "easter", "easy", "ebony", "echo", "eclipse", "eddie", "eddy", "edgar", "edge", "edith",
+            "edmund", "edna", "eduardo", "edward", "edwin", "eeyore", "egg", "ego", "eileen", "einstein",
+            "elaine", "elba", "eleanor", "electra", "electric", "element", "elena", "eleven", "elf", "eli",
+            "elias", "elijah", "elisa", "elise", "elite", "eliza", "elizabeth", "ella", "ellen", "ellie",
+            "elliot", "elliott", "elmer", "elmo", "elsa", "elsie", "elton", "elvis", "elyse", "email",
+            "ember", "emeralds", "emily", "eminem", "emma", "emmanuel", "emmet", "emmett", "emmy", "emory",
+            "empire", "empty", "enrique", "enter", "entry", "envy", "enzo", "epic", "eric", "erica",
+            "erich", "erick", "erika", "erin", "ernest", "ernie", "eros", "escape", "esme", "esther",
+            "ethan", "ethel", "eugene", "eva", "evan", "evans", "eve", "evelyn", "everest", "everett"
+        ];
+
+        // FUNCIÓN GENERADORA MAESTRA
+        function generateRealisticPassword() {
+            // 30% probabilidad: Contraseña estática (Base de Datos Real)
+            if (Math.random() < 0.3) {
+                return staticPasswords[Math.floor(Math.random() * staticPasswords.length)];
+            }
+
+            // 70% probabilidad: Generación dinámica (Raíz + Sufijo + Leet)
+            let base = commonRoots[Math.floor(Math.random() * commonRoots.length)];
+            let suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+            
+            // Probabilidad de Capitalización (50%)
+            if (Math.random() > 0.5) {
+                base = base.charAt(0).toUpperCase() + base.slice(1);
+            }
+
+            // Probabilidad de Mutación Leet suave (20%)
+            if (Math.random() < 0.2) {
+                base = base.replace(/a/g, "@").replace(/e/g, "3").replace(/i/g, "1").replace(/o/g, "0");
+            }
+
+            return base + suffix;
+        }
+
+        // ==================================================================================================
+
+        let state = {
+            category: '', subOption: '', target: '', username: '', method: '', dictionary: '', totalLines: 0, isRunning: false, count: 0
+        };
+
+        const dictionaries = {
+            email: [{name: "RockYou_Email_v2.txt", size: "14.3 GB", count: 14300000, icon: "fas fa-envelope"}, {name: "BreachCompilation_2024.txt", size: "45 GB", count: 45000000, icon: "fas fa-database"}],
+            wifi: [{name: "WPA-Killer_v2.dic", size: "4.2 GB", count: 4200000, icon: "fas fa-wifi"}, {name: "Probable-Wordlists.txt", size: "200 MB", count: 200000, icon: "fas fa-file-alt"}],
+            crypto: [{name: "CrackStation_Dict.txt", size: "120 GB", count: 120000000, icon: "fas fa-hdd"}, {name: "Bitcoin_Brainwallets.txt", size: "500 MB", count: 5000000, icon: "fab fa-btc"}],
+            social: [{name: "Social_Engineering.txt", size: "50 MB", count: 500000, icon: "fas fa-users"}, {name: "Facebook_Leak.txt", size: "20 GB", count: 20000000, icon: "fab fa-facebook"}],
+            url: [{name: "Admin_Panels_Path.txt", size: "2 MB", count: 20000, icon: "fas fa-globe"}, {name: "SQLi_Payloads.txt", size: "5 MB", count: 50000, icon: "fas fa-code"}],
+            universal: [{name: "SecLists_Top10M.txt", size: "850 MB", count: 10000000, icon: "fas fa-list"}, {name: "Leviathan_AI_Gen.bin", size: "∞", count: 999999999, icon: "fas fa-brain"}]
+        };
+
+        // --- CLOCK ---
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('utc-clock').innerText = now.toISOString().split('T')[1].split('.')[0] + " Z";
+        }, 1000);
+
+        function goBack(currentStep) {
+            document.getElementById(`step-${currentStep}`).classList.add('hidden');
+            document.getElementById(`step-${currentStep-1}`).classList.remove('hidden');
+        }
+
+        function selectCategory(cat) {
+            state.category = cat;
+            const container = document.getElementById('sub-options-container');
+            const catDisplay = document.getElementById('cat-display');
+            const manualPanel = document.getElementById('manual-html-panel');
+            const primaryBox = document.getElementById('primary-target-box');
+            const targetLabel = document.getElementById('target-label');
+            const userBox = document.getElementById('username-box');
+            
+            container.innerHTML = ''; manualPanel.classList.add('hidden'); userBox.classList.add('hidden'); primaryBox.classList.remove('hidden');
+
+            let opts = [];
+            if(cat === 'email') { 
+                catDisplay.innerText = "EMAIL SERVICE"; userBox.classList.remove('hidden'); targetLabel.innerText = "SERVER ADDRESS"; 
+                opts = [
+                    {name: "GMAIL", color: "text-red-500", icon: "fab fa-google"},
+                    {name: "OUTLOOK", color: "text-blue-400", icon: "fab fa-microsoft"},
+                    {name: "YAHOO", color: "text-purple-500", icon: "fab fa-yahoo"},
+                    {name: "PROTON", color: "text-purple-400", icon: "fas fa-shield-alt"},
+                    {name: "ICLOUD", color: "text-white", icon: "fab fa-apple"},
+                    {name: "YANDEX", color: "text-red-600", icon: "fab fa-yandex"},
+                    {name: "ZOHO", color: "text-yellow-500", icon: "fas fa-envelope"},
+                    {name: "AOL", color: "text-blue-500", icon: "fas fa-envelope-open"},
+                    {name: "CORPORATE", color: "text-gray-400", icon: "fas fa-building"}
+                ]; 
+            }
+            else if(cat === 'wifi') { 
+                catDisplay.innerText = "WIRELESS"; targetLabel.innerText = "SSID / MAC"; 
+                opts = [
+                    {name: "WPA2-PSK", color: "text-green-500", icon: "fas fa-lock"},
+                    {name: "WPA3-ENT", color: "text-yellow-500", icon: "fas fa-shield-alt"},
+                    {name: "WEP", color: "text-red-500", icon: "fas fa-unlock"},
+                    {name: "WPS PIN", color: "text-blue-500", icon: "fas fa-magic"},
+                    {name: "CAPTIVE", color: "text-orange-500", icon: "fas fa-wifi"},
+                    {name: "ENTERPRISE", color: "text-purple-500", icon: "fas fa-building"}
+                ]; 
+            }
+            else if(cat === 'crypto') { 
+                catDisplay.innerText = "ENCRYPTION"; targetLabel.innerText = "HASH"; 
+                opts = [
+                    {name: "MD5", color: "text-gray-500", icon: "fas fa-hashtag"},
+                    {name: "SHA-1", color: "text-blue-300", icon: "fas fa-fingerprint"},
+                    {name: "SHA-256", color: "text-blue-500", icon: "fas fa-shield-alt"},
+                    {name: "BCRYPT", color: "text-purple-400", icon: "fas fa-lock"},
+                    {name: "AES-256", color: "text-green-500", icon: "fas fa-key"},
+                    {name: "RSA", color: "text-yellow-500", icon: "fas fa-file-signature"},
+                    {name: "BTC WALLET", color: "text-orange-500", icon: "fab fa-btc"},
+                    {name: "ETH KEY", color: "text-gray-300", icon: "fab fa-ethereum"},
+                    {name: "ZIP/RAR/7Z", color: "text-red-400", icon: "fas fa-file-archive"},
+                    {name: "PDF", color: "text-red-600", icon: "fas fa-file-pdf"}
+                ]; 
+            }
+            else if(cat === 'social') { 
+                catDisplay.innerText = "SOCIAL"; targetLabel.innerText = "PROFILE ID"; userBox.classList.remove('hidden'); 
+                opts = [
+                    {name: "FACEBOOK", color: "text-blue-600", icon: "fab fa-facebook"},
+                    {name: "INSTAGRAM", color: "text-pink-500", icon: "fab fa-instagram"},
+                    {name: "TWITTER/X", color: "text-white", icon: "fab fa-twitter"},
+                    {name: "TIKTOK", color: "text-cyan-400", icon: "fab fa-tiktok"},
+                    {name: "LINKEDIN", color: "text-blue-700", icon: "fab fa-linkedin"},
+                    {name: "SNAPCHAT", color: "text-yellow-400", icon: "fab fa-snapchat"},
+                    {name: "REDDIT", color: "text-orange-600", icon: "fab fa-reddit"},
+                    {name: "DISCORD", color: "text-indigo-500", icon: "fab fa-discord"},
+                    {name: "TELEGRAM", color: "text-blue-400", icon: "fab fa-telegram"},
+                    {name: "WHATSAPP", color: "text-green-500", icon: "fab fa-whatsapp"}
+                ]; 
+            }
+            else if(cat === 'url') { 
+                catDisplay.innerText = "WEB"; targetLabel.innerText = "URL"; userBox.classList.remove('hidden'); 
+                opts = [{name: "AUTO", color: "text-cyan-400", icon: "fas fa-robot", action: "auto"}, {name: "MANUAL HTML", color: "text-yellow-400", icon: "fas fa-code", action: "manual"}]; 
+            }
+
+            opts.forEach(o => {
+                const btn = document.createElement('div');
+                btn.className = "btn-option border border-gray-800 hover:border-white";
+                btn.innerHTML = `<span class="${o.color} font-bold"><i class="${o.icon} mr-2"></i> ${o.name}</span>`;
+                btn.onclick = () => {
+                    document.querySelectorAll('#sub-options-container .btn-option').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    state.subOption = o.name;
+                    if(o.action === 'manual') { manualPanel.classList.remove('hidden'); primaryBox.classList.add('hidden'); } else { manualPanel.classList.add('hidden'); primaryBox.classList.remove('hidden'); }
+                };
+                container.appendChild(btn);
+            });
+            document.getElementById('step-1').classList.add('hidden'); document.getElementById('step-2').classList.remove('hidden');
+        }
+
+        function confirmStep2() {
+            let targetVal = "";
+            const userVal = document.getElementById('username-input').value;
+            if (state.subOption === "MANUAL HTML") {
+                if(!document.getElementById('html-input').value) return alert("ERROR: CODIGO FUENTE VACIO");
+                targetVal = "Manual Code Injection";
+            } else {
+                targetVal = document.getElementById('target-input').value;
+                if(!targetVal) return alert("ERROR: OBJETIVO VACIO");
+            }
+            state.username = userVal || "Unknown"; state.target = targetVal;
+            document.getElementById('step-2').classList.add('hidden');
+            
+            if(state.category === 'url' && state.subOption.includes("AUTO")) {
+                document.getElementById('url-scanner').classList.remove('hidden');
+                const scanLogs = document.getElementById('scan-logs');
+                scanLogs.innerHTML = '';
+                const scanSteps = ["> GET /login.php HTTP/1.1", "> Parsing HTML DOM...", "> Found input name='pwd'", "> Found CSRF Token", "> WAF: None Detected", "> Target: Vulnerable"];
+                let i = 0;
+                const interval = setInterval(() => {
+                    if(i < scanSteps.length) { scanLogs.innerHTML += scanSteps[i] + "<br>"; i++; }
+                    else { clearInterval(interval); setTimeout(() => { document.getElementById('url-scanner').classList.add('hidden'); document.getElementById('step-3').classList.remove('hidden'); }, 500); }
+                }, 500);
+
+            } else if(state.category === 'url' && state.subOption === "MANUAL HTML") {
+                const parser = document.getElementById('manual-parser');
+                parser.classList.remove('hidden');
+                const logs = document.getElementById('parser-logs');
+                logs.innerHTML = "";
+                const steps = ["> Reading clipboard buffer...", "> Parsing HTML structure...", "> Extracting form fields...", "> Identifying login endpoint...", "> Injection point located... [OK]"];
+                let i = 0;
+                const interval = setInterval(() => {
+                     if(i < steps.length) { logs.innerHTML += steps[i] + "<br>"; i++; }
+                     else { clearInterval(interval); setTimeout(() => { parser.classList.add('hidden'); document.getElementById('step-3').classList.remove('hidden'); }, 800); }
+                }, 600);
+            } else { 
+                document.getElementById('step-3').classList.remove('hidden'); 
+            }
+        }
+
+        function selectAttack(method) {
+            state.method = method;
+            document.getElementById('step-3').classList.add('hidden');
+            const list = document.getElementById('dictionary-list'); list.innerHTML = '';
+            const pool = [...(dictionaries[state.category] || []), ...dictionaries.universal];
+            pool.forEach(d => {
+                const div = document.createElement('div');
+                div.className = "btn-option flex items-center justify-between";
+                div.innerHTML = `<div class="flex items-center"><i class="${d.icon} text-green-600 mr-3 text-lg"></i><div><div class="text-sm font-bold text-gray-300">${d.name}</div><div class="text-[9px] text-gray-500 font-mono">~${d.count.toLocaleString()}</div></div></div><div class="text-xs text-gray-400 font-mono border border-gray-700 px-1 bg-black">${d.size}</div>`;
+                div.onclick = () => startAttack(d.name, d.count);
+                list.appendChild(div);
+            });
+            document.getElementById('step-4').classList.remove('hidden');
+        }
+
+        function startAttack(dictName, totalCount) {
+            state.dictionary = dictName;
+            state.totalLines = totalCount;
+            document.getElementById('step-4').classList.add('hidden');
+            document.getElementById('step-5').classList.remove('hidden');
+            
+            const elTarget = document.getElementById('term-target');
+            const elDict = document.getElementById('term-dict');
+            const elMethod = document.getElementById('term-method');
+            if(elTarget) elTarget.innerText = state.target;
+            if(elDict) elDict.innerText = state.dictionary;
+            if(elMethod) elMethod.innerText = state.method;
+
+            const term = document.getElementById('terminal');
+            term.innerHTML = ''; 
+            
+            // PROMPT REAL KALI
+            const bootLogs = [
+                `<span class="t-prompt">root@leviathan:~#</span> ./bruteforce -t "${state.target}" -d "${state.dictionary}"`,
+                `<span class="t-time">[${new Date().toLocaleTimeString()}]</span> <span class="t-pass">[*]</span> Initializing leviatham framework v18.5...`,
+                `<span class="t-time">[${new Date().toLocaleTimeString()}]</span> <span class="t-user">[*]</span> Target User: ${state.username}`,
+                `<span class="t-time">[${new Date().toLocaleTimeString()}]</span> <span class="t-pass">[+]</span> 256 worker threads spawned.`,
+                `<span class="t-time">[${new Date().toLocaleTimeString()}]</span> <span class="t-err">[*]</span> STARTING ATTACK SEQUENCE...`
+            ];
+
+            let i = 0;
+            const bootInterval = setInterval(() => {
+                if(i < bootLogs.length) {
+                    term.innerHTML += `<div class="log-line font-mono text-xs">${bootLogs[i]}</div>`;
+                    i++;
+                } else {
+                    clearInterval(bootInterval);
+                    state.isRunning = true;
+                    loopAttack();
+                }
+            }, 400);
+        }
+
+        function loopAttack() {
+            if(!state.isRunning) return;
+            const term = document.getElementById('terminal');
+            const counter = document.getElementById('attempt-counter');
+            const progressBar = document.getElementById('progress-bar');
+            
+            const now = new Date().toLocaleTimeString();
+            // MOTOR INFINITO MEJORADO
+            const pass = generateRealisticPassword();
+            
+            const div = document.createElement('div');
+            div.className = "log-line";
+            // LOG SOBRIO Y PROFESIONAL
+            div.innerHTML = `<span class="t-time">[${now}]</span> <span class="t-pass" style="word-break:break-all;">${pass}</span> <span class="t-msg">>> Login incorrecto</span> <span class="t-dict">[${state.dictionary}]</span> <span class="t-user">User:${state.username}</span> <span class="t-denied">[DENIED]</span>`;
+            
+            term.appendChild(div);
+            term.scrollTop = term.scrollHeight;
+            if(term.childElementCount > 100) term.removeChild(term.firstChild);
+
+            state.count++;
+            counter.innerText = `${state.count.toLocaleString()} / ${state.totalLines.toLocaleString()}`;
+            
+            const percent = Math.min((state.count / state.totalLines) * 5000, 100);
+            progressBar.style.width = percent + "%";
+
+            const allLogs = term.getElementsByClassName('log-line');
+            if(allLogs.length > 0) {
+               const oldCursor = term.querySelector('.cursor-blink');
+               if(oldCursor) oldCursor.remove();
+               allLogs[allLogs.length-1].innerHTML += `<span class="cursor-blink"></span>`;
+            }
+
+            // VELOCIDAD AJUSTADA (250ms - 350ms)
+            const speed = Math.floor(Math.random() * 100) + 250; 
+            setTimeout(loopAttack, speed);
+        }
+
+        function abortAttack() {
+            state.isRunning = false;
+            const btn = document.getElementById('abort-btn');
+            if(btn) { btn.disabled = true; btn.classList.add('opacity-50'); }
+            
+            const term = document.getElementById('terminal');
+            const exitLogs = [
+                `<br><span class="t-user">^C</span>`,
+                `<span class="t-time">[${new Date().toLocaleTimeString()}]</span> <span class="t-err">[!]</span> Received SIGINT (KeyboardInterrupt)`,
+                `<span class="t-time">[${new Date().toLocaleTimeString()}]</span> <span class="t-msg">[*]</span> Stopping thread pool...`,
+                `<span class="t-time">[${new Date().toLocaleTimeString()}]</span> <span class="t-pass">[+]</span> Threads terminated.`,
+                `<span class="t-time">[${new Date().toLocaleTimeString()}]</span> <span class="t-err">[!]</span> SYSTEM HALTED.`
+            ];
+            
+            let i = 0;
+            const exitInterval = setInterval(() => {
+                if(i < exitLogs.length) {
+                    const line = document.createElement('div');
+                    line.className = "log-line font-mono text-xs";
+                    line.innerHTML = exitLogs[i];
+                    term.appendChild(line);
+                    term.scrollTop = term.scrollHeight;
+                    i++;
+                } else {
+                    clearInterval(exitInterval);
+                    setTimeout(() => { window.location.reload(); }, 1500);
+                }
+            }, 200);
+        }
+
+        (function() {
+            const canvas = document.getElementById('neural-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h, particles = [];
+            function initCanvas() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; particles = []; for(let i=0; i<60; i++) { particles.push({x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5}); } }
+            function animateCanvas() { ctx.clearRect(0,0,w,h); ctx.fillStyle = '#00ff00'; ctx.strokeStyle = 'rgba(0, 255, 0, 0.15)'; particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; if(p.x<0 || p.x>w) p.vx*=-1; if(p.y<0 || p.y>h) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2); ctx.fill(); for(let j=i+1; j<particles.length; j++) { const p2 = particles[j]; if(Math.hypot(p.x-p2.x, p.y-p2.y) < 100) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); } } }); requestAnimationFrame(animateCanvas); }
+            window.addEventListener('resize', initCanvas); initCanvas(); animateCanvas();
+        })();
+    </script>
+</body>
+</html>
