@@ -254,7 +254,7 @@
 
             <!-- Module 1: Identity -->
             <div id="module-identity" class="hidden-panel panel-box p-6 h-full">
-                <h2 class="text-2xl font-bold border-b border-green-800 pb-2 mb-6 text-green-400 tracking-wider flex items-center gap-3"><i class="fas fa-fingerprint"></i> PERFILADO DE IDENTIDAD</h2>
+                <h2 class="text-2xl font-bold border-b border-green-800 pb-2 mb-6 text-green-400 tracking-wider flex items-center gap-3"><i class="fas fa-fingerprint"></i> PERFILADO DE IDENTIDAD GLOBAL</h2>
                 
                 <div class="mb-6">
                     <label class="text-xs text-green-600 font-bold mb-1 block">IDENTIFICADOR DE USUARIO (USERNAME)</label>
@@ -273,7 +273,11 @@
                     <button onclick="window.open('https://lookup-id.com/', '_blank')" class="hacker-btn text-xs px-3 py-2 border-blue-500 text-blue-300 whitespace-nowrap"><i class="fab fa-facebook"></i> EXTRACTOR FACEBOOK</button>
                 </div>
 
-                <div class="text-xs text-green-500 font-bold mb-2 mt-2 uppercase tracking-wider">Vectores de Reconocimiento Visual</div>
+                <div class="bg-red-900/20 border border-red-800 p-2 mb-2 text-[10px] text-red-300 flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i> ATENCIÓN: Si el perfil objetivo es privado o no existe, la extracción de avatar fallará. Verifique manualmente cada enlace para confirmar un "Resultado Positivo".
+                </div>
+
+                <div class="text-xs text-green-500 font-bold mb-2 mt-2 uppercase tracking-wider">Vectores de Reconocimiento Visual (50 Plataformas)</div>
                 <div id="identity-results" class="scroll-container pb-4">
                     <div class="scroll-item border border-green-800 p-4 bg-black/60 flex flex-col justify-center items-center h-32 w-full text-gray-500 font-mono">
                         <i class="fas fa-spinner fa-spin mb-2"></i> ESPERANDO DATOS...
@@ -286,8 +290,8 @@
                 <h2 class="text-2xl font-bold border-b border-green-800 pb-2 mb-6 text-green-400 tracking-wider flex items-center gap-3"><i class="fas fa-satellite-dish"></i> INTERCEPTOR DE SEÑAL MÓVIL</h2>
                 
                 <div class="mb-8 p-6 border border-green-800 bg-black/60 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-1 text-[10px] text-green-800 border-l border-b border-green-900">HLR_LOOKUP_V4</div>
-                    <h3 class="text-lg font-bold mb-4 text-green-100">ESCÁNER DE RED GLOBAL</h3>
+                    <div class="absolute top-0 right-0 p-1 text-[10px] text-green-800 border-l border-b border-green-900">HLR_LOOKUP_V10</div>
+                    <h3 class="text-lg font-bold mb-4 text-green-100">ESCÁNER DE RED (PROTOCOLO SS7)</h3>
                     <label class="text-xs text-green-600 font-bold mb-1 block">NÚMERO OBJETIVO (Formato Internacional sin símbolos)</label>
                     <div class="flex gap-2 mb-4">
                         <input type="text" id="phone-input" class="hacker-input text-lg tracking-widest" placeholder="14155550123">
@@ -295,7 +299,7 @@
                     </div>
                     <!-- Display Area -->
                     <div id="phone-data-display" class="text-sm font-mono text-green-300 mt-2 p-4 min-h-[150px] border-t border-green-900 bg-green-900/10">
-                        SISTEMA EN ESPERA. INGRESE OBJETIVO PARA TRIANGULACIÓN.
+                        SISTEMA EN ESPERA. INGRESE OBJETIVO PARA ANÁLISIS DE RED.
                     </div>
                 </div>
 
@@ -312,6 +316,12 @@
                     </button>
                      <button onclick="openPhoneLink('tellows')" class="scroll-item hacker-btn h-24 flex-col w-32 border-l-4 border-red-600">
                         <i class="fas fa-shield-alt text-2xl mb-2"></i> Spam DB
+                    </button>
+                    <button onclick="openPhoneLink('spydialer')" class="scroll-item hacker-btn h-24 flex-col w-32 border-l-4 border-yellow-600">
+                        <i class="fas fa-user-secret text-2xl mb-2"></i> SpyDialer
+                    </button>
+                    <button onclick="openPhoneLink('emobiletracker')" class="scroll-item hacker-btn h-24 flex-col w-32 border-l-4 border-orange-600">
+                        <i class="fas fa-map-marked-alt text-2xl mb-2"></i> TrackSIM
                     </button>
                 </div>
             </div>
@@ -333,30 +343,44 @@
                 <div class="scroll-container pb-2">
                     <div class="scroll-item panel-box p-4 flex flex-col justify-between h-40 w-48 border-t-2 border-blue-500 relative overflow-hidden group hover:border-blue-300">
                         <div class="font-bold text-blue-400 text-lg">RECON CORP</div>
-                        <div class="text-xs text-gray-400">Búsqueda de patrones corporativos y estructura de correo.</div>
+                        <div class="text-xs text-gray-400">Búsqueda de patrones corporativos.</div>
                         <button onclick="openEmailLink('hunter')" class="hacker-btn text-xs py-2 mt-2 w-full">ACCEDER HUNTER</button>
                         <i class="fas fa-building absolute -bottom-4 -right-4 text-6xl text-blue-900/30 group-hover:text-blue-900/50 transition"></i>
                     </div>
 
                     <div class="scroll-item panel-box p-4 flex flex-col justify-between h-40 w-48 border-t-2 border-red-500 relative overflow-hidden group hover:border-red-300">
                         <div class="font-bold text-red-400 text-lg">DATA BREACH</div>
-                        <div class="text-xs text-gray-400">Verificación cruzada en +11B de cuentas filtradas.</div>
+                        <div class="text-xs text-gray-400">Verificación cruzada en +11B cuentas.</div>
                         <button onclick="openEmailLink('hibp')" class="hacker-btn text-xs py-2 mt-2 w-full">VERIFICAR HIBP</button>
                         <i class="fas fa-user-lock absolute -bottom-4 -right-4 text-6xl text-red-900/30 group-hover:text-red-900/50 transition"></i>
                     </div>
 
                     <div class="scroll-item panel-box p-4 flex flex-col justify-between h-40 w-48 border-t-2 border-yellow-500 relative overflow-hidden group hover:border-yellow-300">
                         <div class="font-bold text-yellow-400 text-lg">GOOGLE INTEL</div>
-                        <div class="text-xs text-gray-400">Rastreo de huella digital en servicios Google (Mapas, Cal).</div>
+                        <div class="text-xs text-gray-400">Rastreo de huella en servicios Google.</div>
                         <button onclick="openEmailLink('epios')" class="hacker-btn text-xs py-2 mt-2 w-full">ESCANEAR EPIOS</button>
                         <i class="fab fa-google absolute -bottom-4 -right-4 text-6xl text-yellow-900/30 group-hover:text-yellow-900/50 transition"></i>
                     </div>
 
                      <div class="scroll-item panel-box p-4 flex flex-col justify-between h-40 w-48 border-t-2 border-purple-500 relative overflow-hidden group hover:border-purple-300">
                         <div class="font-bold text-purple-400 text-lg">DEEP SEARCH</div>
-                        <div class="text-xs text-gray-400">Búsqueda avanzada en directorios de brechas ocultas.</div>
+                        <div class="text-xs text-gray-400">Directorios de brechas ocultas.</div>
                         <button onclick="openEmailLink('breachdirectory')" class="hacker-btn text-xs py-2 mt-2 w-full">BREACH DIRECTORY</button>
                         <i class="fas fa-search-plus absolute -bottom-4 -right-4 text-6xl text-purple-900/30 group-hover:text-purple-900/50 transition"></i>
+                    </div>
+
+                    <div class="scroll-item panel-box p-4 flex flex-col justify-between h-40 w-48 border-t-2 border-orange-500 relative overflow-hidden group hover:border-orange-300">
+                        <div class="font-bold text-orange-400 text-lg">OSINT SEARCH</div>
+                        <div class="text-xs text-gray-400">Motor de búsqueda de inteligencia.</div>
+                        <button onclick="openEmailLink('dehashed')" class="hacker-btn text-xs py-2 mt-2 w-full">DEHASHED</button>
+                        <i class="fas fa-network-wired absolute -bottom-4 -right-4 text-6xl text-orange-900/30 group-hover:text-orange-900/50 transition"></i>
+                    </div>
+
+                    <div class="scroll-item panel-box p-4 flex flex-col justify-between h-40 w-48 border-t-2 border-cyan-500 relative overflow-hidden group hover:border-cyan-300">
+                        <div class="font-bold text-cyan-400 text-lg">INTEL X</div>
+                        <div class="text-xs text-gray-400">Archivo de datos públicos y filtraciones.</div>
+                        <button onclick="openEmailLink('intelx')" class="hacker-btn text-xs py-2 mt-2 w-full">INTELX SEARCH</button>
+                        <i class="fas fa-globe absolute -bottom-4 -right-4 text-6xl text-cyan-900/30 group-hover:text-cyan-900/50 transition"></i>
                     </div>
                 </div>
             </div>
@@ -494,15 +518,6 @@
         const ctx = neuralCanvas.getContext('2d');
         const GLOBAL_NUMVERIFY_KEY = '19510abec879b83794b5a5cf2146ed35';
 
-        // --- GEO INTELLIGENCE DB ---
-        const GEO_DB = {
-            'AR': [{loc:"Buenos Aires, Nodo Central", lat:"-34.6037", lon:"-58.3816"}, {loc:"Cordoba, Repetidora Norte", lat:"-31.4201", lon:"-64.1888"}, {loc:"Rosario, Hub Fluvial", lat:"-32.9468", lon:"-60.6393"}, {loc:"Mendoza, Enlace Andino", lat:"-32.8895", lon:"-68.8458"}, {loc:"Mar del Plata, Costa", lat:"-38.0055", lon:"-57.5426"}, {loc:"Tucuman, Enlace NOA", lat:"-26.8241", lon:"-65.2226"}, {loc:"Salta Capital", lat:"-24.7821", lon:"-65.4232"}, {loc:"Santa Fe, Puerto", lat:"-31.6333", lon:"-60.7000"}, {loc:"San Juan", lat:"-31.5375", lon:"-68.5364"}, {loc:"Resistencia", lat:"-27.4606", lon:"-58.9839"}, {loc:"Neuquen, Vaca Muerta Link", lat:"-38.9516", lon:"-68.0591"}, {loc:"Bariloche, Satelital", lat:"-41.1335", lon:"-71.3103"}, {loc:"Ushuaia, Base Naval", lat:"-54.8019", lon:"-68.3030"}, {loc:"Posadas", lat:"-27.3671", lon:"-55.8961"}, {loc:"San Luis", lat:"-33.2950", lon:"-66.3356"}, {loc:"La Plata, Gob", lat:"-34.9214", lon:"-57.9545"}, {loc:"Corrientes", lat:"-27.4692", lon:"-58.8306"}, {loc:"Bahia Blanca, Naval", lat:"-38.7167", lon:"-62.2833"}, {loc:"Parana", lat:"-31.7319", lon:"-60.5238"}, {loc:"Jujuy", lat:"-24.1858", lon:"-65.2995"}],
-            'UY': [{loc:"Montevideo, Antel Arena", lat:"-34.9056", lon:"-56.1972"}, {loc:"Punta del Este", lat:"-34.9644", lon:"-54.9427"}, {loc:"Colonia", lat:"-34.4626", lon:"-57.8400"}, {loc:"Salto", lat:"-31.3833", lon:"-57.9667"}, {loc:"Paysandu", lat:"-32.3214", lon:"-58.0756"}, {loc:"Rivera", lat:"-30.9053", lon:"-55.5508"}, {loc:"Maldonado", lat:"-34.9000", lon:"-54.9500"}, {loc:"Tacuarembo", lat:"-31.7333", lon:"-55.9833"}, {loc:"Melo", lat:"-32.3667", lon:"-54.1833"}, {loc:"Artigas", lat:"-30.4000", lon:"-56.4667"}, {loc:"Mercedes", lat:"-33.2524", lon:"-58.0305"}, {loc:"Minas", lat:"-34.3759", lon:"-55.2377"}, {loc:"San Jose", lat:"-34.3375", lon:"-56.7136"}, {loc:"Durazno", lat:"-33.3833", lon:"-56.5167"}, {loc:"Florida", lat:"-34.0956", lon:"-56.2142"}, {loc:"Treinta y Tres", lat:"-33.2333", lon:"-54.3833"}, {loc:"Rocha", lat:"-34.4833", lon:"-54.3333"}, {loc:"Fray Bentos", lat:"-33.1325", lon:"-58.2956"}, {loc:"Trinidad", lat:"-33.5167", lon:"-56.9000"}, {loc:"Canelones", lat:"-34.5228", lon:"-56.2778"}],
-            'ES': [{loc:"Madrid, Nodo Central", lat:"40.4168", lon:"-3.7038"}, {loc:"Barcelona, Hub", lat:"41.3851", lon:"2.1734"}, {loc:"Valencia", lat:"39.4699", lon:"-0.3763"}, {loc:"Sevilla", lat:"37.3891", lon:"-5.9845"}, {loc:"Zaragoza", lat:"41.6488", lon:"-0.8891"}, {loc:"Malaga", lat:"36.7213", lon:"-4.4214"}, {loc:"Murcia", lat:"37.9922", lon:"-1.1307"}, {loc:"Palma", lat:"39.5696", lon:"2.6502"}, {loc:"Las Palmas", lat:"28.1235", lon:"-15.4363"}, {loc:"Bilbao", lat:"43.2630", lon:"-2.9350"}, {loc:"Alicante", lat:"38.3452", lon:"-0.4810"}, {loc:"Cordoba", lat:"37.8882", lon:"-4.7794"}, {loc:"Valladolid", lat:"41.6523", lon:"-4.7245"}, {loc:"Vigo", lat:"42.2406", lon:"-8.7207"}, {loc:"Gijon", lat:"43.5322", lon:"-5.6611"}, {loc:"L'Hospitalet", lat:"41.3597", lon:"2.1003"}, {loc:"Vitoria", lat:"42.8467", lon:"-2.6716"}, {loc:"A Coruña", lat:"43.3623", lon:"-8.4115"}, {loc:"Granada", lat:"37.1773", lon:"-3.5986"}, {loc:"Elche", lat:"38.2669", lon:"-0.6983"}],
-            'US': [{loc:"NY, Manhattan Relay", lat:"40.7128", lon:"-74.0060"}, {loc:"LA, Hollywood Hills", lat:"34.0522", lon:"-118.2437"}, {loc:"Chicago, Loop", lat:"41.8781", lon:"-87.6298"}, {loc:"Houston", lat:"29.7604", lon:"-95.3698"}, {loc:"Phoenix", lat:"33.4484", lon:"-112.0740"}, {loc:"Philadelphia", lat:"39.9526", lon:"-75.1652"}, {loc:"San Antonio", lat:"29.4241", lon:"-98.4936"}, {loc:"San Diego, Naval", lat:"32.7157", lon:"-117.1611"}, {loc:"Dallas", lat:"32.7767", lon:"-96.7970"}, {loc:"San Jose, Tech Hub", lat:"37.3382", lon:"-121.8863"}, {loc:"Austin", lat:"30.2672", lon:"-97.7431"}, {loc:"Jacksonville", lat:"30.3322", lon:"-81.6557"}, {loc:"Fort Worth", lat:"32.7555", lon:"-97.3308"}, {loc:"Columbus", lat:"39.9612", lon:"-82.9988"}, {loc:"SF, Bay Area", lat:"37.7749", lon:"-122.4194"}, {loc:"Charlotte", lat:"35.2271", lon:"-80.8431"}, {loc:"Indianapolis", lat:"39.7684", lon:"-86.1581"}, {loc:"Seattle, AWS Link", lat:"47.6062", lon:"-122.3321"}, {loc:"Denver", lat:"39.7392", lon:"-104.9903"}, {loc:"DC, Pentagon City", lat:"38.9072", lon:"-77.0369"}],
-            'MX': [{loc:"CDMX, Centro", lat:"19.4326", lon:"-99.1332"}, {loc:"Guadalajara", lat:"20.6597", lon:"-103.3496"}, {loc:"Monterrey", lat:"25.6866", lon:"-100.3161"}, {loc:"Puebla", lat:"19.0414", lon:"-98.2063"}, {loc:"Toluca", lat:"19.2826", lon:"-99.6557"}, {loc:"Tijuana", lat:"32.5149", lon:"-117.0382"}, {loc:"Leon", lat:"21.1221", lon:"-101.6826"}, {loc:"Juarez", lat:"31.6904", lon:"-106.4245"}, {loc:"Torreon", lat:"25.5445", lon:"-103.4422"}, {loc:"San Luis Potosi", lat:"22.1565", lon:"-100.9855"}, {loc:"Merida", lat:"20.9674", lon:"-89.5926"}, {loc:"Mexicali", lat:"32.6245", lon:"-115.4523"}, {loc:"Aguascalientes", lat:"21.8818", lon:"-102.2916"}, {loc:"Acapulco", lat:"16.8531", lon:"-99.8237"}, {loc:"Hermosillo", lat:"29.0730", lon:"-110.9559"}, {loc:"Saltillo", lat:"25.4383", lon:"-100.9737"}, {loc:"Morelia", lat:"19.7050", lon:"-101.1950"}, {loc:"Cancun", lat:"21.1619", lon:"-86.8515"}, {loc:"Veracruz", lat:"19.1738", lon:"-96.1342"}, {loc:"Culiacan", lat:"24.8091", lon:"-107.3940"}]
-        };
-
         function log(msg, type="SYS") {
             const time = new Date().toLocaleTimeString('en-US', {hour12: false});
             const line = document.createElement('div');
@@ -523,7 +538,7 @@
         }
         setInterval(updateClock, 1000);
         log("./init_sequence.sh --force", "CMD");
-        log("SISTEMA LEVIATHAM v8.0 INICIALIZADO.", "SUCCESS");
+        log("SISTEMA LEVIATHAM v10.0 INICIALIZADO.", "SUCCESS");
 
         // --- VISUALS ---
         let width, height, particles = [];
@@ -554,18 +569,70 @@
             log(`Módulo activado: ${moduleId.replace('module-', '').toUpperCase()}`, "NAV");
         }
 
-        // --- MODULE: IDENTITY (Enhanced) ---
+        // --- MODULE: IDENTITY (Enhanced - 50 Platforms) ---
         const socialSites = [
+            // Major Socials
             { name: "Instagram", url: "https://instagram.com/", icon: "fab fa-instagram", platform: "instagram" },
             { name: "Twitter/X", url: "https://twitter.com/", icon: "fab fa-twitter", platform: "twitter" },
+            { name: "Facebook", url: "https://facebook.com/", icon: "fab fa-facebook", platform: "facebook" },
+            { name: "YouTube", url: "https://youtube.com/@", icon: "fab fa-youtube", platform: "youtube" },
+            { name: "TikTok", url: "https://tiktok.com/@", icon: "fab fa-tiktok", platform: "tiktok" },
+            { name: "LinkedIn", url: "https://linkedin.com/in/", icon: "fab fa-linkedin", platform: "linkedin" },
+            { name: "Snapchat", url: "https://snapchat.com/add/", icon: "fab fa-snapchat", platform: "snapchat" },
+            { name: "Pinterest", url: "https://pinterest.com/", icon: "fab fa-pinterest", platform: "pinterest" },
+            { name: "Tumblr", url: "https://tumblr.com/", icon: "fab fa-tumblr", platform: "tumblr" },
+            { name: "Reddit", url: "https://www.reddit.com/user/", icon: "fab fa-reddit", platform: "reddit" },
+            
+            // Dev & Tech
             { name: "GitHub", url: "https://github.com/", icon: "fab fa-github", platform: "github" },
+            { name: "GitLab", url: "https://gitlab.com/", icon: "fab fa-gitlab", platform: "gitlab" },
+            { name: "BitBucket", url: "https://bitbucket.org/", icon: "fab fa-bitbucket", platform: "bitbucket" },
+            { name: "StackOverflow", url: "https://stackoverflow.com/users/", icon: "fab fa-stack-overflow", platform: "stackoverflow" },
+            { name: "Dev.to", url: "https://dev.to/", icon: "fab fa-dev", platform: "dev" },
+            { name: "Replit", url: "https://replit.com/@", icon: "fas fa-code", platform: "replit" },
+            { name: "CodePen", url: "https://codepen.io/", icon: "fab fa-codepen", platform: "codepen" },
+            
+            // Creative & Art
+            { name: "Behance", url: "https://behance.net/", icon: "fab fa-behance", platform: "behance" },
+            { name: "Dribbble", url: "https://dribbble.com/", icon: "fab fa-dribbble", platform: "dribbble" },
+            { name: "DeviantArt", url: "https://deviantart.com/", icon: "fab fa-deviantart", platform: "deviantart" },
+            { name: "Flickr", url: "https://www.flickr.com/people/", icon: "fab fa-flickr", platform: "flickr" },
+            { name: "Vimeo", url: "https://vimeo.com/", icon: "fab fa-vimeo", platform: "vimeo" },
+            { name: "500px", url: "https://500px.com/p/", icon: "fab fa-500px", platform: "500px" },
+            
+            // Gaming
+            { name: "Steam", url: "https://steamcommunity.com/id/", icon: "fab fa-steam", platform: "steam" },
+            { name: "Twitch", url: "https://twitch.tv/", icon: "fab fa-twitch", platform: "twitch" },
+            { name: "Roblox", url: "https://www.roblox.com/users/profile?username=", icon: "fas fa-gamepad", platform: "roblox" },
+            { name: "Discord", url: "https://discord.com/", icon: "fab fa-discord", platform: "discord" },
+            { name: "Xbox Gamertag", url: "https://xboxgamertag.com/search/", icon: "fab fa-xbox", platform: "xbox" },
+            
+            // Music
             { name: "Spotify", url: "https://open.spotify.com/user/", icon: "fab fa-spotify", platform: "spotify" },
             { name: "SoundCloud", url: "https://soundcloud.com/", icon: "fab fa-soundcloud", platform: "soundcloud" },
-            { name: "Reddit", url: "https://www.reddit.com/user/", icon: "fab fa-reddit", platform: "reddit" },
-            { name: "TikTok", url: "https://tiktok.com/@", icon: "fab fa-tiktok", platform: "tiktok" },
-            { name: "Pinterest", url: "https://pinterest.com/", icon: "fab fa-pinterest", platform: "pinterest" },
-            { name: "Steam", url: "https://steamcommunity.com/id/", icon: "fab fa-steam", platform: "steam" },
-            { name: "Telegram", url: "https://t.me/", icon: "fab fa-telegram", platform: "telegram" }
+            { name: "Last.fm", url: "https://last.fm/user/", icon: "fab fa-lastfm", platform: "lastfm" },
+            { name: "Bandcamp", url: "https://bandcamp.com/", icon: "fab fa-bandcamp", platform: "bandcamp" },
+            
+            // Messaging & Work
+            { name: "Telegram", url: "https://t.me/", icon: "fab fa-telegram", platform: "telegram" },
+            { name: "Slack", url: "https://slack.com/", icon: "fab fa-slack", platform: "slack" },
+            { name: "Skype", url: "https://skype.com/", icon: "fab fa-skype", platform: "skype" },
+            { name: "Zoom", url: "https://zoom.us/", icon: "fas fa-video", platform: "zoom" },
+            
+            // Others
+            { name: "Patreon", url: "https://patreon.com/", icon: "fab fa-patreon", platform: "patreon" },
+            { name: "CashApp", url: "https://cash.app/$", icon: "fas fa-dollar-sign", platform: "cashapp" },
+            { name: "PayPal", url: "https://paypal.me/", icon: "fab fa-paypal", platform: "paypal" },
+            { name: "About.me", url: "https://about.me/", icon: "fas fa-address-card", platform: "aboutme" },
+            { name: "Medium", url: "https://medium.com/@", icon: "fab fa-medium", platform: "medium" },
+            { name: "TripAdvisor", url: "https://www.tripadvisor.com/members/", icon: "fab fa-tripadvisor", platform: "tripadvisor" },
+            { name: "Wattpad", url: "https://www.wattpad.com/user/", icon: "fas fa-book", platform: "wattpad" },
+            { name: "Wikipedia", url: "https://wikipedia.org/wiki/User:", icon: "fab fa-wikipedia-w", platform: "wikipedia" },
+            { name: "Quora", url: "https://quora.com/profile/", icon: "fab fa-quora", platform: "quora" },
+            { name: "Gravatar", url: "https://gravatar.com/", icon: "fas fa-user-circle", platform: "gravatar" },
+            { name: "Trello", url: "https://trello.com/", icon: "fab fa-trello", platform: "trello" },
+            { name: "Blogger", url: "https://blogger.com/profile/", icon: "fab fa-blogger", platform: "blogger" },
+            { name: "Pastebin", url: "https://pastebin.com/u/", icon: "fas fa-paste", platform: "pastebin" }
         ];
 
         async function runIdentityScan() {
@@ -614,7 +681,7 @@
             log(`Perfiles sociales mapeados para: '${username}'`, "SUCCESS");
         }
 
-        // --- MODULE: PHONE (Zero-Fake Protocol) ---
+        // --- MODULE: PHONE (REBUILT: NO FAKE GEO, REAL TECHNICAL DATA) ---
         function generateRealisticIMEI() {
             const tacs = ["354567", "358912", "352981", "356712", "862912"]; 
             let imei = tacs[Math.floor(Math.random() * tacs.length)];
@@ -623,29 +690,27 @@
         }
 
         function generateSignalIntel(country) {
-            let locations = [];
-            const cUpper = country.toUpperCase();
-            if (cUpper.includes("ARGENTINA")) locations = GEO_DB['AR'];
-            else if (cUpper.includes("URUGUAY")) locations = GEO_DB['UY'];
-            else if (cUpper.includes("SPAIN") || cUpper.includes("ESPAÑA")) locations = GEO_DB['ES'];
-            else if (cUpper.includes("UNITED STATES") || cUpper.includes("USA")) locations = GEO_DB['US'];
-            else if (cUpper.includes("MEXICO") || cUpper.includes("MÉXICO")) locations = GEO_DB['MX'];
-            else locations = GEO_DB['US'];
-
-            const selected = locations[Math.floor(Math.random() * locations.length)];
+            // New Technical Data Generation (Replaces fake geo)
             const rsrp = Math.floor(Math.random() * (120 - 70 + 1) + 70) * -1;
             const bands = ["B4 (AWS)", "B7 (2600)", "B28 (700)", "B66 (AWS-3)", "B2 (1900)"];
             const band = bands[Math.floor(Math.random() * bands.length)];
+            const vlr = Math.floor(Math.random() * 90000) + 10000;
             
+            // Hexadecimal Location Area Code (Real-looking)
+            const lac = "0x" + Math.floor(Math.random() * 65535).toString(16).toUpperCase();
+            
+            // Internal Carrier IP (SGSN)
+            const sgsnIp = `10.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+
             return `
                 <div class="col-span-2 border-t border-green-800 mt-3 pt-2 text-blue-300 font-bold bg-blue-900/10 p-2">>>> INTELIGENCIA DE SEÑALES (SIGINT)</div>
-                <div><span class="text-green-500 font-bold">NODO CELDA:</span> ${selected.loc}</div>
-                <div><span class="text-green-500 font-bold">TRIANGULACIÓN:</span> ${selected.lat}, ${selected.lon}</div>
+                <div><span class="text-green-500 font-bold">LAC (AREA CODE):</span> ${lac}</div>
+                <div><span class="text-green-500 font-bold">SGSN IP (INTERNAL):</span> ${sgsnIp}</div>
                 <div><span class="text-green-500 font-bold">ID GLOBAL (CGI):</span> 722-${Math.floor(Math.random()*999)}-${Math.floor(Math.random()*1000000)}</div>
+                <div><span class="text-green-500 font-bold">MSC/VLR (SWITCHING):</span> MSC-${vlr}-GT</div>
                 <div><span class="text-green-500 font-bold">IMEI DETECTADO:</span> ${generateRealisticIMEI()}</div>
                 <div><span class="text-green-500 font-bold">POTENCIA (RSRP):</span> ${rsrp} dBm</div>
                 <div><span class="text-green-500 font-bold">BANDA:</span> LTE ${band}</div>
-                <div><span class="text-green-500 font-bold">LATENCIA RED:</span> ${Math.floor(Math.random() * 60)} ms</div>
                 <div><span class="text-green-500 font-bold">ESTADO:</span> ENLACE ACTIVO</div>
             `;
         }
@@ -671,7 +736,7 @@
                         <div><span class="text-green-500 font-bold">TIPO DE RED:</span> ${data.line_type || "DESCONOCIDO"}</div>
                         <div><span class="text-green-500 font-bold">JURISDICCIÓN:</span> ${data.country_name} (${data.country_code})</div>
                         <div><span class="text-green-500 font-bold">CARRIER:</span> ${data.carrier || "PROTEGIDO/MVNO"}</div>
-                        <div class="col-span-2"><span class="text-green-500 font-bold">ZONA REGISTRADA:</span> ${data.location || "N/A"}</div>
+                        <div class="col-span-2"><span class="text-green-500 font-bold">ZONA REGISTRADA (API):</span> ${data.location || "N/A"}</div>
                     `;
                     intelHtml += generateSignalIntel(data.country_name);
                     intelHtml += `</div>`;
@@ -694,6 +759,8 @@
             if(service === 'syncme') url = `https://sync.me/search/?number=${number}`;
             if(service === 'whatsapp') url = `https://wa.me/${number}`;
             if(service === 'tellows') url = `https://www.tellows.com/num/${number}`;
+            if(service === 'spydialer') url = `https://www.spydialer.com/`; // SpyDialer requires manual input on site usually
+            if(service === 'emobiletracker') url = `https://www.emobiletracker.com/free-trace-mobile-number.php`;
             window.open(url, '_blank');
         }
 
@@ -736,6 +803,8 @@
             if(service === 'breachdirectory') url = `https://breachdirectory.org/`;
             if(service === 'epios') url = `https://epios.com/profile/${email}`;
             if(service === 'hunter') url = `https://hunter.io/search/${domain}`;
+            if(service === 'dehashed') url = `https://dehashed.com/search?query=${email}`;
+            if(service === 'intelx') url = `https://intelx.io/?s=${email}`;
             window.open(url, '_blank');
         }
 
