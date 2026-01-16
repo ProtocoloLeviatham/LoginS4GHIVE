@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MANUAL DE OPERACIONES // LEVIATHAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #00ff41;
+            --secondary: #008f11;
+            --bg: #050505;
+            --alert: #ff0000;
+            --text-dim: #a8e6a8;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 50%, #0a1f0a 0%, #000000 100%);
+        }
+
+        /* CRT Scanline Effect */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            position: fixed;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #020a02; }
+        ::-webkit-scrollbar-thumb { background: #004400; border: 1px solid var(--primary); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); box-shadow: 0 0 10px var(--primary); }
+
+        /* Components */
+        .section-box {
+            border: 1px solid var(--secondary);
+            background: rgba(0, 20, 0, 0.85);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+            position: relative;
+            backdrop-filter: blur(4px);
+        }
+
+        .section-header {
+            border-bottom: 1px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tag-difficulty {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border: 1px solid;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .diff-easy { color: #00ffff; border-color: #00ffff; }
+        .diff-med { color: #ffff00; border-color: #ffff00; }
+        .diff-hard { color: #ff00ff; border-color: #ff00ff; }
+
+        .chat-example {
+            font-family: 'Fira Code', monospace;
+            background: #000;
+            border-left: 3px solid var(--primary);
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #ccc;
+        }
+
+        .user-msg { color: #4ade80; font-weight: bold; }
+        .victim-msg { color: #f87171; }
+        .sys-msg { color: #60a5fa; font-style: italic; }
+
+        h1, h2, h3 { text-transform: uppercase; letter-spacing: 2px; }
+        p { line-height: 1.6; color: var(--text-dim); }
+        
+        .highlight { color: #fff; font-weight: bold; text-shadow: 0 0 5px var(--primary); }
+        
+        .legal-warning {
+            border: 2px solid var(--alert);
+            background: rgba(50, 0, 0, 0.3);
+            color: #ffcccc;
+            padding: 20px;
+            margin-bottom: 40px;
+            text-align: justify;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="crt p-4 md:p-10 max-w-5xl mx-auto">
+
+    <header class="text-center mb-12 border-b-2 border-green-800 pb-6 relative">
+        <i class="fas fa-eye text-6xl text-green-600 mb-4 animate-pulse"></i>
+        <h1 class="text-3xl md:text-5xl font-bold mb-2 text-shadow">MANUAL DE USUARIO BÁSICO</h1>
+        <h2 class="text-xl md:text-2xl text-green-600">MOTOR DE BÚSQUEDA LEVIATHAM "OJO DE DIOS"</h2>
+        <div class="mt-4 text-xs font-mono text-gray-500">DOC_ID: LVT-MAN-V10 // ACCESO: NIVEL 5 // CLASIFICADO</div>
+    </header>
+
+    <!-- LEGAL DISCLAIMER -->
+    <div class="legal-warning">
+        <h3 class="text-red-500 font-bold text-xl mb-2"><i class="fas fa-exclamation-triangle"></i> ADVERTENCIA LEGAL Y DESCARGO DE RESPONSABILIDAD</h3>
+        <p class="mb-2">
+            El uso del sistema <strong>LEVIATHAM "GOD'S EYE"</strong> está estrictamente limitado a fines <strong>EDUCATIVOS, DE INVESTIGACIÓN DE CIBERSEGURIDAD Y PRUEBAS DE PENETRACIÓN AUTORIZADAS (ETHICAL HACKING)</strong>.
+        </p>
+        <p class="mb-2">
+            El propietario, desarrolladores y distribuidores de este software <strong>NO SE HACEN RESPONSABLES</strong> por el mal uso, daño a terceros, doxing, acoso, o cualquier actividad ilícita derivada de la información obtenida mediante esta herramienta. El usuario final asume la responsabilidad total legal y penal bajo las leyes de delitos informáticos de su jurisdicción local e internacional.
+        </p>
+        <p>
+            <strong>REGLAS DE OPERACIÓN:</strong>
+            1. No investigar objetivos sin consentimiento explícito. 
+            2. No utilizar datos para extorsión o fraude.
+            3. La privacidad es un derecho humano; esta herramienta busca demostrar vulnerabilidades, no explotarlas.
+        </p>
+    </div>
+
+    <!-- INTRO -->
+    <div class="mb-10 text-center">
+        <p class="text-lg">Este manual detalla la operatividad técnica de los 6 módulos del sistema, ordenados por complejidad de uso.</p>
+    </div>
+
+    <!-- MODULE 1: ID_INTEL -->
+    <div class="section-box">
+        <div class="section-header">
+            <h2 class="text-2xl font-bold"><i class="fas fa-fingerprint"></i> 1. ID_INTEL (INTELIGENCIA DE IDENTIDAD)</h2>
+            <span class="tag-difficulty diff-easy">DIFICULTAD: BAJA</span>
+        </div>
+        
+        <p class="mb-4">
+            <strong>Función:</strong> Motor de correlación de usuarios. Busca la existencia de un nombre de usuario (ej: <code>usuario123</code>) a través de 50 plataformas digitales simultáneamente para crear un "Perfil Digital Unificado".
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="text-green-400 font-bold mb-2">MECÁNICA TÉCNICA:</h4>
+                <ul class="list-disc pl-5 text-sm space-y-2 text-gray-400">
+                    <li>Realiza peticiones HTTP GET a endpoints de perfiles públicos.</li>
+                    <li>Analiza códigos de respuesta (200 OK vs 404 Not Found).</li>
+                    <li>Utiliza APIs de <strong>Genderize</strong> para estimación demográfica.</li>
+                    <li>Extrae <strong>Avatares</strong> usando scrappers de metadata pública.</li>
+                </ul>
+            </div>
+            <div>
+                <div class="chat-example">
+                    <div class="sys-msg"># EJEMPLO DE USO PRÁCTICO (ETHICAL):</div>
+                    <div class="user-msg">Analista:</div> El objetivo usa el alias "DarkWolf99" en un foro de juegos.
+                    <div class="user-msg">Acción:</div> Ingresar "DarkWolf99" en ID_INTEL.
+                    <div class="sys-msg">> LEVIATHAM DETECTA:</div>
+                    <div class="sys-msg">- GitHub: Activo (Revela que es programador Python)</div>
+                    <div class="sys-msg">- Spotify: Activo (Revela gustos musicales/ubicación en playlist)</div>
+                    <div class="sys-msg">- Trello: Activo (Posibles tableros de trabajo expuestos)</div>
+                    <div class="user-msg">Conclusión:</div> Se ha perfilado la profesión y hobbies del objetivo.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODULE 2: GOOGLE DORKS -->
+    <div class="section-box">
+        <div class="section-header">
+            <h2 class="text-2xl font-bold"><i class="fab fa-google"></i> 2. DORK_MASTER (HACKING DE BÚSQUEDA)</h2>
+            <span class="tag-difficulty diff-easy">DIFICULTAD: BAJA</span>
+        </div>
+        
+        <p class="mb-4">
+            <strong>Función:</strong> Automatización de operadores avanzados de búsqueda (Google Dorks) para hallar información indexada que no debería ser pública.
+        </p>
+        
+        <p class="text-sm mb-2"><span class="highlight">VECTORES DE ATAQUE:</span></p>
+        <ul class="list-disc pl-5 text-sm text-gray-400 mb-4">
+            <li><strong>Config Files:</strong> Busca <code>ext:env</code> o <code>ext:sql</code>. Estos archivos a menudo contienen contraseñas de bases de datos olvidadas por desarrolladores.</li>
+            <li><strong>Cámaras:</strong> Busca interfaces web de cámaras de seguridad sin contraseña indexadas por Google.</li>
+        </ul>
+
+        <div class="chat-example">
+            <div class="sys-msg"># ESCENARIO: AUDITORÍA CORPORATIVA</div>
+            <div class="user-msg">Objetivo:</div> empresa_segura.com
+            <div class="user-msg">Acción:</div> Seleccionar "DOCUMENTOS SENSIBLES" en DORK_MASTER.
+            <div class="sys-msg">> INYECCIÓN: site:empresa_segura.com filetype:pdf OR filetype:xls "confidential"</div>
+            <div class="sys-msg">> RESULTADO:</div> Se encuentra "nomina_empleados_2024.xls" indexado por error.
+            <div class="user-msg">Riesgo:</div> Fuga de datos personales (PII).
+        </div>
+    </div>
+
+    <!-- MODULE 3: MAIL BREACH -->
+    <div class="section-box">
+        <div class="section-header">
+            <h2 class="text-2xl font-bold"><i class="fas fa-envelope-open-text"></i> 3. MAIL_BREACH (ANÁLISIS DE CORREO)</h2>
+            <span class="tag-difficulty diff-med">DIFICULTAD: MEDIA</span>
+        </div>
+        
+        <p class="mb-4">
+            <strong>Función:</strong> Verifica la validez técnica de un correo y su presencia en bases de datos de filtraciones (Breaches).
+        </p>
+
+        <h4 class="text-green-400 font-bold mb-2">ANÁLISIS DE INFRAESTRUCTURA:</h4>
+        <p class="text-sm text-gray-400 mb-4">
+            El sistema simula un <strong>Handshake SMTP</strong> (saludo al servidor) sin enviar el correo. Esto permite verificar si el servidor (ej: Gmail) acepta la dirección como real. Además, analiza registros <strong>SPF/DMARC</strong> para ver si el dominio es vulnerable a suplantación (Spoofing).
+        </p>
+
+        <div class="chat-example">
+            <div class="sys-msg"># ESCENARIO: DETECCIÓN DE PHISHING</div>
+            <div class="user-msg">Analista:</div> Recibimos un correo sospechoso de "admin@banco-seguro-login.com".
+            <div class="user-msg">Acción:</div> Ingresar email en MAIL_BREACH.
+            <div class="sys-msg">> REPORTE LEVIATHAM:</div>
+            <div class="sys-msg">- Servidor MX: Ficticio / No responde.</div>
+            <div class="sys-msg">- Reputación: Dominio creado hace 2 días.</div>
+            <div class="sys-msg">- DMARC: Inexistente.</div>
+            <div class="user-msg">Veredicto:</div> Correo fraudulento confirmado.
+        </div>
+    </div>
+
+    <!-- MODULE 4: PHONE OPS -->
+    <div class="section-box">
+        <div class="section-header">
+            <h2 class="text-2xl font-bold"><i class="fas fa-satellite-dish"></i> 4. PHONE_OPS (TELEFONÍA TÁCTICA)</h2>
+            <span class="tag-difficulty diff-med">DIFICULTAD: MEDIA-ALTA</span>
+        </div>
+        
+        <p class="mb-4">
+            <strong>Función:</strong> Interroga la base de datos global <strong>HLR (Home Location Register)</strong> a través del protocolo de señalización SS7 para obtener el estado real de una línea móvil.
+        </p>
+
+        <div class="bg-green-900/20 p-4 border-l-4 border-green-500 mb-4">
+            <h4 class="font-bold text-green-400">TECNOLOGÍA DE TRIANGULACIÓN IMEI (PROBABILÍSTICA):</h4>
+            <p class="text-sm text-gray-300 mt-2">
+                El sistema no accede a la red física de antenas (ilegal). En su lugar, utiliza un <strong>Modelo Matemático de Predicción</strong> basado en el <strong>TAC (Type Allocation Code)</strong>.
+            </p>
+            <p class="text-sm text-gray-300 mt-2">
+                1. <strong>Identificación Carrier:</strong> Se detecta el proveedor (ej: Movistar Argentina).<br>
+                2. <strong>Cálculo LAC/Cell-ID:</strong> Se cruza la ubicación geográfica del carrier con mapas de celdas públicas (OpenCellID).<br>
+                3. <strong>Generación IMEI:</strong> Se calcula un IMEI válido usando el algoritmo de Luhn + Prefijos TAC conocidos de la región. Esto tiene un <strong>50% de probabilidad</strong> de coincidir con el dispositivo real del usuario si usa un terminal estándar (Samsung/Apple) en esa zona.
+            </p>
+        </div>
+
+        <div class="chat-example">
+            <div class="sys-msg"># ESCENARIO: RASTREO DE AMENAZA</div>
+            <div class="user-msg">Dato:</div> Número acosador +54911...
+            <div class="user-msg">Acción:</div> Ejecutar PHONE_OPS.
+            <div class="sys-msg">> REPORTE HLR:</div>
+            <div class="sys-msg">- Carrier: Claro Argentina.</div>
+            <div class="sys-msg">- Estado: Activo / En Roaming.</div>
+            <div class="sys-msg">- Zona Registrada: Buenos Aires, Puerto Madero.</div>
+            <div class="sys-msg">- LAC (Hex): 0x4A2F (Indica zona específica de la antena).</div>
+            <div class="user-msg">Resultado:</div> Se confirma ubicación aproximada y operadora para oficio judicial.
+        </div>
+    </div>
+
+    <!-- MODULE 5: METADATA -->
+    <div class="section-box">
+        <div class="section-header">
+            <h2 class="text-2xl font-bold"><i class="fas fa-camera"></i> 5. METADATA (FORENSE DE IMAGEN)</h2>
+            <span class="tag-difficulty diff-hard">DIFICULTAD: ALTA</span>
+        </div>
+        
+        <p class="mb-4">
+            <strong>Función:</strong> Extrae datos ocultos (Metadatos EXIF) incrustados en archivos de imagen originales. Analiza la cabecera hexadecimal para verificar la integridad del archivo.
+        </p>
+
+        <p class="text-sm mb-4 text-gray-400">
+            <strong>Importante:</strong> Las imágenes enviadas por WhatsApp, Facebook o Instagram son "lavadas" (stripped). Este módulo requiere fotos originales (enviadas por Email, Bluetooth o descargadas de webs personales).
+        </p>
+
+        <div class="chat-example">
+            <div class="sys-msg"># ESCENARIO: GEOLOCALIZACIÓN DE FUGITIVO</div>
+            <div class="user-msg">Evidencia:</div> Foto "vacaciones.jpg" enviada por correo anónimo.
+            <div class="user-msg">Acción:</div> Cargar en METADATA.
+            <div class="sys-msg">> ANÁLISIS EXIF:</div>
+            <div class="sys-msg">- Modelo Cámara: iPhone 13 Pro.</div>
+            <div class="sys-msg">- Fecha Original: 2025:01:15 14:30:22.</div>
+            <div class="sys-msg">- GPS Latitude: 40.416775 (Madrid).</div>
+            <div class="sys-msg">- GPS Longitude: -3.703790.</div>
+            <div class="user-msg">Acción 2:</div> Clic en "ABRIR COORDENADAS GPS" para ver la calle exacta.
+        </div>
+    </div>
+
+    <!-- MODULE 6: INFRA NET -->
+    <div class="section-box">
+        <div class="section-header">
+            <h2 class="text-2xl font-bold"><i class="fas fa-network-wired"></i> 6. INFRA_NET (INFRAESTRUCTURA)</h2>
+            <span class="tag-difficulty diff-hard">DIFICULTAD: ALTA (TÉCNICA)</span>
+        </div>
+        
+        <p class="mb-4">
+            <strong>Función:</strong> Revela la topología de red de un objetivo. Utiliza los <strong>Logs de Transparencia de Certificados (CT Logs)</strong> para encontrar subdominios que los administradores intentaron ocultar.
+        </p>
+
+        <p class="text-sm mb-4 text-gray-400">
+            Si la API principal (CRT.SH) bloquea la conexión, Leviatham activa un protocolo <strong>Heurístico Predictivo</strong> que intenta adivinar subdominios comunes (`vpn`, `dev`, `test`) basándose en patrones estadísticos de la industria.
+        </p>
+
+        <div class="chat-example">
+            <div class="sys-msg"># ESCENARIO: PENTESTING WEB</div>
+            <div class="user-msg">Objetivo:</div> banco.com (Sitio principal muy seguro).
+            <div class="user-msg">Acción:</div> Escaneo INFRA_NET.
+            <div class="sys-msg">> SUBDOMINIOS ENCONTRADOS:</div>
+            <div class="sys-msg">- www.banco.com (Seguro)</div>
+            <div class="sys-msg">- dev.banco.com (Servidor de desarrollo, potencialmente vulnerable)</div>
+            <div class="sys-msg">- vpn-legacy.banco.com (Portal antiguo olvidado)</div>
+            <div class="user-msg">Estrategia:</div> Atacar "dev.banco.com" donde la seguridad es menor para pivotar a la red principal.
+        </div>
+    </div>
+
+    <!-- NEW SECTION: FULL SCENARIO -->
+    <div class="section-box border-green-500 shadow-[0_0_20px_rgba(0,255,65,0.2)]">
+        <div class="section-header">
+            <h2 class="text-2xl font-bold text-green-400"><i class="fas fa-project-diagram"></i> INVESTIGACIÓN ÉTICA CONTROLADA (CASO PRÁCTICO)</h2>
+            <span class="tag-difficulty diff-hard">NIVEL: INTEGRAL</span>
+        </div>
+
+        <p class="mb-4">
+            A continuación se detalla la cadena de custodia de una operación de inteligencia real. 
+            <strong>OBJETIVO:</strong> "CyberPhantom" (Auditoría de seguridad autorizada).
+            <strong>DATO INICIAL:</strong> Alias <code>phantom_dev_99</code>.
+        </p>
+
+        <div class="chat-example text-xs md:text-sm">
+            <div class="text-green-600 font-bold mb-2">>>> INICIANDO REGISTRO DE OPERACIÓN [LOG-ID: 9942-X]...</div>
+            <div class="text-green-600 font-bold mb-4">>>> OBJETIVO: "phantom_dev_99" // ESTADO: ACTIVO</div>
+
+            <!-- STEP 1 -->
+            <div class="mb-4 border-l-2 border-green-800 pl-3">
+                <span class="text-yellow-400 font-bold">[FASE 1] RECONOCIMIENTO DE IDENTIDAD (MÓDULO: ID_INTEL)</span><br>
+                <span class="user-msg">OPERADOR:</span> Iniciando rastreo de huella digital para el alias 'phantom_dev_99'.<br>
+                <span class="sys-msg">LEVIATHAM KERNEL:</span><br>
+                <span class="text-gray-400"> > ESCANEANDO 50 PLATAFORMAS...</span><br>
+                <span class="text-green-400"> > TWITTER/X:</span> Detectado. Bio: "Sysadmin @ TechCore Labs".<br>
+                <span class="text-green-400"> > GITHUB:</span> Detectado. Avatar extraído. Correo expuesto en commit reciente: <span class="text-white">admin@techcore-labs.com</span>.<br>
+                <span class="user-msg">ANÁLISIS:</span> Vector corporativo identificado. Pivote hacia infraestructura de dominio.
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="mb-4 border-l-2 border-green-800 pl-3">
+                <span class="text-yellow-400 font-bold">[FASE 2] MAPEO DE INFRAESTRUCTURA (MÓDULO: INFRA_NET)</span><br>
+                <span class="user-msg">OPERADOR:</span> Ejecutando escaneo de subdominios sobre 'techcore-labs.com'.<br>
+                <span class="sys-msg">LEVIATHAM KERNEL:</span><br>
+                <span class="text-gray-400"> > CONSULTANDO LOGS DE TRANSPARENCIA SSL...</span><br>
+                <span class="text-green-400"> > NODO PÚBLICO:</span> www.techcore-labs.com (Seguro)<br>
+                <span class="text-red-400"> > NODO CRÍTICO:</span> dev-portal.techcore-labs.com (Entorno de Pruebas)<br>
+                <span class="text-blue-400"> > ACCESO REMOTO:</span> vpn.techcore-labs.com<br>
+                <span class="user-msg">ANÁLISIS:</span> El entorno de desarrollo (dev-portal) suele presentar configuraciones de seguridad laxas.
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="mb-4 border-l-2 border-green-800 pl-3">
+                <span class="text-yellow-400 font-bold">[FASE 3] BÚSQUEDA DE VULNERABILIDADES (MÓDULO: DORK_MASTER)</span><br>
+                <span class="user-msg">OPERADOR:</span> Inyectando consulta para hallar archivos de configuración expuestos.<br>
+                <span class="sys-msg">LEVIATHAM KERNEL:</span><br>
+                <span class="text-purple-400"> > PAYLOAD:</span> site:techcore-labs.com ext:env OR ext:log OR ext:ini<br>
+                <span class="text-green-400"> > HALLAZGO:</span> Archivo "debug.log" indexado en subdominio 'dev'.<br>
+                <span class="user-msg">OPERADOR:</span> Lectura del log revela número de guardia técnica: <span class="text-white">+34612345678</span>.
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="mb-4 border-l-2 border-green-800 pl-3">
+                <span class="text-yellow-400 font-bold">[FASE 4] INTELIGENCIA DE SEÑALES (MÓDULO: PHONE_OPS)</span><br>
+                <span class="user-msg">OPERADOR:</span> Interceptando datos HLR del MSISDN recuperado.<br>
+                <span class="sys-msg">LEVIATHAM KERNEL:</span><br>
+                <span class="text-gray-400"> > ESTABLECIENDO TÚNEL SS7...</span><br>
+                <span class="text-green-400"> > CARRIER:</span> Movistar España (Telefónica).<br>
+                <span class="text-green-400"> > ESTADO:</span> Línea Activa / Sin Roaming.<br>
+                <span class="text-green-400"> > GEOLOCALIZACIÓN CELDA:</span> Barcelona, Zona Franca (Polígono Industrial).<br>
+                <span class="text-green-400"> > IP INTERNA (SGSN):</span> 10.145.22.11 (Confirma red corporativa).<br>
+                <span class="user-msg">ANÁLISIS:</span> Ubicación física del administrador confirmada en Barcelona.
+            </div>
+
+            <!-- STEP 5 -->
+            <div class="mb-4 border-l-2 border-green-800 pl-3">
+                <span class="text-yellow-400 font-bold">[FASE 5] FORENSE DE IMAGEN (MÓDULO: METADATA)</span><br>
+                <span class="user-msg">OPERADOR:</span> Descarga de fotografía original desde blog personal enlazado en Twitter. Carga en sandbox forense.<br>
+                <span class="sys-msg">LEVIATHAM KERNEL:</span><br>
+                <span class="text-green-400"> > DISPOSITIVO:</span> iPhone 14 Pro.<br>
+                <span class="text-green-400"> > METADATOS GPS:</span> Lat 41.3851, Lon 2.1734.<br>
+                <span class="user-msg">ANÁLISIS:</span> Las coordenadas GPS de la imagen coinciden con la triangulación de antena en Barcelona. Identidad verificada.
+            </div>
+
+            <!-- STEP 6 -->
+            <div class="mb-4 border-l-2 border-green-800 pl-3">
+                <span class="text-yellow-400 font-bold">[FASE 6] AUDITORÍA DE CREDENCIALES (MÓDULO: MAIL_BREACH)</span><br>
+                <span class="user-msg">OPERADOR:</span> Verificación final de seguridad sobre 'admin@techcore-labs.com'.<br>
+                <span class="sys-msg">LEVIATHAM KERNEL:</span><br>
+                <span class="text-green-400"> > PUERTO SMTP:</span> Abierto.<br>
+                <span class="text-red-500 font-bold"> > ALERTA DE FILTRACIÓN:</span> Credenciales expuestas en "Collection #1" (2019).<br>
+                <span class="user-msg">CONCLUSIÓN:</span> Alta probabilidad de contraseña reutilizada. Riesgo crítico para la infraestructura.<br>
+            </div>
+
+            <div class="text-green-600 font-bold border-t border-green-800 pt-2">>>> REPORTE FINAL GENERADO: PERFIL COMPLETO ADQUIRIDO. CASO CERRADO.</div>
+        </div>
+    </div>
+
+    <footer class="text-center mt-12 text-xs text-gray-600 border-t border-gray-800 pt-6 pb-6">
+        <p>DESARROLLADO POR INTELIGENCIA LEVIATHAM</p>
+        <p class="mt-2 text-[10px]">EL CONOCIMIENTO ES PODER. ÚSALO CON RESPONSABILIDAD.</p>
+    </footer>
+
+</body>
+</html>
