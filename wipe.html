@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEVIATHAM WIPE-S4G | CLASSIFIED</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Share Tech Mono y Fira Code para terminal -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cia-green': '#00ff41',
+                        'cia-dark': '#0d0208',
+                        'cia-dim': '#003b00',
+                        'cia-alert': '#ff003c',
+                        'kali-blue': '#2472c8',
+                        'kali-red': '#dd2e44',
+                        'kali-prompt': '#00d3d0'
+                    },
+                    fontFamily: {
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                        term: ['"Fira Code"', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glitch': 'glitch 1s linear infinite',
+                    },
+                    keyframes: {
+                        glitch: {
+                            '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
+                            '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
+                            '62%': { transform: 'translate(0,0) skew(5deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #000;
+            color: #e0e0e0;
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Scrollbar Personalizado (Estilo Terminal) */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0d0d; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border: 1px solid #000;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+
+        /* CRT Effect Overlay */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        
+        .crt::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            z-index: 50;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.0279517393478923; }
+            5% { opacity: 0.0456102373070442; }
+            100% { opacity: 0.02279517393478923; }
+        }
+
+        /* Background Canvas */
+        #neuro-net {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Hacker Box Styles */
+        .hacker-box {
+            background: rgba(10, 10, 15, 0.9);
+            border: 1px solid #333;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+        .hacker-box:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.15);
+            border-color: #00ff41;
+        }
+
+        .hacker-btn {
+            background: rgba(0, 20, 0, 0.6);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            text-transform: uppercase;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 1px;
+            overflow: hidden;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        
+        .hacker-btn:hover {
+            background: #00ff41;
+            color: #000;
+            box-shadow: 0 0 10px #00ff41;
+        }
+
+        /* Title Glitch Effect */
+        .leviatham-title {
+            position: relative;
+            color: #fff;
+            text-transform: uppercase;
+        }
+        .leviatham-title::before, .leviatham-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .leviatham-title::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00c1;
+            clip: rect(24px, 550px, 90px, 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        .leviatham-title::after {
+            left: -2px;
+            text-shadow: -1px 0 #00fff9;
+            clip: rect(85px, 550px, 140px, 0);
+            animation: glitch-anim 2.5s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(14px, 9999px, 122px, 0); }
+            5% { clip: rect(78px, 9999px, 147px, 0); }
+            10% { clip: rect(28px, 9999px, 59px, 0); }
+            15% { clip: rect(98px, 9999px, 12px, 0); }
+            20% { clip: rect(18px, 9999px, 63px, 0); }
+            100% { clip: rect(65px, 9999px, 109px, 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(65px, 9999px, 119px, 0); }
+            15% { clip: rect(108px, 9999px, 14px, 0); }
+            30% { clip: rect(32px, 9999px, 68px, 0); }
+            100% { clip: rect(8px, 9999px, 145px, 0); }
+        }
+
+        /* Burn Effect for Auto Destruct */
+        .burning {
+            filter: contrast(200%) brightness(150%) sepia(100%) hue-rotate(-50deg) saturate(500%) blur(1px);
+            animation: burn 0.1s infinite;
+        }
+        @keyframes burn {
+            0% { transform: translate(1px, 1px) rotate(0deg); opacity: 0.9; }
+            50% { transform: translate(-1px, -1px) rotate(1deg); opacity: 1; }
+            100% { transform: translate(1px, -1px) rotate(-1deg); opacity: 0.9; }
+        }
+    </style>
+</head>
+<body class="crt h-screen w-screen flex flex-col text-sm md:text-base bg-black">
+
+    <!-- Canvas Background -->
+    <canvas id="neuro-net"></canvas>
+
+    <!-- Main Interface -->
+    <main class="flex-1 flex flex-col relative h-screen w-full max-w-7xl mx-auto border-x border-gray-900 bg-black/40 backdrop-blur-sm">
+        
+        <!-- Top Bar -->
+        <header class="h-16 border-b border-gray-800 bg-black/80 flex items-center justify-between px-6 sticky top-0 z-30">
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-shield-alt text-2xl text-gray-500" id="shield-icon"></i>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-gray-500 font-term uppercase">Public IP Address</span>
+                        <span id="user-ip" class="text-white font-bold font-term tracking-wider">SCANNING...</span>
+                    </div>
+                </div>
+                <div class="h-8 w-[1px] bg-gray-800"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] text-gray-500 font-term uppercase">Security Status</span>
+                    <span id="sec-status" class="text-cia-alert font-bold font-term">UNSECURE</span>
+                </div>
+            </div>
+            
+            <button onclick="quickWipe()" class="px-4 py-2 text-xs md:text-sm font-bold border border-cia-alert text-cia-alert hover:bg-cia-alert hover:text-white transition-all uppercase tracking-wider">
+                <i class="fas fa-radiation fa-spin mr-2" style="animation-duration: 3s;"></i> EMERGENCY WIPE
+            </button>
+        </header>
+
+        <!-- WIPE Content Area -->
+        <div id="content-area" class="flex-1 overflow-y-auto p-6 md:p-10 pb-40 relative">
+            
+            <!-- Header Section -->
+            <div class="mb-10 flex items-end justify-between border-b border-gray-800 pb-4">
+                <div>
+                    <!-- LEVIATHAM WIPE-S4G Title with Animation -->
+                    <h1 class="text-4xl md:text-6xl font-bold tracking-tighter text-white mb-2 leviatham-title" data-text="LEVIATHAM WIPE-S4G">
+                        LEVIATHAM WIPE-S4G
+                    </h1>
+                    <p class="text-gray-400 max-w-3xl font-term text-xs md:text-sm mt-2">
+                        Herramienta de saneamiento de datos forense. Utilice para eliminar huellas digitales, cookies de rastreo y ofuscar la topología de red.
+                    </p>
+                </div>
+                <div class="text-right hidden md:block">
+                    <div class="text-xs text-gray-600 font-mono">BUILD: v5.0-S4G</div>
+                    <div class="text-xs text-cia-green font-mono">SYS: LEVIATHAM-ROOT</div>
+                </div>
+            </div>
+
+            <!-- Grid de Opciones -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- 1. Borrar Cache (Real) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-trash"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">Clear Cache & Storage</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Eliminación nivel bajo de `localStorage` y `sessionStorage`. Previene persistencia de datos offline.
+                        </p>
+                    </div>
+                    <button onclick="wipeRealCache()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-eraser mr-2"></i> EXECUTE CLEAR
+                    </button>
+                </div>
+
+                <!-- 2. Limpiar IP (Simulado) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-network-wired"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">IP Ghosting Chains</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Enruta el tráfico a través de 5 proxies dinámicos (Tor/I2P). Oculta el origen real.
+                        </p>
+                    </div>
+                    <button onclick="simIpGhosting()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-ghost mr-2"></i> INIT CHAIN
+                    </button>
+                </div>
+
+                <!-- 3. Destruir Cookies (Real) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-cookie"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">Cookie Shredder</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Sobreescribe cookies de sesión con datos basura antes de eliminarlas (Anti-Recovery).
+                        </p>
+                    </div>
+                    <button onclick="wipeRealCookies()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-file-code mr-2"></i> SHRED DATA
+                    </button>
+                </div>
+
+                <!-- 4. Disolver Logs ISP (Simulado) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-server"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">ISP Log Dissolver</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Inyección SQL simulada en nodos de registro locales para purgar timestamps de conexión.
+                        </p>
+                    </div>
+                    <button onclick="simIspLog()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-soap mr-2"></i> PURGE LOGS
+                    </button>
+                </div>
+
+                <!-- 5. Scramble DNS (Simulado) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-random"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">DNS Scrambler</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Fuerza DNS-over-HTTPS y rota servidores resolver cada 200ms para evitar perfilado.
+                        </p>
+                    </div>
+                    <button onclick="simDnsScramble()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-shield-virus mr-2"></i> SCRAMBLE
+                    </button>
+                </div>
+
+                <!-- 6. Pistas Falsas (Simulado - Beaconing) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-map-signs"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">Decoy Routing</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Genera "Ruido Blanco" digital enviando pings falsos a servidores gubernamentales y DNS públicos.
+                        </p>
+                    </div>
+                    <button onclick="simDecoyRouting()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-paper-plane mr-2"></i> DEPLOY DECOYS
+                    </button>
+                </div>
+
+                <!-- 7. Flush Identidad (Real) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-id-badge"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">Identity Flush</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Rota el Fingerprint UUID interno de la sesión. Desvincula acciones pasadas de las futuras.
+                        </p>
+                    </div>
+                    <button onclick="wipeGhostId()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-user-secret mr-2"></i> NEW IDENTITY
+                    </button>
+                </div>
+
+                <!-- 8. Inyectar Ruido (Simulado) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-wifi"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">Traffic Noise Injection</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Carga masiva de recursos en background (Curl) para saturar el análisis de tráfico sniffer.
+                        </p>
+                    </div>
+                    <button onclick="simTrafficNoise()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-volume-up mr-2"></i> INJECT NOISE
+                    </button>
+                </div>
+
+                <!-- 9. Borrar Huella Canvas (Real) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-fingerprint"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">Canvas Anti-Fingerprint</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Inyecta ruido aleatorio en el contexto de renderizado 2D/3D para alterar la firma de la GPU.
+                        </p>
+                    </div>
+                    <button onclick="wipeCanvasFingerprint()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-mask mr-2"></i> SPOOF GPU
+                    </button>
+                </div>
+
+                <!-- 10. Destruir Llaves (Real) -->
+                <div class="hacker-box p-5 flex flex-col justify-between group relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 text-6xl text-gray-800 -z-10 group-hover:text-gray-700 transition-colors"><i class="fas fa-key"></i></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white mb-1">Vault Key Purge (RAM)</h3>
+                        <p class="text-xs text-gray-400 mb-4 h-12 font-term">
+                            Sobreescribe direcciones de memoria RAM donde residen las claves de descifrado.
+                        </p>
+                    </div>
+                    <button onclick="wipeVaultKeys()" class="hacker-btn w-full py-2 text-sm font-bold">
+                        <i class="fas fa-memory mr-2"></i> ZERO-FILL RAM
+                    </button>
+                </div>
+            
+            </div>
+
+            <!-- Danger Zone Footer -->
+            <div class="border-t border-gray-800 pt-8 mt-6 mb-24 grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Auto Destruccion -->
+                <div class="bg-red-950/20 border border-red-900/50 p-6 relative overflow-hidden rounded-sm hover:border-red-600 transition-colors">
+                    <div class="absolute top-0 right-0 p-4 text-red-800 text-5xl opacity-20"><i class="fas fa-biohazard"></i></div>
+                    <h3 class="text-red-500 font-bold text-xl mb-2 tracking-wider">AUTO_DESTRUCT_SEQ</h3>
+                    <p class="text-xs text-gray-400 mb-6 font-term">
+                        Protocolo de tierra quemada. Inicia temporizador de 10s seguido de corrupción visual y redirección a agujero negro (404).
+                    </p>
+                    <button onclick="initAutoDestruct()" class="w-full py-4 text-sm font-bold border border-red-600 text-red-500 hover:bg-red-600 hover:text-white transition-all uppercase tracking-[0.2em]">
+                        <i class="fas fa-skull-crossbones mr-2"></i> ARMAR SECUENCIA
+                    </button>
+                </div>
+
+                <!-- Panic Button -->
+                <div class="bg-red-950/20 border border-red-900/50 p-6 relative overflow-hidden rounded-sm hover:border-red-600 transition-colors">
+                     <div class="absolute top-0 right-0 p-4 text-red-800 text-5xl opacity-20"><i class="fas fa-exclamation-triangle"></i></div>
+                    <h3 class="text-red-500 font-bold text-xl mb-2 tracking-wider">PANIC BUTTON</h3>
+                    <p class="text-xs text-gray-400 mb-6 font-term">
+                        EMERGENCIA NIVEL 5. Limpieza instantánea (<1ms) y redirección forzada a Clearnet (Google).
+                    </p>
+                    <button onclick="panicButton()" class="bg-red-600 text-white font-black w-full py-4 text-lg border border-red-500 hover:bg-red-700 shadow-[0_0_20px_#ff0000] animate-pulse">
+                        ABORT & EJECT NOW
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Kali Linux Terminal Panel (Compact Height) -->
+        <div id="terminal" class="h-32 bg-[#0d0d0d] border-t-2 border-kali-blue p-2 font-term text-xs overflow-y-auto w-full z-40 absolute bottom-0 opacity-95 shadow-[0_-5px_20px_rgba(0,0,0,0.8)]">
+            <div id="terminal-content" class="flex flex-col space-y-1 p-2">
+                <!-- Log entries go here -->
+                <div class="font-term text-gray-400">Kali GNU/Linux Rolling [Version 2026.1]</div>
+                <div class="font-term text-gray-400 mb-2">Type "help" for a list of commands.</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JS Logic -->
+    <script>
+        // --- 1. CONFIG & UTILS ---
+        const terminalContent = document.getElementById('terminal-content');
+
+        let ghostID = "UNASSIGNED";
+        const TERMINAL_USER = '<span class="text-kali-blue">┌──(</span><span class="text-kali-red">root💀leviatham</span><span class="text-kali-blue">)-[</span><span class="text-white">~</span><span class="text-kali-blue">]</span><br><span class="text-kali-blue">└─#</span>';
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        ghostID = generateUUID();
+
+        // --- 2. TERMINAL LOGIC (KALI STYLE) ---
+        function logTerminal(cmd, output, type = 'info') {
+            const container = document.createElement('div');
+            container.className = "mb-2";
+
+            // Prompt Line
+            const promptDiv = document.createElement('div');
+            promptDiv.innerHTML = `${TERMINAL_USER} <span class="text-white">${cmd}</span>`;
+            container.appendChild(promptDiv);
+
+            // Output Lines
+            if (output) {
+                const outputDiv = document.createElement('div');
+                let color = 'text-gray-300';
+                if(type === 'error') color = 'text-red-500';
+                if(type === 'success') color = 'text-cia-green';
+                if(type === 'warning') color = 'text-yellow-400';
+                
+                outputDiv.className = `${color} pl-4 whitespace-pre-wrap`;
+                outputDiv.innerHTML = output;
+                container.appendChild(outputDiv);
+            }
+            
+            terminalContent.appendChild(container);
+            
+            // Auto scroll
+            const terminal = document.getElementById('terminal');
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // --- 3. NO-OVERLAY SIMULATION SYSTEM (LOGS ONLY) ---
+        function runSimulation(title, steps, durationPerStep, callback) {
+            // Log start of process
+            logTerminal(`./${title}`, "Initializing sequence...", "warning");
+            
+            let currentStep = 0;
+            const totalSteps = steps.length;
+            
+            const interval = setInterval(() => {
+                if (currentStep >= totalSteps) {
+                    clearInterval(interval);
+                    if (callback) callback();
+                    return;
+                }
+
+                const stepData = steps[currentStep];
+                // Direct log to terminal without overlay
+                logTerminal(stepData.cmd, stepData.out, 'info');
+
+                currentStep++;
+
+            }, durationPerStep);
+        }
+
+        // --- 4. TOP BAR LOGIC & SHARED STATE ---
+        function checkSharedIPState() {
+            // Check if IP is hidden in other pages (simulated via localStorage from 'Comando.html')
+            const isHidden = localStorage.getItem('agency_ip_hidden');
+            if (isHidden === 'true') {
+                setIPHiddenUI();
+            } else {
+                fetchIP();
+            }
+        }
+
+        function setIPHiddenUI() {
+            document.getElementById('user-ip').innerText = "GHOSTED (VPN_CHAIN)";
+            document.getElementById('user-ip').classList.add('text-cia-green');
+            document.getElementById('user-ip').classList.remove('text-white');
+            document.getElementById('sec-status').innerText = "SECURE";
+            document.getElementById('sec-status').classList.remove('text-cia-alert');
+            document.getElementById('sec-status').classList.add('text-cia-green');
+            document.getElementById('shield-icon').classList.add('text-cia-green');
+            document.getElementById('shield-icon').classList.remove('text-gray-500');
+        }
+
+        async function fetchIP() {
+            // Only fetch if not hidden
+            if(localStorage.getItem('agency_ip_hidden') === 'true') return;
+
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                document.getElementById('user-ip').innerText = data.ip;
+                
+                logTerminal("ifconfig eth0", `eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500\n        inet ${data.ip}  netmask 255.255.255.0  broadcast 0.0.0.0`, 'warning');
+            } catch (error) {
+                document.getElementById('user-ip').innerText = "UNKNOWN_NODE";
+            }
+        }
+        
+        // --- 5. ACTIONS ---
+
+        function wipeRealCache() {
+            runSimulation("clean_cache.sh", [
+                { msg: "Mounting Storage...", cmd: "mount /dev/local_storage /mnt/temp", out: "Mounted read-write." },
+                { msg: "Zeroing out sectors...", cmd: "dd if=/dev/zero of=/mnt/temp/cache bs=1M count=10", out: "10+0 records in\n10+0 records out" },
+                { msg: "Unlinking...", cmd: "rm -rf /mnt/temp/*", out: "Filesystem unlinked." }
+            ], 600, () => {
+                localStorage.clear();
+                sessionStorage.clear();
+                logTerminal("verify_integrity", "Clean. No artifacts found.", "success");
+            });
+        }
+
+        function wipeRealCookies() {
+            runSimulation("shred_cookies.py", [
+                { msg: "Analyzing headers...", cmd: "python3 cookie_analyzer.py --scan", out: "Found tracking cookies." },
+                { msg: "Overwriting values...", cmd: "shred -u -z -n 3 cookies.db", out: "Pass 1/3: random...\nPass 2/3: random...\nPass 3/3: zeros..." },
+            ], 800, () => {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i];
+                    const eqPos = cookie.indexOf("=");
+                    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                }
+                logTerminal("status_check", "Cookie jar empty.", "success");
+            });
+        }
+
+        function simIpGhosting() {
+            const steps = [
+                { msg: "Starting TOR service...", cmd: "service tor start", out: "Starting tor daemon... OK" },
+                { msg: "Building circuit (Node 1/3)...", cmd: "tor-resolve --circuit 1", out: "Relay: France (Exit)" },
+                { msg: "Building circuit (Node 2/3)...", cmd: "tor-resolve --circuit 2", out: "Relay: Panama (Middle)" },
+                { msg: "Building circuit (Node 3/3)...", cmd: "tor-resolve --circuit 3", out: "Relay: Unknown (Entry)" },
+                { msg: "Verifying anonymity...", cmd: "curl --socks5-hostname localhost:9050 ipinfo.io", out: "New IP Assigned." }
+            ];
+            
+            runSimulation("init_ghost_chain.sh", steps, 1500, () => {
+                 localStorage.setItem('agency_ip_hidden', 'true');
+                 setIPHiddenUI();
+                 logTerminal("whoami", "ghost_user", "success");
+            });
+        }
+
+        function simIspLog() {
+             runSimulation("exploit_isp_logs", [
+                { msg: "Scanning local gateway...", cmd: "nmap -sS -p 80,443 192.168.1.1", out: "Port 80/tcp open" },
+                { msg: "Injecting payload...", cmd: "./sqlmap -u 'http://gateway/admin' --dbs", out: "Database found: syslog" },
+                { msg: "Dropping tables...", cmd: "DROP TABLE connection_logs;", out: "Query OK, 4122 rows affected." },
+            ], 1200, () => {
+                 logTerminal("exit", "Connection closed.", "success");
+            });
+        }
+
+        function simDnsScramble() {
+             runSimulation("scramble_dns", [
+                { msg: "Flushing cache...", cmd: "systemd-resolve --flush-caches", out: "Cache cleared." },
+                { msg: "Enabling DoH...", cmd: "set_dns --proto https --provider cloudflare", out: "Tunnel established." },
+                { msg: "Randomizing resolvers...", cmd: "watch -n 0.2 'dns_switch_random'", out: "Resolver: 8.8.8.8 > 1.1.1.1 > 9.9.9.9" },
+            ], 1000, () => {
+                 logTerminal("status", "DNS Leaks: 0%", "success");
+            });
+        }
+
+        function simDecoyRouting() {
+             runSimulation("decoy_emitter", [
+                { msg: "Generating packets...", cmd: "hping3 --rand-source --flood", out: "Mode: FLOOD" },
+                { msg: "Targeting governmental nodes...", cmd: "target list: nsa.gov, gchq.gov, fsb.ru", out: "Queuing packets..." },
+                { msg: "Sending bursts...", cmd: "send_burst --count 5000", out: "Sent 5000 packets." },
+                { msg: "Confusing routes...", cmd: "traceroute -m 50", out: "*** *** ***" },
+            ], 2000, () => {
+                 logTerminal("report", "Network Analysis: INCONCLUSIVE", "success");
+            });
+        }
+
+        function wipeGhostId() {
+            runSimulation("id_rotate", [
+                { msg: "Calculating new hash...", cmd: "openssl rand -hex 16", out: "a3f1...9b2c" },
+                { msg: "Updating session headers...", cmd: "sed -i 's/OLD_ID/NEW_ID/g' session.conf", out: "Config updated." },
+            ], 800, () => {
+                ghostID = generateUUID();
+                logTerminal("echo $GHOST_ID", ghostID, "success");
+            });
+        }
+
+        function simTrafficNoise() {
+            runSimulation("noise_injector", [
+                { msg: "Spawning threads...", cmd: "fork_bomb --limit 12", out: "PIDs: 401, 402, 403..." },
+                { msg: "Downloading random data...", cmd: "wget --recursive --random-wait google.com", out: "Downloading index.html... 200 OK" },
+                { msg: "Streaming video chunks...", cmd: "youtube-dl --quiet --no-warnings random_vid", out: "Buffer: 50MB" },
+                { msg: "Uploading dummy data...", cmd: "scp -r /dev/urandom remote:/tmp", out: "Transferred 100MB" },
+            ], 2500, () => {
+                 logTerminal("top", "CPU Load: 98% | Network: SATURATED", "warning");
+            });
+        }
+
+        function wipeCanvasFingerprint() {
+             runSimulation("canvas_spoofer", [
+                { msg: "Hooking getContext...", cmd: "LD_PRELOAD=./libcanvas_hook.so chrome", out: "Hooks installed." },
+                { msg: "Adding noise vector...", cmd: "inject_noise --variance 0.05", out: "Applied." },
+            ], 900, () => {
+                window.canvasNoiseVector = Math.random();
+                logTerminal("check_fp", `Fingerprint Hash: ${Math.random().toString(36).substring(7)}`, "success");
+            });
+        }
+
+        function wipeVaultKeys() {
+            runSimulation("mem_scrubber", [
+                { msg: "Scanning Heap...", cmd: "gdb --batch -ex 'find 0x0, 0xffff, KEY_PATTERN' core_dump", out: "Found at 0x7ffd..." },
+                { msg: "Overwriting...", cmd: "memset(0x7ffd, 0, 1024)", out: "Memory cleared." },
+            ], 600, () => {
+                window.vaultKeys = null;
+                delete window.vaultKeys;
+                logTerminal("audit_mem", "No sensitive strings found.", "success");
+            });
+        }
+
+        // --- 6. DANGER ZONE FUNCTIONS ---
+        function initAutoDestruct() {
+            logTerminal("WARNING", "AUTO DESTRUCT INITIATED", "error");
+            let count = 10;
+            const timer = setInterval(() => {
+                logTerminal("TIMER", `T-MINUS ${count}s`, "error");
+                document.body.style.filter = `hue-rotate(${Math.random() * 360}deg) contrast(${100 + (10-count)*20}%)`;
+                count--;
+                if(count < 0) {
+                    clearInterval(timer);
+                    executeDestruction();
+                }
+            }, 1000);
+        }
+
+        function executeDestruction() {
+            document.body.innerHTML = '';
+            document.body.classList.add('burning');
+            document.body.style.backgroundColor = 'white';
+            setTimeout(() => {
+                document.body.classList.remove('burning');
+                document.body.style.filter = 'none';
+                document.body.style.backgroundColor = '#000';
+                document.body.style.color = '#333';
+                document.body.style.fontFamily = 'serif';
+                document.body.innerHTML = `
+                    <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+                        <h1 style="font-size:4rem; color: #444;">404</h1>
+                        <p>Page Not Found</p>
+                        <hr style="width:50px; margin:20px auto; border:1px solid #333;">
+                        <p style="font-size:0.7rem;">Apache/2.4.41 (Ubuntu) Server at 127.0.0.1 Port 80</p>
+                    </div>
+                `;
+            }, 2000);
+        }
+
+        function quickWipe() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.reload();
+        }
+
+        function panicButton() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.replace("https://www.google.com");
+        }
+
+        // --- 7. NEURAL NETWORK CANVAS ---
+        const canvas = document.getElementById('neuro-net');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.size = Math.random() * 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+            draw() {
+                ctx.fillStyle = '#00ff41';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function initNet() {
+            resize();
+            for (let i = 0; i < 50; i++) particles.push(new Particle());
+        }
+        
+        function animateNet() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach((p, index) => {
+                p.update();
+                p.draw();
+                for (let j = index + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const d = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (d < 120) {
+                        ctx.strokeStyle = `rgba(0, 255, 65, ${1 - d/120})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animateNet);
+        }
+        
+        window.addEventListener('resize', resize);
+        
+        // --- INIT ---
+        window.onload = () => {
+            initNet();
+            animateNet();
+            checkSharedIPState(); // Check if IP was hidden in 'comando.html'
+            logTerminal("whoami", "root", "info");
+            logTerminal("date", new Date().toString(), "info");
+        };
+
+    </script>
+</body>
+</html>
