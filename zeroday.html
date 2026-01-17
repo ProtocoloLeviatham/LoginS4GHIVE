@@ -197,6 +197,7 @@
             padding: 4px;
             outline: none;
             cursor: pointer;
+            max-width: 100px; /* Limit width on mobile */
         }
         select.voice-select:hover {
             background-color: #001100;
@@ -273,25 +274,25 @@
         </div>
     </div>
 
-    <!-- Header -->
-    <header class="flex justify-between items-center p-4 border-b border-green-900 bg-black/80 z-10 relative">
-        <div class="flex items-center gap-3">
+    <!-- Header Adjusted for Mobile Zoom -->
+    <header class="flex justify-between items-center p-2 sm:p-4 border-b border-green-900 bg-black/80 z-10 relative">
+        <div class="flex items-center gap-2 sm:gap-3">
             <!-- Dynamic Avatar/Icon -->
-            <div class="relative w-12 h-12 flex justify-center items-center border border-green-500 rounded-full bg-black overflow-hidden group">
+            <div class="relative w-10 h-10 sm:w-12 sm:h-12 flex justify-center items-center border border-green-500 rounded-full bg-black overflow-hidden group">
                 <img id="avatar-img" src="leviatham.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" class="w-full h-full object-cover" alt="NYX">
                 <!-- Dragon Icon -->
-                <i class="fa-solid fa-dragon text-2xl text-green-500 hidden animate-pulse"></i>
+                <i class="fa-solid fa-dragon text-lg sm:text-2xl text-green-500 hidden animate-pulse"></i>
                 <div class="absolute inset-0 bg-green-500/20 rounded-full animate-ping"></div>
             </div>
             <div>
-                <h1 class="text-2xl font-bold glow-text tracking-wider">NYX <span class="text-xs text-green-700 align-top">v4.8.0</span></h1>
-                <p class="text-xs text-green-600">LEVIATHAM NET: <span class="text-green-400 animate-pulse">CONNECTED</span></p>
+                <h1 class="text-lg sm:text-2xl font-bold glow-text tracking-wider">NYX <span class="text-[10px] sm:text-xs text-green-700 align-top">v4.8.0</span></h1>
+                <p class="text-[10px] sm:text-xs text-green-600">LEVIATHAM NET: <span class="text-green-400 animate-pulse">CONNECTED</span></p>
             </div>
         </div>
         
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-1 sm:gap-2 items-center">
             <!-- Voice Selector -->
-            <select id="voice-select" class="voice-select mr-1" onchange="changeVoiceProfile()" title="Configuración de Voz">
+            <select id="voice-select" class="voice-select mr-1 w-20 sm:w-auto" onchange="changeVoiceProfile()" title="Configuración de Voz">
                 <option value="0">NYX CORE (Atractiva)</option>
                 <option value="1">NYX VELOCITY</option>
                 <option value="2">NYX DEEP</option>
@@ -300,16 +301,16 @@
             </select>
 
             <!-- Voice Toggle Button -->
-            <button onclick="toggleVoice()" id="voice-btn" class="flex items-center border border-green-700 p-2 hover:bg-green-900 transition-colors text-xs uppercase text-green-500" title="Activar/Desactivar Voz">
+            <button onclick="toggleVoice()" id="voice-btn" class="flex items-center border border-green-700 p-1 sm:p-2 hover:bg-green-900 transition-colors text-[10px] sm:text-xs uppercase text-green-500" title="Activar/Desactivar Voz">
                 <i id="voice-icon" class="fa-solid fa-volume-high"></i>
             </button>
             
             <!-- Visor Button Redirect -->
-            <a href="VisorV2.html" class="flex items-center border border-green-700 p-2 hover:bg-green-900 transition-colors text-xs uppercase text-green-500 no-underline">
-                <i class="fa-solid fa-eye mr-1"></i> VISOR V2
+            <a href="VisorV2.html" class="flex items-center border border-green-700 p-1 sm:p-2 hover:bg-green-900 transition-colors text-[10px] sm:text-xs uppercase text-green-500 no-underline">
+                <i class="fa-solid fa-eye mr-1"></i> <span class="hidden sm:inline">VISOR V2</span><span class="inline sm:hidden">V2</span>
             </a>
             <!-- KEYS Button (Replaces Purge) -->
-            <button onclick="toggleKeysModal()" class="border border-green-500 text-green-500 p-2 hover:bg-green-900/30 transition-colors text-xs uppercase" title="Cambiar API KEY">
+            <button onclick="toggleKeysModal()" class="border border-green-500 text-green-500 p-1 sm:p-2 hover:bg-green-900/30 transition-colors text-[10px] sm:text-xs uppercase" title="Cambiar API KEY">
                 <i class="fa-solid fa-key"></i> KEYS
             </button>
         </div>
