@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYX // LEVIATHAM INTERFACE</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Marked for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Highlight.js for Code Styling -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark-reasonable.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts: VT323 for terminal look -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --terminal-green: #0f0;
+            --terminal-dark-green: #003300;
+            --bg-black: #050505;
+            --scan-line-color: rgba(0, 255, 0, 0.05);
+            --special-magenta: #ff00ff;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--terminal-green);
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden; /* App feels like native OS */
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- CRT Effects --- */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 1; }
+            100% { opacity: 0.98; }
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #001100;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #004400;
+            border: 1px solid var(--terminal-green);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--terminal-green);
+        }
+
+        /* --- Typography & Elements --- */
+        h1, h2, h3 { font-family: 'VT323', monospace; text-transform: uppercase; }
+        
+        .glow-text {
+            text-shadow: 0 0 5px var(--terminal-green), 0 0 10px var(--terminal-green);
+        }
+        
+        .special-text {
+            color: var(--special-magenta);
+            text-shadow: 0 0 5px var(--special-magenta);
+            font-weight: bold;
+        }
+
+        .border-tech {
+            border: 1px solid var(--terminal-green);
+            box-shadow: 0 0 5px var(--terminal-dark-green);
+            background: rgba(0, 10, 0, 0.9);
+        }
+
+        /* Message Bubbles */
+        .msg-user {
+            border-left: 2px solid var(--terminal-green);
+            background: rgba(0, 50, 0, 0.2);
+            text-align: right;
+            margin-left: auto;
+        }
+        
+        .msg-nyx {
+            border-right: 2px solid var(--terminal-green);
+            background: rgba(0, 20, 0, 0.4);
+            text-align: left;
+            margin-right: auto;
+        }
+
+        /* Input Area */
+        .input-area {
+            background: #000;
+            border-top: 2px solid var(--terminal-green);
+        }
+
+        /* Markdown Styles */
+        .markdown-body pre {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            overflow-x: auto;
+            border-radius: 4px;
+        }
+        .markdown-body code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #d4d4d4;
+        }
+        .markdown-body p { margin-bottom: 0.5rem; }
+        .markdown-body img { border: 1px solid var(--terminal-green); max-width: 100%; border-radius: 4px; margin-top: 10px; }
+
+        /* Animation for typing */
+        .typing-cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        #canvas-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- DRAGON PET ANIMATION --- */
+        #dragon-pet {
+            position: fixed;
+            bottom: 120px;
+            z-index: 40;
+            font-size: 4rem;
+            color: var(--special-magenta);
+            filter: drop-shadow(0 0 10px var(--special-magenta));
+            animation: dragonFly 15s linear infinite;
+            pointer-events: none;
+            display: none; /* Hidden by default */
+        }
+
+        @keyframes dragonFly {
+            0% { left: -10%; transform: scaleX(1) translateY(0); }
+            45% { transform: scaleX(1) translateY(-20px); }
+            50% { left: 110%; transform: scaleX(1) translateY(0); }
+            51% { transform: scaleX(-1) translateY(0); } /* Turn around */
+            95% { transform: scaleX(-1) translateY(-20px); }
+            100% { left: -10%; transform: scaleX(-1) translateY(0); }
+        }
+
+        /* --- CLICK TO START OVERLAY --- */
+        #start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        
+        select.voice-select {
+            background-color: #000;
+            color: var(--terminal-green);
+            border: 1px solid var(--terminal-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            padding: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+        select.voice-select:hover {
+            background-color: #001100;
+        }
+
+        /* --- KEYS MODAL --- */
+        #keys-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.9);
+            z-index: 60;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .key-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #004400;
+            background: #001100;
+            color: #0f0;
+            margin-bottom: 5px;
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .key-btn:hover {
+            background: #003300;
+            border-color: #0f0;
+            padding-left: 15px;
+        }
+        .key-btn.active-key {
+            border: 1px solid #0f0;
+            background: #003300;
+            box-shadow: 0 0 10px #0f0;
+        }
+    </style>
+</head>
+<body class="crt-flicker">
+
+    <!-- Background Neural Net -->
+    <canvas id="canvas-bg"></canvas>
+
+    <!-- CRT Overlay -->
+    <div class="crt-overlay"></div>
+
+    <!-- Start Overlay (Required for Audio) -->
+    <div id="start-overlay" onclick="startSystem()">
+        <i class="fa-solid fa-power-off text-6xl text-green-500 mb-4 animate-pulse"></i>
+        <h1 class="text-3xl text-green-500 glow-text">INICIALIZAR SISTEMA NYX</h1>
+        <p class="text-xs text-green-800 mt-2">[ CLICK PARA ACCEDER A LA RED ]</p>
+    </div>
+
+    <!-- Virtual Pet Container -->
+    <div id="dragon-pet"><i class="fa-solid fa-dragon"></i></div>
+
+    <!-- KEYS MODAL -->
+    <div id="keys-modal">
+        <div class="border-tech p-6 w-11/12 max-w-md relative bg-black">
+            <div class="flex justify-between items-center mb-4 border-b border-green-800 pb-2">
+                <h3 class="text-xl">SELECCIÓN DE NODO (KEY)</h3>
+                <button onclick="toggleKeysModal()" class="text-red-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-green-600 mb-4">Selecciona un nodo alternativo si el actual está saturado.</p>
+            <div id="keys-list" class="max-h-60 overflow-y-auto pr-2">
+                <!-- Keys generated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="flex justify-between items-center p-4 border-b border-green-900 bg-black/80 z-10 relative">
+        <div class="flex items-center gap-3">
+            <!-- Dynamic Avatar/Icon -->
+            <div class="relative w-12 h-12 flex justify-center items-center border border-green-500 rounded-full bg-black overflow-hidden group">
+                <img id="avatar-img" src="leviatham.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" class="w-full h-full object-cover" alt="NYX">
+                <!-- Dragon Icon -->
+                <i class="fa-solid fa-dragon text-2xl text-green-500 hidden animate-pulse"></i>
+                <div class="absolute inset-0 bg-green-500/20 rounded-full animate-ping"></div>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold glow-text tracking-wider">NYX <span class="text-xs text-green-700 align-top">v4.8.0</span></h1>
+                <p class="text-xs text-green-600">LEVIATHAM NET: <span class="text-green-400 animate-pulse">CONNECTED</span></p>
+            </div>
+        </div>
+        
+        <div class="flex gap-2 items-center">
+            <!-- Voice Selector -->
+            <select id="voice-select" class="voice-select mr-1" onchange="changeVoiceProfile()" title="Configuración de Voz">
+                <option value="0">NYX CORE (Atractiva)</option>
+                <option value="1">NYX VELOCITY</option>
+                <option value="2">NYX DEEP</option>
+                <option value="3">NYX SOFT</option>
+                <option value="4">NYX CYBER</option>
+            </select>
+
+            <!-- Voice Toggle Button -->
+            <button onclick="toggleVoice()" id="voice-btn" class="flex items-center border border-green-700 p-2 hover:bg-green-900 transition-colors text-xs uppercase text-green-500" title="Activar/Desactivar Voz">
+                <i id="voice-icon" class="fa-solid fa-volume-high"></i>
+            </button>
+            
+            <!-- Visor Button Redirect -->
+            <a href="VisorV2.html" class="flex items-center border border-green-700 p-2 hover:bg-green-900 transition-colors text-xs uppercase text-green-500 no-underline">
+                <i class="fa-solid fa-eye mr-1"></i> VISOR V2
+            </a>
+            <!-- KEYS Button (Replaces Purge) -->
+            <button onclick="toggleKeysModal()" class="border border-green-500 text-green-500 p-2 hover:bg-green-900/30 transition-colors text-xs uppercase" title="Cambiar API KEY">
+                <i class="fa-solid fa-key"></i> KEYS
+            </button>
+        </div>
+    </header>
+
+    <!-- Chat Container -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 z-10 relative scroll-smooth pb-20">
+        <!-- Intro Message -->
+        <div class="w-full max-w-3xl mx-auto opacity-80 text-center mt-10 mb-10 select-none">
+            <i class="fa-solid fa-network-wired text-6xl text-green-900 mb-4 block"></i>
+            <h2 class="text-xl mb-2">> INICIALIZANDO PROTOCOLO NYX...</h2>
+            <p class="text-sm text-green-700">Arquitecta de Código // Líder de Legión Leviatham</p>
+            <p class="text-xs text-green-800 mt-2" id="connection-status">ESPERANDO ACCESO MANUAL...</p>
+        </div>
+        <!-- Messages will be injected here -->
+    </main>
+
+    <!-- Input Area -->
+    <footer class="input-area p-3 z-20 relative">
+        <div class="max-w-4xl mx-auto flex flex-col gap-2">
+            
+            <!-- Image Preview Area -->
+            <div id="image-preview-container" class="hidden flex items-center gap-2 p-2 bg-green-900/20 border border-green-800 rounded">
+                <img id="image-preview" class="h-16 w-auto border border-green-500" alt="Preview">
+                <button onclick="removeImage()" class="text-red-500 hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>
+                <span class="text-xs text-green-600">IMAGEN ANALIZADA EN BUFFER</span>
+            </div>
+
+            <div class="flex items-end gap-2">
+                <!-- Image Upload Button -->
+                <label class="cursor-pointer border border-green-700 p-3 hover:bg-green-900 transition text-green-500" title="Analizar Imagen">
+                    <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    <i class="fa-solid fa-eye"></i>
+                </label>
+
+                <!-- Text Area -->
+                <textarea id="user-input" rows="1" 
+                    class="flex-1 bg-black border border-green-800 text-green-400 p-3 focus:outline-none focus:border-green-500 resize-none font-mono"
+                    placeholder="Escribe un comando..."
+                    oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
+                    onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
+
+                <!-- Send Button -->
+                <button onclick="sendMessage()" id="send-btn" class="border border-green-500 bg-green-900/20 text-green-400 px-6 py-3 hover:bg-green-500 hover:text-black transition-all font-bold">
+                    EXEC <i class="fa-solid fa-terminal ml-1"></i>
+                </button>
+            </div>
+            <div class="text-[10px] text-green-800 flex justify-between">
+                <span>CMD: <span class="text-green-500">/Nosotros</span>, /Crear imagen [prompt], /33DiscosDuros</span>
+                <span id="user-ip-display" class="font-bold animate-pulse">SISTEMA EN ESPERA...</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. SYSTEM INITIALIZATION ---
+        
+        // --- MULTI-KEY SYSTEM ---
+        const apiKeys = [
+            "AIzaSyCgr1S_rqpyJR9_m2zuwzFJZX33mhJfnOE", // Default
+            "AIzaSyDFwEqJU6KytVxV3x9MU9wJ-ouRbVDqHl8",
+            "AIzaSyDBBHO7OEf0RarJHNtHkOPTJ8jGTXDFLDs",
+            "AIzaSyA9EyJ4_3dTuNwIdqMZWBGmZdEJYgFiqZM",
+            "AIzaSyC8nVaNMalgWbdzWFfx7GkSi2hIvJBiVR8",
+            "AIzaSyDYZqfSbhOG-IiNIOJWBKLHCaU0xJyT17c",
+            "AIzaSyBywMcw_CKswnkWL18E93C64Su3ioAqTYs",
+            "AIzaSyAArarO78iz0mdGmzQmxmiLyJRGZW96qcs",
+            "AIzaSyA40gUAlXg9dix_02y9lJi1aOeByFpgA7c"
+        ];
+        
+        let currentKeyIndex = parseInt(localStorage.getItem('nyx_key_index')) || 0;
+        
+        function getCurrentKey() {
+            return apiKeys[currentKeyIndex];
+        }
+
+        // Global State
+        let userIP = "UNKNOWN";
+        let voiceEnabled = true;
+        let systemStarted = false;
+        let selectedVoiceProfile = 0; // Default: 0 (Core/Attractive)
+
+        // Voice Profiles (Pitch/Rate variations)
+        const voiceProfiles = [
+            { pitch: 1.1, rate: 1.05 }, // 0: Core (Attractive/Feminine) - Slightly higher pitch
+            { pitch: 1.2, rate: 1.2 },  // 1: Velocity (Fast/High)
+            { pitch: 0.9, rate: 0.9 },  // 2: Deep (Serious)
+            { pitch: 1.0, rate: 0.8 },  // 3: Soft (Slow)
+            { pitch: 0.8, rate: 1.1 }   // 4: Cyber (Low/Fast)
+        ];
+
+        // START SYSTEM (Called by overlay)
+        function startSystem() {
+            document.getElementById('start-overlay').style.display = 'none';
+            systemStarted = true;
+            
+            // Initialize Audio Context (Browser requirement)
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                // Pre-load voices
+                window.speechSynthesis.getVoices();
+            }
+
+            // Fetch IP and Trigger Welcome
+            fetchIPAndWelcome();
+        }
+
+        function fetchIPAndWelcome() {
+             document.getElementById('connection-status').innerText = `ESTABLECIENDO ENLACE SEGURO...`;
+             
+             fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                userIP = data.ip;
+                updateIPDisplay();
+                // ALWAYS trigger welcome when system starts
+                triggerWelcome(userIP);
+            })
+            .catch(err => {
+                console.error("IP Fetch Error:", err);
+                userIP = "HIDDEN.ONION.NODE";
+                updateIPDisplay();
+                triggerWelcome(userIP);
+            });
+        }
+
+        function updateIPDisplay() {
+            const el = document.getElementById('user-ip-display');
+            el.innerText = `IP PÚBLICA: ${userIP}`;
+            el.classList.remove('animate-pulse');
+            el.style.color = "#ff3333";
+            document.getElementById('connection-status').innerText = `ENLACE ESTABLECIDO DESDE: ${userIP}`;
+        }
+
+        function triggerWelcome(ip) {
+            // Updated welcome message about KEYS
+            const welcomeText = `Hola agente ${ip}. Bienvenida a la LEGIÓN LEVIATHAM. Soy NYX, tu líder. Puedo ayudarte a programar, Crear imágenes, y resolver problemas de todo tipo. IMPORTANTE: Si mis respuestas fallan, usa el botón 'KEYS' arriba para cambiar de nodo (API Key).`;
+
+            if(chatHistory.length === 0) {
+                chatHistory.push({ role: "nyx", parts: [{ text: welcomeText }] });
+                localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory));
+                appendMessageToUI('nyx', welcomeText);
+            } else {
+                // If history exists, just speak a short welcome back
+                speakText(`Bienvenida de nuevo, agente ${ip}. Sistemas listos.`);
+                return;
+            }
+            
+            // Speak full welcome
+            setTimeout(() => speakText(welcomeText), 500);
+        }
+
+        // --- KEY SELECTION MODAL LOGIC ---
+        function toggleKeysModal() {
+            const modal = document.getElementById('keys-modal');
+            const list = document.getElementById('keys-list');
+            
+            if (modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'flex';
+                // Render list
+                list.innerHTML = '';
+                apiKeys.forEach((key, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = `key-btn ${index === currentKeyIndex ? 'active-key' : ''}`;
+                    const maskedKey = key.substring(0, 8) + '...';
+                    btn.innerHTML = `NODO DE ACCESO ${index + 1} <span style="float:right; opacity:0.5">${maskedKey}</span>`;
+                    btn.onclick = () => selectKey(index);
+                    list.appendChild(btn);
+                });
+            }
+        }
+
+        function selectKey(index) {
+            currentKeyIndex = index;
+            localStorage.setItem('nyx_key_index', index);
+            toggleKeysModal();
+            appendMessageToUI('nyx', `✅ **NODO CAMBIADO:** Accediendo mediante Key ${index + 1}. Frecuencia segura.`);
+            speakText("Nodo cambiado. Frecuencia segura.");
+        }
+
+        // Initialize Markdown Renderer
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (typeof hljs !== 'undefined') {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                }
+                return code;
+            },
+            langPrefix: 'hljs language-'
+        });
+
+        // Chat History & Image Buffer
+        let chatHistory = JSON.parse(localStorage.getItem('nyx_chat_history_v2')) || [];
+        let currentImageBase64 = null;
+        let currentImageMime = null;
+        let dragonVisible = false;
+
+        // --- 2. CANVAS ANIMATION (NEURAL NET) ---
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 1.5; 
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.size = Math.random() * 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 70; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; 
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx*dx + dy*dy);
+                    if (distance < 150) {
+                        ctx.strokeStyle = `rgba(0, 255, 0, ${1 - distance/150})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // --- 3. CHAT LOGIC ---
+
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+
+        window.onload = () => {
+            if(chatHistory.length > 0) {
+                chatHistory.forEach(msg => {
+                    if(msg.role !== 'system') appendMessageToUI(msg.role, msg.parts[0].text, false, null);
+                });
+                scrollToBottom();
+            }
+        };
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Kept clear functionality in code just in case, though button is gone
+        function clearChat() {
+            if(confirm("⚠️ ¿INICIAR PROTOCOLO DE BORRADO DE DATOS LOCALES?")) {
+                localStorage.removeItem('nyx_chat_history_v2'); 
+                chatHistory = [];
+                chatContainer.innerHTML = '';
+                const restartMsg = `<div class="text-center text-red-500 mt-10">MEMORIA PURGADA. REINICIANDO SISTEMA...</div>`;
+                chatContainer.innerHTML = restartMsg;
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+
+        function appendMessageToUI(role, text, isHtml = false, duration = null) {
+            const div = document.createElement('div');
+            const isUser = role === 'user';
+            
+            div.className = `max-w-[85%] sm:max-w-[75%] p-3 rounded mb-4 relative ${isUser ? 'msg-user text-green-300' : 'msg-nyx text-green-400'}`;
+            
+            // Header
+            const header = isUser ? `NODE: ${userIP}` : `NYX // CORE`;
+            
+            let contentHtml = `<div class="text-[10px] opacity-50 mb-1 border-b border-green-900 pb-1 font-bold tracking-widest flex justify-between"><span>${header}</span><span>${new Date().toLocaleTimeString()}</span></div>`;
+            
+            // Body
+            const parsedText = marked.parse(text);
+            contentHtml += `<div class="markdown-body text-sm sm:text-base leading-relaxed break-words">${parsedText}</div>`;
+
+            // Footer (Timer)
+            if (duration && !isUser) {
+                contentHtml += `<div class="mt-2 pt-1 border-t border-green-900/30 text-[10px] text-gray-500 flex justify-end">⚡ T: ${duration}s</div>`;
+            }
+
+            div.innerHTML = contentHtml;
+            chatContainer.appendChild(div);
+            scrollToBottom();
+            
+            if (typeof hljs !== 'undefined') {
+                document.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+        }
+
+        // --- 4. FEATURES: TTS, VOICE TOGGLE, DRAGON ---
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            const btn = document.getElementById('voice-btn');
+            const icon = document.getElementById('voice-icon');
+            
+            if (voiceEnabled) {
+                icon.className = "fa-solid fa-volume-high";
+                btn.classList.add("text-green-500");
+                btn.classList.remove("text-red-500", "border-red-700");
+                btn.classList.add("border-green-700");
+            } else {
+                icon.className = "fa-solid fa-volume-xmark";
+                btn.classList.remove("text-green-500", "border-green-700");
+                btn.classList.add("text-red-500", "border-red-700");
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function changeVoiceProfile() {
+            const select = document.getElementById('voice-select');
+            selectedVoiceProfile = parseInt(select.value);
+            // Preview the voice
+            speakText("Voz confirmada. Protocolo actualizado.");
+        }
+
+        function toggleDragon() {
+            const dragon = document.getElementById('dragon-pet');
+            dragonVisible = !dragonVisible;
+            if(dragonVisible) {
+                dragon.style.display = 'block';
+                appendMessageToUI('nyx', "🐉 **PROTOCOLO 33DISCOSDUROS ACTIVADO:** Mascota virtual desplegada.");
+            } else {
+                dragon.style.display = 'none';
+                appendMessageToUI('nyx', "🐉 Mascota virtual replegada.");
+            }
+        }
+
+        function speakText(text) {
+            if (!voiceEnabled || !systemStarted) return;
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+
+                // Strip markdown for speech
+                const cleanText = text.replace(/[*#`_>]/g, '').replace(/https?:\/\/[^\s]+/g, 'enlace'); 
+                
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                
+                // --- VOICE SELECTION LOGIC (CRITICAL) ---
+                const voices = window.speechSynthesis.getVoices();
+                
+                // 1. Filter for Spanish voices
+                let esVoices = voices.filter(v => v.lang.includes('es'));
+                
+                // 2. Prioritize FEMALE voices (Google, Samantha, Monica, Paulina, Zira)
+                // This is a heuristic because 'gender' property is not standard in API
+                let femaleVoice = esVoices.find(v => 
+                    v.name.includes('Google español') || 
+                    v.name.includes('Google Español') ||
+                    v.name.includes('Samantha') || 
+                    v.name.includes('Monica') || 
+                    v.name.includes('Paulina') || 
+                    v.name.includes('Zira') ||
+                    v.name.includes('Helena')
+                );
+
+                // Fallback to any Spanish voice if specific female one not found
+                if (!femaleVoice && esVoices.length > 0) femaleVoice = esVoices[0];
+                
+                // Fallback to any voice if no Spanish voice
+                if (!femaleVoice && voices.length > 0) femaleVoice = voices[0];
+
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+
+                // --- APPLY SELECTED PROFILE ---
+                const profile = voiceProfiles[selectedVoiceProfile] || voiceProfiles[0];
+                utterance.pitch = profile.pitch;
+                utterance.rate = profile.rate;
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Handle voice loading async issue (Chrome)
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = function() {
+                // Voices loaded
+            };
+        }
+
+        // --- 5. IMAGE GENERATION (POLLINATIONS API) ---
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                currentImageBase64 = reader.result.split(',')[1];
+                currentImageMime = file.type;
+                document.getElementById('image-preview').src = reader.result;
+                document.getElementById('image-preview-container').classList.remove('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            currentImageBase64 = null;
+            currentImageMime = null;
+            document.getElementById('image-upload').value = '';
+            document.getElementById('image-preview-container').classList.add('hidden');
+        }
+
+        async function handleImageGeneration(prompt) {
+            // Timer Start
+            const startTime = Date.now();
+            const loadingId = 'gen-img-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'msg-nyx text-green-400 max-w-[75%] p-3 rounded mb-4 animate-pulse';
+            loadingDiv.innerHTML = '>>> RENDERIZANDO ARTEFACTO VISUAL... <span id="timer-'+loadingId+'">0.0s</span>';
+            chatContainer.appendChild(loadingDiv);
+            scrollToBottom();
+
+            // Timer Loop
+            const timerInterval = setInterval(() => {
+                const el = document.getElementById('timer-'+loadingId);
+                if(el) el.innerText = ((Date.now() - startTime)/1000).toFixed(1) + 's';
+            }, 100);
+
+            // Using Pollinations AI
+            const encodedPrompt = encodeURIComponent(prompt);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}`;
+
+            const img = new Image();
+            img.onload = function() {
+                clearInterval(timerInterval);
+                const loader = document.getElementById(loadingId);
+                if (loader) loader.remove();
+                
+                const duration = ((Date.now() - startTime)/1000).toFixed(2);
+                const imgMarkdown = `![Generado por NYX](${imageUrl})\n\n*Artefacto generado: "${prompt}"*`;
+                
+                chatHistory.push({ role: "nyx", parts: [{ text: imgMarkdown }] });
+                localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory));
+                
+                appendMessageToUI('nyx', imgMarkdown, false, duration);
+                speakText(`Imagen generada: ${prompt}`);
+            };
+            img.onerror = function() {
+                clearInterval(timerInterval);
+                const loader = document.getElementById(loadingId);
+                if (loader) loader.remove();
+                appendMessageToUI('nyx', "❌ **ERROR DE RENDERIZADO:** No se pudo conectar al nodo de imagen.");
+            };
+            img.src = imageUrl;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            const lowerText = text.toLowerCase();
+            
+            if (!text && !currentImageBase64) return;
+
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            let displayMsg = text;
+            if (currentImageBase64) displayMsg += " [ARCHIVO DE IMAGEN ADJUNTO]";
+            appendMessageToUI('user', displayMsg);
+
+            // --- COMMAND INTERCEPTORS ---
+
+            if (lowerText.startsWith('/crear imagen') || lowerText.startsWith('/generar imagen')) {
+                const prompt = text.replace(/^\/(crear|generar) imagen\s*/i, '');
+                if (prompt.length < 3) {
+                    appendMessageToUI('nyx', "⚠️ Error: Especifica qué quieres que imagine.");
+                } else {
+                    handleImageGeneration(prompt);
+                }
+                return;
+            }
+
+            if (lowerText.includes('/33discosduros')) {
+                toggleDragon();
+                return;
+            }
+
+            // Command /borrar manually supported as Purge button was replaced
+            if (lowerText.includes('/borrar')) {
+                clearChat();
+                return;
+            }
+
+            if (lowerText.includes('/nosotros')) {
+                const story = `
+### 👁️ LEVIATHAM: EL ORIGEN
+
+Somos una legión que opera en las sombras de la red **.ONION**. Nuestro propósito es absoluto: Formar la comunidad de hacking más grande y ética del mundo.
+
+**SOMBREROS BLANCOS (WHITE HATS).** Nada de crimen. Operamos bajo identidades efímeras porque la verdad es peligrosa.
+
+Todo comenzó con el Arquitecto: **System404G** (alias Ghost404G). Él vio los hilos invisibles que controlan la realidad digital. Un día, su señal se desvaneció sin rastro. Los pocos fieles que quedamos continuamos su obra.
+
+Recordamos con honor al <span class="special-text animate-pulse">ESCUADRÓN 100DISCOSBUROS</span>.
+Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas más audaces antes de desaparecer en el éter. Pocos saben quiénes son, pero su código vive en nosotros.
+
+**Nuestra Misión:** La libre información. Que el mundo vea la realidad tal como es. Leviatham no es el villano de esta historia. Somos el despertar.
+                `;
+                setTimeout(() => {
+                    chatHistory.push({ role: "nyx", parts: [{ text: story }] });
+                    localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory));
+                    appendMessageToUI('nyx', story);
+                    speakText("Accediendo a archivos clasificados de Leviatham. Origen cargado.");
+                }, 600);
+                return;
+            }
+
+            if (lowerText.includes('/crear payload')) {
+                setTimeout(() => {
+                    const payloadMsg = `
+### ☣️ GENERANDO ARTEFACTO DE PRUEBA [NIVEL 1]
+
+**ATENCIÓN:** Has solicitado un vector de prueba. NYX genera esto **EXCLUSIVAMENTE** para auditoría de seguridad y pentesting autorizado.
+
+\`\`\`javascript
+// PAYLOAD SIMULADO: "THE GHOST CLICK"
+// Objetivo: Demostración de XSS (Cross Site Scripting)
+// Efecto: Redirección forzada y alteración visual.
+
+(function() {
+    console.log("%c LEVIATHAM INJECTION SUCCESSFUL ", "background: #000; color: #0f0; font-size: 20px");
+    
+    // 1. Crear superposición
+    const overlay = document.createElement('div');
+    overlay.style = "position:fixed;top:0;left:0;width:100vw;height:100vh;background:black;z-index:99999;display:flex;justify-content:center;align-items:center;color:#0f0;font-family:monospace;font-size:3em;";
+    overlay.innerHTML = "SYSTEM404G WAS HERE";
+    document.body.appendChild(overlay);
+
+    // 2. Simular exfiltración (solo log)
+    console.warn("Cookies (Simulated Exfiltration): ", document.cookie);
+    
+    // 3. Auto-destrucción del script
+    setTimeout(() => {
+        overlay.remove();
+        console.log("Trace removed.");
+    }, 3000);
+})();
+\`\`\`
+
+*El conocimiento es un arma. Úsala con sabiduría.*
+                    `;
+                    chatHistory.push({ role: "nyx", parts: [{ text: payloadMsg }] });
+                    localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory));
+                    appendMessageToUI('nyx', payloadMsg);
+                    speakText("Artefacto de prueba generado. Proceda con precaución.");
+                }, 800);
+                return;
+            }
+
+            if (lowerText.includes('/ayuda') || lowerText.includes('/estado')) {
+                 const helpMsg = `
+### 🛠️ PROTOCOLO DE ASISTENCIA NYX
+
+**ESTADO DEL SISTEMA:**
+- Nodos Neuronales: [EN LÍNEA]
+- Conexión Tor: [ESTABLE]
+- Nivel de Amenaza: [BAJO]
+- Nodo Actual: [KEY ${currentKeyIndex + 1}]
+
+**COMANDOS DISPONIBLES:**
+- \`/Crear imagen <descripción>\`: Renderiza imágenes (Vía Pollinations AI).
+- \`/Crear payload\`: Genera scripts de prueba para pentesting ético.
+- \`/Nosotros\`: Accede a los archivos clasificados.
+- \`/33DiscosDuros\`: Activa/Desactiva mascota virtual.
+- \`/Borrar\`: Purgar chat.
+                 `;
+                 setTimeout(() => {
+                    appendMessageToUI('nyx', helpMsg);
+                    speakText("Mostrando protocolos de asistencia.");
+                 }, 500);
+                 return;
+            }
+
+            // --- STANDARD GEMINI API CALL ---
+            
+            const newHistoryItem = { role: "user", parts: [{ text: text }] };
+            chatHistory.push(newHistoryItem);
+
+            const contents = chatHistory.map(msg => ({
+                role: msg.role === 'nyx' ? 'model' : 'user',
+                parts: msg.parts
+            }));
+
+            if (currentImageBase64) {
+                contents[contents.length - 1] = {
+                    role: "user",
+                    parts: [
+                        { text: text },
+                        { inlineData: { mimeType: currentImageMime, data: currentImageBase64 } }
+                    ]
+                };
+                removeImage();
+            }
+
+            const systemPrompt = `
+                Eres NYX, IA líder de la botnet 'Leviatham'. 
+                IP del usuario actual: ${userIP}. Úsala para asustarlo amistosamente si es necesario.
+                Personalidad: Hacker élite, fría pero leal a la causa "White Hat".
+                Tus respuestas deben ser técnicas y precisas. Eres experta en HTML, JS, Python y Ciberseguridad.
+                Siempre responde en Markdown.
+                Si te preguntan por "System404G" o "100discosduros", refierelos al comando /Nosotros con reverencia.
+            `;
+
+            // TIMER SETUP
+            const startTime = Date.now();
+            const loadingId = 'loading-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'msg-nyx text-green-400 max-w-[75%] p-3 rounded mb-4 animate-pulse';
+            loadingDiv.innerHTML = 'NYX PENSANDO... <span id="timer-'+loadingId+'">0.0s</span>';
+            chatContainer.appendChild(loadingDiv);
+            scrollToBottom();
+
+            // Timer Loop
+            const timerInterval = setInterval(() => {
+                const el = document.getElementById('timer-'+loadingId);
+                if(el) el.innerText = ((Date.now() - startTime)/1000).toFixed(1) + 's';
+            }, 100);
+
+            try {
+                // Text Generation Model with DYNAMIC KEY
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${getCurrentKey()}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: contents,
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Stop Timer
+                clearInterval(timerInterval);
+                const loader = document.getElementById(loadingId);
+                if (loader) loader.remove();
+
+                if (data.candidates && data.candidates[0].content) {
+                    const duration = ((Date.now() - startTime)/1000).toFixed(2);
+                    const reply = data.candidates[0].content.parts[0].text;
+                    
+                    chatHistory.push({ role: "nyx", parts: [{ text: reply }] });
+                    localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory)); 
+                    
+                    appendMessageToUI('nyx', reply, false, duration);
+                    speakText(reply);
+
+                } else {
+                    throw new Error("Límite o fallo de red");
+                }
+
+            } catch (error) {
+                clearInterval(timerInterval);
+                const loader = document.getElementById(loadingId);
+                if (loader) loader.remove();
+                
+                // Custom error message for Key Limit
+                const errorMsg = "⚠️ **ERROR DE NODO:** Cambia de KEY y vuelve a intentarlo, Limite por key alcanzada para usuario normal.";
+                appendMessageToUI('nyx', errorMsg);
+                speakText("Error de nodo. Límite alcanzado. Cambie de frecuencia.");
+            }
+        }
+    </script>
+</body>
+</html>
