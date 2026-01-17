@@ -683,7 +683,7 @@
 
         // --- MODULE: PHONE (REBUILT: NO FAKE GEO, REAL TECHNICAL DATA) ---
         function generateRealisticIMEI() {
-            const tacs = ["354567", "358912", "352981", "356712", "862912"]; 
+            const tacs = ["3545678", "3589192", "3529781", "3956712", "8692912"]; 
             let imei = tacs[Math.floor(Math.random() * tacs.length)];
             for(let i=0; i<8; i++) imei += Math.floor(Math.random() * 10);
             return imei; 
@@ -981,3 +981,4 @@
     </script>
 </body>
 </html>
+
