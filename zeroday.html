@@ -5,20 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NYX // LEVIATHAM INTERFACE</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Marked for Markdown Parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    <!-- Highlight.js for Code Styling -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark-reasonable.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Google Fonts: VT323 for terminal look -->
     <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
@@ -121,18 +116,43 @@
 
         /* Markdown Styles */
         .markdown-body pre {
-            background: #111;
-            border: 1px solid #333;
-            padding: 10px;
+            background: #0a0a0a;
+            border: 1px solid #004400;
+            padding: 15px;
             overflow-x: auto;
             border-radius: 4px;
+            position: relative; /* Para el botón de copiar */
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
         .markdown-body code {
             font-family: 'Consolas', 'Monaco', monospace;
-            color: #d4d4d4;
+            color: #aaddaa;
         }
         .markdown-body p { margin-bottom: 0.5rem; }
         .markdown-body img { border: 1px solid var(--terminal-green); max-width: 100%; border-radius: 4px; margin-top: 10px; }
+
+        /* Copy Button Style */
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 50, 0, 0.8);
+            border: 1px solid var(--terminal-green);
+            color: var(--terminal-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+            background: var(--terminal-green);
+            color: #000;
+        }
 
         /* Animation for typing */
         .typing-cursor::after {
@@ -221,23 +241,18 @@
 </head>
 <body class="crt-flicker">
 
-    <!-- Background Neural Net -->
     <canvas id="canvas-bg"></canvas>
 
-    <!-- CRT Overlay -->
     <div class="crt-overlay"></div>
 
-    <!-- Start Overlay (Required for Audio) -->
     <div id="start-overlay" onclick="startSystem()">
         <i class="fa-solid fa-power-off text-6xl text-green-500 mb-4 animate-pulse"></i>
         <h1 class="text-3xl text-green-500 glow-text">INICIALIZAR SISTEMA NYX</h1>
         <p class="text-xs text-green-800 mt-2">[ CLICK PARA ACCEDER A LA RED ]</p>
     </div>
 
-    <!-- Virtual Pet Container -->
     <div id="dragon-pet"><i class="fa-solid fa-dragon"></i></div>
 
-    <!-- KEYS MODAL -->
     <div id="keys-modal">
         <div class="border-tech p-6 w-11/12 max-w-md relative bg-black flex flex-col">
             <div class="flex justify-between items-center mb-4 border-b border-green-800 pb-2">
@@ -247,7 +262,6 @@
             
             <p class="text-xs text-green-600 mb-4">Ingresa tu API Key Privada para activar el sistema.</p>
 
-            <!-- Key Input Section -->
             <div class="mb-4">
                 <label class="block text-xs text-green-700 mb-1">API KEY (Google Gemini):</label>
                 <div class="flex gap-2">
@@ -261,24 +275,20 @@
         </div>
     </div>
 
-    <!-- Header Adjusted for Mobile Zoom -->
     <header class="flex justify-between items-center p-2 sm:p-4 border-b border-green-900 bg-black/80 z-10 relative">
         <div class="flex items-center gap-2 sm:gap-3">
-            <!-- Dynamic Avatar/Icon -->
             <div class="relative w-10 h-10 sm:w-12 sm:h-12 flex justify-center items-center border border-green-500 rounded-full bg-black overflow-hidden group">
                 <img id="avatar-img" src="leviatham.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" class="w-full h-full object-cover" alt="NYX">
-                <!-- Dragon Icon -->
                 <i class="fa-solid fa-dragon text-lg sm:text-2xl text-green-500 hidden animate-pulse"></i>
                 <div class="absolute inset-0 bg-green-500/20 rounded-full animate-ping"></div>
             </div>
             <div>
-                <h1 class="text-lg sm:text-2xl font-bold glow-text tracking-wider">NYX <span class="text-[10px] sm:text-xs text-green-700 align-top">v5.1 (STABLE)</span></h1>
+                <h1 class="text-lg sm:text-2xl font-bold glow-text tracking-wider">NYX <span class="text-[10px] sm:text-xs text-green-700 align-top">v5.2 (STABLE)</span></h1>
                 <p class="text-[10px] sm:text-xs text-green-600">LEVIATHAM NET: <span class="text-green-400 animate-pulse">CONNECTED</span></p>
             </div>
         </div>
         
         <div class="flex gap-1 sm:gap-2 items-center">
-            <!-- Voice Selector -->
             <select id="voice-select" class="voice-select mr-1 w-20 sm:w-auto" onchange="changeVoiceProfile()" title="Configuración de Voz">
                 <option value="0">NYX CORE (Atractiva)</option>
                 <option value="1">NYX VELOCITY</option>
@@ -287,39 +297,31 @@
                 <option value="4">NYX CYBER</option>
             </select>
 
-            <!-- Voice Toggle Button -->
             <button onclick="toggleVoice()" id="voice-btn" class="flex items-center border border-green-700 p-1 sm:p-2 hover:bg-green-900 transition-colors text-[10px] sm:text-xs uppercase text-green-500" title="Activar/Desactivar Voz">
                 <i id="voice-icon" class="fa-solid fa-volume-high"></i>
             </button>
             
-            <!-- Visor Button Redirect -->
             <a href="VisorV2.html" class="flex items-center border border-green-700 p-1 sm:p-2 hover:bg-green-900 transition-colors text-[10px] sm:text-xs uppercase text-green-500 no-underline">
                 <i class="fa-solid fa-eye mr-1"></i> <span class="hidden sm:inline">VISOR V2</span><span class="inline sm:hidden">V2</span>
             </a>
-            <!-- KEYS Button -->
             <button onclick="toggleKeysModal()" class="border border-green-500 text-green-500 p-1 sm:p-2 hover:bg-green-900/30 transition-colors text-[10px] sm:text-xs uppercase" title="Configurar KEY">
                 <i class="fa-solid fa-key"></i> KEY
             </button>
         </div>
     </header>
 
-    <!-- Chat Container -->
-    <main id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-4 z-10 relative scroll-smooth pb-20">
-        <!-- Intro Message -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4 z-10 relative scroll-smooth pb-20">
         <div class="w-full max-w-3xl mx-auto opacity-80 text-center mt-10 mb-10 select-none">
             <i class="fa-solid fa-network-wired text-6xl text-green-900 mb-4 block"></i>
             <h2 class="text-xl mb-2">> INICIALIZANDO PROTOCOLO NYX...</h2>
             <p class="text-sm text-green-700">Arquitecta de Código // Líder de Legión Leviatham</p>
             <p class="text-xs text-green-800 mt-2" id="connection-status">ESPERANDO ACCESO MANUAL...</p>
         </div>
-        <!-- Messages will be injected here -->
-    </main>
+        </main>
 
-    <!-- Input Area -->
     <footer class="input-area p-3 z-20 relative">
         <div class="max-w-4xl mx-auto flex flex-col gap-2">
             
-            <!-- Image Preview Area -->
             <div id="image-preview-container" class="hidden flex items-center gap-2 p-2 bg-green-900/20 border border-green-800 rounded">
                 <img id="image-preview" class="h-16 w-auto border border-green-500" alt="Preview">
                 <button onclick="removeImage()" class="text-red-500 hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>
@@ -327,20 +329,17 @@
             </div>
 
             <div class="flex items-end gap-2">
-                <!-- Image Upload Button -->
                 <label class="cursor-pointer border border-green-700 p-3 hover:bg-green-900 transition text-green-500" title="Analizar Imagen">
                     <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
                     <i class="fa-solid fa-eye"></i>
                 </label>
 
-                <!-- Text Area -->
                 <textarea id="user-input" rows="1" 
-                    class="flex-1 bg-black border border-green-800 text-green-400 p-3 focus:outline-none focus:border-green-500 resize-none font-mono"
+                    class="flex-1 bg-black border border-green-800 text-green-400 p-3 focus:outline-none focus:border-green-500 resize-none font-mono text-sm sm:text-base"
                     placeholder="Escribe un comando..."
                     oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
                     onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
 
-                <!-- Send Button -->
                 <button onclick="sendMessage()" id="send-btn" class="border border-green-500 bg-green-900/20 text-green-400 px-6 py-3 hover:bg-green-500 hover:text-black transition-all font-bold">
                     EXEC <i class="fa-solid fa-terminal ml-1"></i>
                 </button>
@@ -379,13 +378,13 @@
         let systemStarted = false;
         let selectedVoiceProfile = 0; 
 
-        // Voice Profiles
+        // Voice Profiles (OPTIMIZED FOR NYX)
         const voiceProfiles = [
-            { pitch: 1.1, rate: 1.05 },
-            { pitch: 1.2, rate: 1.2 },
-            { pitch: 0.9, rate: 0.9 },
-            { pitch: 1.0, rate: 0.8 },
-            { pitch: 0.8, rate: 1.1 }
+            { pitch: 0.9, rate: 1.0 },  // NYX CORE (Atractiva/Seria)
+            { pitch: 1.1, rate: 1.2 },  // VELOCITY
+            { pitch: 0.7, rate: 0.9 },  // DEEP (Más hacker)
+            { pitch: 1.0, rate: 0.8 },  // SOFT
+            { pitch: 0.5, rate: 1.1 }   // CYBER (Robótica)
         ];
 
         // START SYSTEM
@@ -610,7 +609,10 @@ Hola agente **${ip}**. Bienvenido al núcleo de la **LEGIÓN LEVIATHAM**. Soy **
             const div = document.createElement('div');
             const isUser = role === 'user';
             
-            div.className = `max-w-[85%] sm:max-w-[75%] p-3 rounded mb-4 relative ${isUser ? 'msg-user text-green-300' : 'msg-nyx text-green-400'}`;
+            // OPTIMIZACIÓN ESPACIO EN CELULARES: 
+            // Antes: max-w-[85%] sm:max-w-[75%]
+            // Ahora: max-w-[95%] sm:max-w-[75%] -> Aprovecha más pantalla en móvil
+            div.className = `max-w-[95%] sm:max-w-[75%] p-3 rounded mb-4 relative ${isUser ? 'msg-user text-green-300' : 'msg-nyx text-green-400'}`;
             
             const header = isUser ? `NODE: ${userIP}` : `NYX // CORE ${liteMode ? '(LITE)' : ''}`;
             
@@ -625,6 +627,33 @@ Hola agente **${ip}**. Bienvenido al núcleo de la **LEGIÓN LEVIATHAM**. Soy **
 
             div.innerHTML = contentHtml;
             chatContainer.appendChild(div);
+            
+            // --- INYECCIÓN DEL BOTÓN DE COPIAR ---
+            if (!isUser) {
+                // Buscamos todos los bloques de código (<pre>) generados en este mensaje
+                const codeBlocks = div.querySelectorAll('pre');
+                codeBlocks.forEach(pre => {
+                    // Crear botón
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-btn';
+                    copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> COPY SYSTEM';
+                    
+                    // Lógica de copiado
+                    copyBtn.onclick = () => {
+                        const code = pre.querySelector('code').innerText;
+                        navigator.clipboard.writeText(code).then(() => {
+                            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> COPIADO';
+                            setTimeout(() => {
+                                copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> COPY SYSTEM';
+                            }, 2000);
+                        });
+                    };
+                    
+                    // Añadir botón al bloque pre
+                    pre.appendChild(copyBtn);
+                });
+            }
+
             scrollToBottom();
             
             if (typeof hljs !== 'undefined') {
@@ -678,19 +707,27 @@ Hola agente **${ip}**. Bienvenido al núcleo de la **LEGIÓN LEVIATHAM**. Soy **
                 
                 window.speechSynthesis.cancel();
                 
-                // Strip HTML/Markdown
+                // Strip HTML/Markdown pero MANTENER puntuación para pausas naturales
                 let cleanText = text.replace(/<[^>]*>?/gm, ''); 
-                cleanText = cleanText.replace(/[*#`_>]/g, '').replace(/https?:\/\/[^\s]+/g, 'enlace');
+                cleanText = cleanText.replace(/[*#`_>\[\]]/g, '').replace(/https?:\/\/[^\s]+/g, 'enlace');
                 
                 const utterance = new SpeechSynthesisUtterance(cleanText);
                 
+                // MEJORA DE SELECCIÓN DE VOZ (Prioridad a voces de calidad)
                 let esVoices = voices.filter(v => v.lang.includes('es'));
-                let femaleVoice = esVoices.find(v => v.name.includes('Google español') || v.name.includes('Samantha') || v.name.includes('Monica') || v.name.includes('Paulina'));
                 
-                if (!femaleVoice && esVoices.length > 0) femaleVoice = esVoices[0];
-                if (!femaleVoice && voices.length > 0) femaleVoice = voices[0]; // Fallback to any voice
+                // Intentar encontrar voces de Microsoft o Google específicas que suenan mejor
+                let preferredVoice = esVoices.find(v => v.name.includes('Microsoft Helena') || v.name.includes('Microsoft Sabrina') || v.name.includes('Google español'));
                 
-                if (femaleVoice) utterance.voice = femaleVoice;
+                // Fallback a otras voces femeninas comunes
+                if (!preferredVoice) {
+                    preferredVoice = esVoices.find(v => v.name.includes('Samantha') || v.name.includes('Monica') || v.name.includes('Paulina'));
+                }
+                
+                if (!preferredVoice && esVoices.length > 0) preferredVoice = esVoices[0];
+                if (!preferredVoice && voices.length > 0) preferredVoice = voices[0]; // Fallback to any voice
+                
+                if (preferredVoice) utterance.voice = preferredVoice;
 
                 const profile = voiceProfiles[selectedVoiceProfile] || voiceProfiles[0];
                 utterance.pitch = profile.pitch;
@@ -733,7 +770,7 @@ Hola agente **${ip}**. Bienvenido al núcleo de la **LEGIÓN LEVIATHAM**. Soy **
             const loadingId = 'gen-img-' + Date.now();
             const loadingDiv = document.createElement('div');
             loadingDiv.id = loadingId;
-            loadingDiv.className = 'msg-nyx text-green-400 max-w-[75%] p-3 rounded mb-4 animate-pulse';
+            loadingDiv.className = 'msg-nyx text-green-400 max-w-[95%] sm:max-w-[75%] p-3 rounded mb-4 animate-pulse';
             loadingDiv.innerHTML = '>>> RENDERIZANDO ARTEFACTO VISUAL... <span id="timer-'+loadingId+'">0.0s</span>';
             chatContainer.appendChild(loadingDiv);
             scrollToBottom();
@@ -858,7 +895,7 @@ Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas
             const loadingId = 'loading-' + Date.now();
             const loadingDiv = document.createElement('div');
             loadingDiv.id = loadingId;
-            loadingDiv.className = 'msg-nyx text-green-400 max-w-[75%] p-3 rounded mb-4 animate-pulse';
+            loadingDiv.className = 'msg-nyx text-green-400 max-w-[95%] sm:max-w-[75%] p-3 rounded mb-4 animate-pulse';
             loadingDiv.innerHTML = `NYX PENSANDO... ${liteMode ? '[MODO LITE]' : ''} <span id="timer-${loadingId}">0.0s</span>`;
             chatContainer.appendChild(loadingDiv);
             scrollToBottom();
