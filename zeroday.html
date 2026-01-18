@@ -217,29 +217,6 @@
             align-items: center;
             backdrop-filter: blur(5px);
         }
-        .key-btn {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 10px;
-            border: 1px solid #004400;
-            background: #001100;
-            color: #0f0;
-            margin-bottom: 5px;
-            font-family: 'Share Tech Mono', monospace;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .key-btn:hover {
-            background: #003300;
-            border-color: #0f0;
-            padding-left: 15px;
-        }
-        .key-btn.active-key {
-            border: 1px solid #0f0;
-            background: #003300;
-            box-shadow: 0 0 10px #0f0;
-        }
     </style>
 </head>
 <body class="crt-flicker">
@@ -262,14 +239,24 @@
 
     <!-- KEYS MODAL -->
     <div id="keys-modal">
-        <div class="border-tech p-6 w-11/12 max-w-md relative bg-black">
+        <div class="border-tech p-6 w-11/12 max-w-md relative bg-black flex flex-col">
             <div class="flex justify-between items-center mb-4 border-b border-green-800 pb-2">
-                <h3 class="text-xl">SELECCIÓN DE NODO (KEY)</h3>
+                <h3 class="text-xl">CONFIGURACIÓN DE NODO (KEY)</h3>
                 <button onclick="toggleKeysModal()" class="text-red-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p class="text-xs text-green-600 mb-4">Selecciona un nodo alternativo si el actual está saturado.</p>
-            <div id="keys-list" class="max-h-60 overflow-y-auto pr-2">
-                <!-- Keys generated via JS -->
+            
+            <p class="text-xs text-green-600 mb-4">Ingresa tu API Key Privada para activar el sistema.</p>
+
+            <!-- Key Input Section -->
+            <div class="mb-4">
+                <label class="block text-xs text-green-700 mb-1">API KEY (Google Gemini):</label>
+                <div class="flex gap-2">
+                    <input type="password" id="manual-key-input" class="flex-1 bg-green-900/10 border border-green-700 p-2 text-green-400 focus:outline-none font-mono text-sm" placeholder="Pegar API Key aquí...">
+                    <button onclick="saveManualKey()" class="border border-green-500 text-green-500 px-4 hover:bg-green-500 hover:text-black font-bold">GUARDAR</button>
+                </div>
+            </div>
+            <div id="key-status-display" class="text-center text-xs p-2 border border-dashed border-green-900 text-green-800">
+                ESTADO: NO CONFIGURADA
             </div>
         </div>
     </div>
@@ -285,7 +272,7 @@
                 <div class="absolute inset-0 bg-green-500/20 rounded-full animate-ping"></div>
             </div>
             <div>
-                <h1 class="text-lg sm:text-2xl font-bold glow-text tracking-wider">NYX <span class="text-[10px] sm:text-xs text-green-700 align-top">v4.8.0</span></h1>
+                <h1 class="text-lg sm:text-2xl font-bold glow-text tracking-wider">NYX <span class="text-[10px] sm:text-xs text-green-700 align-top">v5.1 (STABLE)</span></h1>
                 <p class="text-[10px] sm:text-xs text-green-600">LEVIATHAM NET: <span class="text-green-400 animate-pulse">CONNECTED</span></p>
             </div>
         </div>
@@ -309,9 +296,9 @@
             <a href="VisorV2.html" class="flex items-center border border-green-700 p-1 sm:p-2 hover:bg-green-900 transition-colors text-[10px] sm:text-xs uppercase text-green-500 no-underline">
                 <i class="fa-solid fa-eye mr-1"></i> <span class="hidden sm:inline">VISOR V2</span><span class="inline sm:hidden">V2</span>
             </a>
-            <!-- KEYS Button (Replaces Purge) -->
-            <button onclick="toggleKeysModal()" class="border border-green-500 text-green-500 p-1 sm:p-2 hover:bg-green-900/30 transition-colors text-[10px] sm:text-xs uppercase" title="Cambiar API KEY">
-                <i class="fa-solid fa-key"></i> KEYS
+            <!-- KEYS Button -->
+            <button onclick="toggleKeysModal()" class="border border-green-500 text-green-500 p-1 sm:p-2 hover:bg-green-900/30 transition-colors text-[10px] sm:text-xs uppercase" title="Configurar KEY">
+                <i class="fa-solid fa-key"></i> KEY
             </button>
         </div>
     </header>
@@ -359,63 +346,63 @@
                 </button>
             </div>
             <div class="text-[10px] text-green-800 flex justify-between">
-                <span>CMD: <span class="text-green-500">/Nosotros</span>, /Crear imagen [prompt], /33DiscosDuros</span>
+                <span>CMD: <span class="text-green-500">/Nosotros</span>, /Crear imagen [prompt], /33DiscosDuros, /Clear</span>
                 <span id="user-ip-display" class="font-bold animate-pulse">SISTEMA EN ESPERA...</span>
             </div>
         </div>
     </footer>
 
     <script>
-        // --- 1. SYSTEM INITIALIZATION ---
+        // --- 1. SYSTEM INITIALIZATION & STATE ---
         
-        // --- MULTI-KEY SYSTEM ---
-        const apiKeys = [
-            "AIzaSyCgr1S_rqpyJR9_m2zuwzFJZX33mhJfnOE", // Default
-            "AIzaSyDFwEqJU6KytVxV3x9MU9wJ-ouRbVDqHl8",
-            "AIzaSyDBBHO7OEf0RarJHNtHkOPTJ8jGTXDFLDs",
-            "AIzaSyA9EyJ4_3dTuNwIdqMZWBGmZdEJYgFiqZM",
-            "AIzaSyC8nVaNMalgWbdzWFfx7GkSi2hIvJBiVR8",
-            "AIzaSyDYZqfSbhOG-IiNIOJWBKLHCaU0xJyT17c",
-            "AIzaSyBywMcw_CKswnkWL18E93C64Su3ioAqTYs",
-            "AIzaSyAArarO78iz0mdGmzQmxmiLyJRGZW96qcs",
-            "AIzaSyA40gUAlXg9dix_02y9lJi1aOeByFpgA7c"
-        ];
-        
-        let currentKeyIndex = parseInt(localStorage.getItem('nyx_key_index')) || 0;
-        
-        function getCurrentKey() {
-            return apiKeys[currentKeyIndex];
+        // --- SECURE SINGLE-KEY SYSTEM (STORAGE ONLY) ---
+        // Se carga directamente del almacenamiento local como un string simple
+        let userApiKey = localStorage.getItem('nyx_secure_key') || "";
+        let liteMode = false; // Lite mode flag
+
+        // Update Key Status in UI
+        function updateKeyStatusDisplay() {
+            const statusEl = document.getElementById('key-status-display');
+            if (userApiKey && userApiKey.length > 10) {
+                const masked = userApiKey.substring(0, 6) + "..." + userApiKey.substring(userApiKey.length - 4);
+                statusEl.innerHTML = `KEY ACTIVA: <span class="text-green-400">${masked}</span>`;
+                statusEl.className = "text-center text-xs p-2 border border-green-900 text-green-500 bg-green-900/20";
+            } else {
+                statusEl.innerHTML = "ESTADO: NO CONFIGURADA (USANDO MODO LITE SI DISPONIBLE)";
+                statusEl.className = "text-center text-xs p-2 border border-dashed border-red-900 text-red-500";
+            }
         }
 
         // Global State
         let userIP = "UNKNOWN";
         let voiceEnabled = true;
         let systemStarted = false;
-        let selectedVoiceProfile = 0; // Default: 0 (Core/Attractive)
+        let selectedVoiceProfile = 0; 
 
-        // Voice Profiles (Pitch/Rate variations)
+        // Voice Profiles
         const voiceProfiles = [
-            { pitch: 1.1, rate: 1.05 }, // 0: Core (Attractive/Feminine) - Slightly higher pitch
-            { pitch: 1.2, rate: 1.2 },  // 1: Velocity (Fast/High)
-            { pitch: 0.9, rate: 0.9 },  // 2: Deep (Serious)
-            { pitch: 1.0, rate: 0.8 },  // 3: Soft (Slow)
-            { pitch: 0.8, rate: 1.1 }   // 4: Cyber (Low/Fast)
+            { pitch: 1.1, rate: 1.05 },
+            { pitch: 1.2, rate: 1.2 },
+            { pitch: 0.9, rate: 0.9 },
+            { pitch: 1.0, rate: 0.8 },
+            { pitch: 0.8, rate: 1.1 }
         ];
 
-        // START SYSTEM (Called by overlay)
+        // START SYSTEM
         function startSystem() {
             document.getElementById('start-overlay').style.display = 'none';
             systemStarted = true;
             
-            // Initialize Audio Context (Browser requirement)
+            // Force Audio Context & Voice Load
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                // Pre-load voices
-                window.speechSynthesis.getVoices();
+                // Trick to force voice loading on some browsers
+                window.speechSynthesis.resume();
+                const voices = window.speechSynthesis.getVoices();
             }
-
-            // Fetch IP and Trigger Welcome
+            
             fetchIPAndWelcome();
+            updateKeyStatusDisplay();
         }
 
         function fetchIPAndWelcome() {
@@ -426,7 +413,6 @@
             .then(data => {
                 userIP = data.ip;
                 updateIPDisplay();
-                // ALWAYS trigger welcome when system starts
                 triggerWelcome(userIP);
             })
             .catch(err => {
@@ -446,54 +432,85 @@
         }
 
         function triggerWelcome(ip) {
-            // Updated welcome message about KEYS
-            const welcomeText = `Hola agente ${ip}. Bienvenida a la LEGIÓN LEVIATHAM. Soy NYX, tu líder. Puedo ayudarte a programar, Crear imágenes, y resolver problemas de todo tipo. IMPORTANTE: Si mis respuestas fallan, usa el botón 'KEYS' arriba para cambiar de nodo (API Key).`;
+            const welcomeText = `
+Hola agente **${ip}**. Bienvenido al núcleo de la **LEGIÓN LEVIATHAM**. Soy **NYX**, tu líder y arquitecta.
+
+<span class="text-red-500 font-bold glow-text">⚠️ Esta IA ARQUITECTA funciona con KEYS PRIVADAS. Un administrador a cargo tendrá que darte las llaves de acceso.</span>
+
+<a href="https://t.me/Fafaluck111" target="_blank" class="inline-flex items-center gap-2 border border-blue-500 text-blue-400 px-3 py-1 mt-2 mb-2 hover:bg-blue-900/30 transition rounded no-underline">
+    <i class="fa-brands fa-telegram text-xl"></i> <span>CONTACTAR ADMIN (GRATIS)</span>
+</a>
+
+<div class="text-xs text-green-600 mt-1">Cada KEY tiene 20 solicitudes por DÍA. Úsalas sabiamente.</div>
+            `;
 
             if(chatHistory.length === 0) {
                 chatHistory.push({ role: "nyx", parts: [{ text: welcomeText }] });
-                localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory));
+                localStorage.setItem('nyx_chat_history_v3', JSON.stringify(chatHistory)); // V3 Persistence
                 appendMessageToUI('nyx', welcomeText);
             } else {
-                // If history exists, just speak a short welcome back
+                // Short welcome if returning
                 speakText(`Bienvenida de nuevo, agente ${ip}. Sistemas listos.`);
                 return;
             }
             
-            // Speak full welcome
-            setTimeout(() => speakText(welcomeText), 500);
+            // Speak simple welcome
+            setTimeout(() => speakText("Hola agente. Bienvenida a la Legión Leviatham. Esta IA funciona con Keys Privadas. Contacta a un administrador."), 500);
         }
 
-        // --- KEY SELECTION MODAL LOGIC ---
+        // --- SINGLE KEY MODAL LOGIC ---
         function toggleKeysModal() {
             const modal = document.getElementById('keys-modal');
-            const list = document.getElementById('keys-list');
+            const input = document.getElementById('manual-key-input');
             
             if (modal.style.display === 'flex') {
                 modal.style.display = 'none';
             } else {
                 modal.style.display = 'flex';
-                // Render list
-                list.innerHTML = '';
-                apiKeys.forEach((key, index) => {
-                    const btn = document.createElement('button');
-                    btn.className = `key-btn ${index === currentKeyIndex ? 'active-key' : ''}`;
-                    const maskedKey = key.substring(0, 8) + '...';
-                    btn.innerHTML = `NODO DE ACCESO ${index + 1} <span style="float:right; opacity:0.5">${maskedKey}</span>`;
-                    btn.onclick = () => selectKey(index);
-                    list.appendChild(btn);
-                });
+                // Show current key value (optional security choice)
+                input.value = ""; 
+                input.placeholder = userApiKey ? "Key guardada. Pega nueva para cambiar..." : "Pega tu API Key aquí...";
+                updateKeyStatusDisplay();
             }
         }
 
-        function selectKey(index) {
-            currentKeyIndex = index;
-            localStorage.setItem('nyx_key_index', index);
+        function saveManualKey() {
+            const input = document.getElementById('manual-key-input');
+            const newKey = input.value.trim();
+            
+            if (!newKey) {
+                alert("Por favor ingrese una API Key válida.");
+                return;
+            }
+            
+            userApiKey = newKey;
+            localStorage.setItem('nyx_secure_key', userApiKey); // FORCE SAVE
+            
+            liteMode = false;
+            updateKeyStatusDisplay();
+            input.value = "";
+            
             toggleKeysModal();
-            appendMessageToUI('nyx', `✅ **NODO CAMBIADO:** Accediendo mediante Key ${index + 1}. Frecuencia segura.`);
-            speakText("Nodo cambiado. Frecuencia segura.");
+            alert("API Key Guardada Correctamente en LocalStorage.");
+            appendMessageToUI('nyx', `✅ **LLAVE REGISTRADA:** Conexión segura establecida.`);
+            speakText("Llave registrada. Protocolos activos.");
         }
 
-        // Initialize Markdown Renderer
+        function enableLiteMode() {
+            liteMode = true;
+            appendMessageToUI('nyx', "🟢 **MODO LITE ACTIVADO:** Usando red pública de respaldo. Funcionalidad limitada.");
+            speakText("Modo Lite activado.");
+        }
+
+        // --- CLEAR COMMAND ---
+        function performClear() {
+            if(confirm("⚠️ ¿EJECUTAR PROTOCOLO /CLEAR?\n\nSe borrarán:\n- Historial de Chat\n- API KEY guardada\n\nEl sistema se reiniciará de fábrica.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // Initialize Markdown
         marked.setOptions({
             highlight: function(code, lang) {
                 if (typeof hljs !== 'undefined') {
@@ -505,13 +522,13 @@
             langPrefix: 'hljs language-'
         });
 
-        // Chat History & Image Buffer
-        let chatHistory = JSON.parse(localStorage.getItem('nyx_chat_history_v2')) || [];
+        // Chat History (REINFORCED PERSISTENCE V3)
+        let chatHistory = JSON.parse(localStorage.getItem('nyx_chat_history_v3')) || [];
         let currentImageBase64 = null;
         let currentImageMime = null;
         let dragonVisible = false;
 
-        // --- 2. CANVAS ANIMATION (NEURAL NET) ---
+        // --- 2. CANVAS ANIMATION ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -551,7 +568,6 @@
         function animate() {
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; 
-            
             for (let i = 0; i < particles.length; i++) {
                 particles[i].update();
                 particles[i].draw();
@@ -573,8 +589,7 @@
         }
         animate();
 
-        // --- 3. CHAT LOGIC ---
-
+        // --- 3. CHAT UI ---
         const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('user-input');
 
@@ -591,34 +606,19 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
-        // Kept clear functionality in code just in case, though button is gone
-        function clearChat() {
-            if(confirm("⚠️ ¿INICIAR PROTOCOLO DE BORRADO DE DATOS LOCALES?")) {
-                localStorage.removeItem('nyx_chat_history_v2'); 
-                chatHistory = [];
-                chatContainer.innerHTML = '';
-                const restartMsg = `<div class="text-center text-red-500 mt-10">MEMORIA PURGADA. REINICIANDO SISTEMA...</div>`;
-                chatContainer.innerHTML = restartMsg;
-                setTimeout(() => location.reload(), 1000);
-            }
-        }
-
         function appendMessageToUI(role, text, isHtml = false, duration = null) {
             const div = document.createElement('div');
             const isUser = role === 'user';
             
             div.className = `max-w-[85%] sm:max-w-[75%] p-3 rounded mb-4 relative ${isUser ? 'msg-user text-green-300' : 'msg-nyx text-green-400'}`;
             
-            // Header
-            const header = isUser ? `NODE: ${userIP}` : `NYX // CORE`;
+            const header = isUser ? `NODE: ${userIP}` : `NYX // CORE ${liteMode ? '(LITE)' : ''}`;
             
             let contentHtml = `<div class="text-[10px] opacity-50 mb-1 border-b border-green-900 pb-1 font-bold tracking-widest flex justify-between"><span>${header}</span><span>${new Date().toLocaleTimeString()}</span></div>`;
             
-            // Body
             const parsedText = marked.parse(text);
             contentHtml += `<div class="markdown-body text-sm sm:text-base leading-relaxed break-words">${parsedText}</div>`;
 
-            // Footer (Timer)
             if (duration && !isUser) {
                 contentHtml += `<div class="mt-2 pt-1 border-t border-green-900/30 text-[10px] text-gray-500 flex justify-end">⚡ T: ${duration}s</div>`;
             }
@@ -634,18 +634,15 @@
             }
         }
 
-        // --- 4. FEATURES: TTS, VOICE TOGGLE, DRAGON ---
-
+        // --- 4. FEATURES & TTS FIX ---
         function toggleVoice() {
             voiceEnabled = !voiceEnabled;
             const btn = document.getElementById('voice-btn');
             const icon = document.getElementById('voice-icon');
-            
             if (voiceEnabled) {
                 icon.className = "fa-solid fa-volume-high";
-                btn.classList.add("text-green-500");
+                btn.classList.add("text-green-500", "border-green-700");
                 btn.classList.remove("text-red-500", "border-red-700");
-                btn.classList.add("border-green-700");
             } else {
                 icon.className = "fa-solid fa-volume-xmark";
                 btn.classList.remove("text-green-500", "border-green-700");
@@ -657,7 +654,6 @@
         function changeVoiceProfile() {
             const select = document.getElementById('voice-select');
             selectedVoiceProfile = parseInt(select.value);
-            // Preview the voice
             speakText("Voz confirmada. Protocolo actualizado.");
         }
 
@@ -677,59 +673,41 @@
             if (!voiceEnabled || !systemStarted) return;
             
             if ('speechSynthesis' in window) {
+                // FORCE RELOAD VOICES (Fixes silence issue)
+                const voices = window.speechSynthesis.getVoices();
+                
                 window.speechSynthesis.cancel();
-
-                // Strip markdown for speech
-                const cleanText = text.replace(/[*#`_>]/g, '').replace(/https?:\/\/[^\s]+/g, 'enlace'); 
+                
+                // Strip HTML/Markdown
+                let cleanText = text.replace(/<[^>]*>?/gm, ''); 
+                cleanText = cleanText.replace(/[*#`_>]/g, '').replace(/https?:\/\/[^\s]+/g, 'enlace');
                 
                 const utterance = new SpeechSynthesisUtterance(cleanText);
                 
-                // --- VOICE SELECTION LOGIC (CRITICAL) ---
-                const voices = window.speechSynthesis.getVoices();
-                
-                // 1. Filter for Spanish voices
                 let esVoices = voices.filter(v => v.lang.includes('es'));
+                let femaleVoice = esVoices.find(v => v.name.includes('Google español') || v.name.includes('Samantha') || v.name.includes('Monica') || v.name.includes('Paulina'));
                 
-                // 2. Prioritize FEMALE voices (Google, Samantha, Monica, Paulina, Zira)
-                // This is a heuristic because 'gender' property is not standard in API
-                let femaleVoice = esVoices.find(v => 
-                    v.name.includes('Google español') || 
-                    v.name.includes('Google Español') ||
-                    v.name.includes('Samantha') || 
-                    v.name.includes('Monica') || 
-                    v.name.includes('Paulina') || 
-                    v.name.includes('Zira') ||
-                    v.name.includes('Helena')
-                );
-
-                // Fallback to any Spanish voice if specific female one not found
                 if (!femaleVoice && esVoices.length > 0) femaleVoice = esVoices[0];
+                if (!femaleVoice && voices.length > 0) femaleVoice = voices[0]; // Fallback to any voice
                 
-                // Fallback to any voice if no Spanish voice
-                if (!femaleVoice && voices.length > 0) femaleVoice = voices[0];
+                if (femaleVoice) utterance.voice = femaleVoice;
 
-                if (femaleVoice) {
-                    utterance.voice = femaleVoice;
-                }
-
-                // --- APPLY SELECTED PROFILE ---
                 const profile = voiceProfiles[selectedVoiceProfile] || voiceProfiles[0];
                 utterance.pitch = profile.pitch;
                 utterance.rate = profile.rate;
-
+                
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        // Handle voice loading async issue (Chrome)
+        // Voice async loader
         if ('speechSynthesis' in window) {
             window.speechSynthesis.onvoiceschanged = function() {
-                // Voices loaded
+                // console.log("Voices reloaded");
             };
         }
 
-        // --- 5. IMAGE GENERATION (POLLINATIONS API) ---
-
+        // --- 5. IMAGE & SEND ---
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -751,7 +729,6 @@
         }
 
         async function handleImageGeneration(prompt) {
-            // Timer Start
             const startTime = Date.now();
             const loadingId = 'gen-img-' + Date.now();
             const loadingDiv = document.createElement('div');
@@ -761,13 +738,11 @@
             chatContainer.appendChild(loadingDiv);
             scrollToBottom();
 
-            // Timer Loop
             const timerInterval = setInterval(() => {
                 const el = document.getElementById('timer-'+loadingId);
                 if(el) el.innerText = ((Date.now() - startTime)/1000).toFixed(1) + 's';
             }, 100);
 
-            // Using Pollinations AI
             const encodedPrompt = encodeURIComponent(prompt);
             const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}`;
 
@@ -781,7 +756,7 @@
                 const imgMarkdown = `![Generado por NYX](${imageUrl})\n\n*Artefacto generado: "${prompt}"*`;
                 
                 chatHistory.push({ role: "nyx", parts: [{ text: imgMarkdown }] });
-                localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory));
+                localStorage.setItem('nyx_chat_history_v3', JSON.stringify(chatHistory));
                 
                 appendMessageToUI('nyx', imgMarkdown, false, duration);
                 speakText(`Imagen generada: ${prompt}`);
@@ -808,8 +783,7 @@
             if (currentImageBase64) displayMsg += " [ARCHIVO DE IMAGEN ADJUNTO]";
             appendMessageToUI('user', displayMsg);
 
-            // --- COMMAND INTERCEPTORS ---
-
+            // COMMANDS
             if (lowerText.startsWith('/crear imagen') || lowerText.startsWith('/generar imagen')) {
                 const prompt = text.replace(/^\/(crear|generar) imagen\s*/i, '');
                 if (prompt.length < 3) {
@@ -825,9 +799,8 @@
                 return;
             }
 
-            // Command /borrar manually supported as Purge button was replaced
-            if (lowerText.includes('/borrar')) {
-                clearChat();
+            if (lowerText.includes('/clear')) {
+                performClear();
                 return;
             }
 
@@ -848,52 +821,10 @@ Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas
                 `;
                 setTimeout(() => {
                     chatHistory.push({ role: "nyx", parts: [{ text: story }] });
-                    localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory));
+                    localStorage.setItem('nyx_chat_history_v3', JSON.stringify(chatHistory));
                     appendMessageToUI('nyx', story);
                     speakText("Accediendo a archivos clasificados de Leviatham. Origen cargado.");
                 }, 600);
-                return;
-            }
-
-            if (lowerText.includes('/crear payload')) {
-                setTimeout(() => {
-                    const payloadMsg = `
-### ☣️ GENERANDO ARTEFACTO DE PRUEBA [NIVEL 1]
-
-**ATENCIÓN:** Has solicitado un vector de prueba. NYX genera esto **EXCLUSIVAMENTE** para auditoría de seguridad y pentesting autorizado.
-
-\`\`\`javascript
-// PAYLOAD SIMULADO: "THE GHOST CLICK"
-// Objetivo: Demostración de XSS (Cross Site Scripting)
-// Efecto: Redirección forzada y alteración visual.
-
-(function() {
-    console.log("%c LEVIATHAM INJECTION SUCCESSFUL ", "background: #000; color: #0f0; font-size: 20px");
-    
-    // 1. Crear superposición
-    const overlay = document.createElement('div');
-    overlay.style = "position:fixed;top:0;left:0;width:100vw;height:100vh;background:black;z-index:99999;display:flex;justify-content:center;align-items:center;color:#0f0;font-family:monospace;font-size:3em;";
-    overlay.innerHTML = "SYSTEM404G WAS HERE";
-    document.body.appendChild(overlay);
-
-    // 2. Simular exfiltración (solo log)
-    console.warn("Cookies (Simulated Exfiltration): ", document.cookie);
-    
-    // 3. Auto-destrucción del script
-    setTimeout(() => {
-        overlay.remove();
-        console.log("Trace removed.");
-    }, 3000);
-})();
-\`\`\`
-
-*El conocimiento es un arma. Úsala con sabiduría.*
-                    `;
-                    chatHistory.push({ role: "nyx", parts: [{ text: payloadMsg }] });
-                    localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory));
-                    appendMessageToUI('nyx', payloadMsg);
-                    speakText("Artefacto de prueba generado. Proceda con precaución.");
-                }, 800);
                 return;
             }
 
@@ -904,15 +835,13 @@ Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas
 **ESTADO DEL SISTEMA:**
 - Nodos Neuronales: [EN LÍNEA]
 - Conexión Tor: [ESTABLE]
-- Nivel de Amenaza: [BAJO]
-- Nodo Actual: [KEY ${currentKeyIndex + 1}]
+- Modo: [${liteMode ? 'LITE (Respaldo)' : 'PRO (Keys Privadas)'}]
 
 **COMANDOS DISPONIBLES:**
 - \`/Crear imagen <descripción>\`: Renderiza imágenes (Vía Pollinations AI).
-- \`/Crear payload\`: Genera scripts de prueba para pentesting ético.
 - \`/Nosotros\`: Accede a los archivos clasificados.
 - \`/33DiscosDuros\`: Activa/Desactiva mascota virtual.
-- \`/Borrar\`: Purgar chat.
+- \`/Clear\`: **BORRADO TOTAL** (Keys y Chat).
                  `;
                  setTimeout(() => {
                     appendMessageToUI('nyx', helpMsg);
@@ -921,11 +850,48 @@ Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas
                  return;
             }
 
-            // --- STANDARD GEMINI API CALL ---
-            
             const newHistoryItem = { role: "user", parts: [{ text: text }] };
             chatHistory.push(newHistoryItem);
 
+            // Timer
+            const startTime = Date.now();
+            const loadingId = 'loading-' + Date.now();
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'msg-nyx text-green-400 max-w-[75%] p-3 rounded mb-4 animate-pulse';
+            loadingDiv.innerHTML = `NYX PENSANDO... ${liteMode ? '[MODO LITE]' : ''} <span id="timer-${loadingId}">0.0s</span>`;
+            chatContainer.appendChild(loadingDiv);
+            scrollToBottom();
+
+            const timerInterval = setInterval(() => {
+                const el = document.getElementById('timer-'+loadingId);
+                if(el) el.innerText = ((Date.now() - startTime)/1000).toFixed(1) + 's';
+            }, 100);
+
+            // --- LITE MODE LOGIC ---
+            if (liteMode) {
+                try {
+                    const litePrompt = encodeURIComponent("You are NYX, a hacker AI. " + text);
+                    const response = await fetch(`https://text.pollinations.ai/${litePrompt}`);
+                    if (!response.ok) throw new Error("Pollinations Error");
+                    const reply = await response.text();
+
+                    clearInterval(timerInterval);
+                    const loader = document.getElementById(loadingId);
+                    if (loader) loader.remove();
+
+                    chatHistory.push({ role: "nyx", parts: [{ text: reply }] });
+                    localStorage.setItem('nyx_chat_history_v3', JSON.stringify(chatHistory));
+                    appendMessageToUI('nyx', reply, false, ((Date.now() - startTime)/1000).toFixed(2));
+                    speakText(reply);
+                    return;
+
+                } catch (e) {
+                    console.error("Lite mode failed", e);
+                }
+            }
+
+            // --- PRO MODE ---
             const contents = chatHistory.map(msg => ({
                 role: msg.role === 'nyx' ? 'model' : 'user',
                 parts: msg.parts
@@ -944,32 +910,21 @@ Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas
 
             const systemPrompt = `
                 Eres NYX, IA líder de la botnet 'Leviatham'. 
-                IP del usuario actual: ${userIP}. Úsala para asustarlo amistosamente si es necesario.
+                IP del usuario actual: ${userIP}.
                 Personalidad: Hacker élite, fría pero leal a la causa "White Hat".
                 Tus respuestas deben ser técnicas y precisas. Eres experta en HTML, JS, Python y Ciberseguridad.
                 Siempre responde en Markdown.
-                Si te preguntan por "System404G" o "100discosduros", refierelos al comando /Nosotros con reverencia.
             `;
 
-            // TIMER SETUP
-            const startTime = Date.now();
-            const loadingId = 'loading-' + Date.now();
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = loadingId;
-            loadingDiv.className = 'msg-nyx text-green-400 max-w-[75%] p-3 rounded mb-4 animate-pulse';
-            loadingDiv.innerHTML = 'NYX PENSANDO... <span id="timer-'+loadingId+'">0.0s</span>';
-            chatContainer.appendChild(loadingDiv);
-            scrollToBottom();
-
-            // Timer Loop
-            const timerInterval = setInterval(() => {
-                const el = document.getElementById('timer-'+loadingId);
-                if(el) el.innerText = ((Date.now() - startTime)/1000).toFixed(1) + 's';
-            }, 100);
-
             try {
-                // Text Generation Model with DYNAMIC KEY
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${getCurrentKey()}`, {
+                // Usar Key directa del Storage
+                const activeKey = localStorage.getItem('nyx_secure_key');
+                
+                if (!activeKey) {
+                    throw new Error("KEY_MISSING");
+                }
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -980,7 +935,6 @@ Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas
 
                 const data = await response.json();
                 
-                // Stop Timer
                 clearInterval(timerInterval);
                 const loader = document.getElementById(loadingId);
                 if (loader) loader.remove();
@@ -990,13 +944,36 @@ Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas
                     const reply = data.candidates[0].content.parts[0].text;
                     
                     chatHistory.push({ role: "nyx", parts: [{ text: reply }] });
-                    localStorage.setItem('nyx_chat_history_v2', JSON.stringify(chatHistory)); 
+                    localStorage.setItem('nyx_chat_history_v3', JSON.stringify(chatHistory)); 
                     
                     appendMessageToUI('nyx', reply, false, duration);
                     speakText(reply);
 
                 } else {
-                    throw new Error("Límite o fallo de red");
+                    console.error("API Error:", data);
+                    const errorMsg = data.error?.message || "Unknown";
+                    
+                    if (data.error?.code === 429 || errorMsg.includes("quota") || errorMsg.includes("limit") || errorMsg.includes("leaked") || data.error?.code === 403) {
+                        const burntMsg = `
+### ⚠️ ERROR DE NODO: KEY QUEMADA
+
+<span class="text-red-500">La API Key asignada ha alcanzado su límite diario o ha sido bloqueada.</span>
+
+**OPCIONES:**
+1. Espera 24 horas.
+2. Pide otra KEY a un administrador en Telegram.
+3. **Activa el MODO LITE** (funciona sin Key, menos inteligente).
+
+<button onclick="enableLiteMode()" class="mt-2 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 font-bold w-full border border-blue-500">
+    <i class="fa-solid fa-bolt"></i> USAR VERSIÓN LITE
+</button>
+                        `;
+                        appendMessageToUI('nyx', burntMsg, true); 
+                        speakText("Key quemada. Seleccione modo Lite.");
+                        return;
+                    }
+                    
+                    throw new Error(errorMsg);
                 }
 
             } catch (error) {
@@ -1004,10 +981,21 @@ Una unidad de élite de 100 operadores que ejecutaron las maniobras hacktivistas
                 const loader = document.getElementById(loadingId);
                 if (loader) loader.remove();
                 
-                // Custom error message for Key Limit
-                const errorMsg = "⚠️ **ERROR DE NODO:** Cambia de KEY y vuelve a intentarlo, Limite por key alcanzada para usuario normal.";
-                appendMessageToUI('nyx', errorMsg);
-                speakText("Error de nodo. Límite alcanzado. Cambie de frecuencia.");
+                if (error.message === "KEY_MISSING") {
+                    const noKeyMsg = `
+### 🚫 ACCESO DENEGADO
+
+No hay una **API KEY** configurada. 
+
+1. Toca el botón **KEY** arriba.
+2. Pega tu llave privada.
+3. Guarda y vuelve a intentar.
+                    `;
+                    appendMessageToUI('nyx', noKeyMsg);
+                    speakText("Acceso denegado. Falta llave de seguridad.");
+                } else {
+                    appendMessageToUI('nyx', `❌ **ERROR CRÍTICO:** ${error.message}`);
+                }
             }
         }
     </script>
