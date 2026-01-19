@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MANUAL DE OPERACIONES // LEVIATHAM</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --hacker-green: #0f0;
+            --hacker-dark: #050505;
+            --panel-bg: rgba(0, 20, 0, 0.95);
+            --gold: #ffd700;
+            --blue-ops: #00aaff;
+        }
+
+        body {
+            background-color: var(--hacker-dark);
+            color: var(--hacker-green);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- CRT Effect --- */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        
+        .glow-text { text-shadow: 0 0 5px var(--hacker-green); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #001100; }
+        ::-webkit-scrollbar-thumb { background: #004400; border: 1px solid var(--hacker-green); }
+
+        /* Panels */
+        .manual-card {
+            border: 1px solid #004400;
+            background: var(--panel-bg);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.05);
+            transition: all 0.3s;
+        }
+        .manual-card:hover {
+            border-color: var(--hacker-green);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .tag-recon { border: 1px solid var(--hacker-green); color: var(--hacker-green); padding: 2px 6px; font-size: 10px; border-radius: 4px; }
+        .tag-weapon { border: 1px solid #ff0000; color: #ff5555; padding: 2px 6px; font-size: 10px; border-radius: 4px; }
+        .tag-blue { border: 1px solid var(--blue-ops); color: var(--blue-ops); padding: 2px 6px; font-size: 10px; border-radius: 4px; }
+
+        h2 { font-family: 'VT323', monospace; font-size: 1.5rem; border-bottom: 1px solid #003300; padding-bottom: 5px; margin-bottom: 15px; }
+        h3 { font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        
+        .example-box {
+            background: #001100;
+            border-left: 3px solid var(--hacker-green);
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #ccffcc;
+        }
+
+        #canvas-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+        }
+    </style>
+</head>
+<body class="crt">
+
+    <canvas id="canvas-bg"></canvas>
+
+    <!-- HEADER -->
+    <header class="p-6 border-b border-green-900 bg-black/90 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold glow-text tracking-widest uppercase">LEVIATHAM <span class="text-sm bg-green-900 text-black px-2">MANUAL</span></h1>
+                <p class="text-xs text-green-600 mt-1">PROTOCOLO DE OPERACIONES // NIVEL 1</p>
+            </div>
+            <a href="social_engineering.html" class="bg-green-900/30 hover:bg-green-700 text-green-400 border border-green-600 px-4 py-2 text-sm font-bold uppercase transition rounded">
+                <i class="fa-solid fa-arrow-left mr-2"></i> VOLVER AL ARCENAL
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-6 relative z-10">
+
+        <!-- INTRO -->
+        <div class="manual-card border-l-4 border-l-green-500">
+            <h2 class="text-green-400">INTRODUCCIÓN AL SISTEMA</h2>
+            <p class="text-sm text-gray-300 leading-relaxed">
+                El **LEVIATHAM S.E.T ARCENAL** es una suite modular diseñada para pruebas de penetración éticas, auditoría de seguridad y análisis forense. 
+                Esta herramienta centraliza capacidades de reconocimiento (OSINT), militarización (Weaponization) y control, conectándose a una base de datos global en tiempo real.
+                <br><br>
+                <span class="text-red-400 font-bold">ADVERTENCIA:</span> El uso de estas herramientas contra sistemas sin autorización expresa es ilegal. Utilice este entorno únicamente con fines educativos o auditorías autorizadas.
+            </p>
+        </div>
+
+        <!-- SECCIÓN 1 -->
+        <div class="mb-12">
+            <h2 class="text-2xl text-green-500 mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-eye"></i> SECCIÓN 1: RECONOCIMIENTO (RECON)
+            </h2>
+
+            <div class="manual-card">
+                <h3><span class="tag-recon">OSINT</span> EMAIL HARVESTER V3</h3>
+                <p class="text-sm text-gray-400 mb-2">Motor de recolección de inteligencia de fuentes abiertas enfocado en identidades corporativas.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Simula la búsqueda en múltiples bases de datos públicas (motores de búsqueda, repositorios de claves PGP, fugas de datos) para encontrar patrones de correo electrónico asociados a un dominio.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Durante una auditoría de ingeniería social, un pentester necesita saber el formato de correo de la empresa (ej: `nombre.apellido@empresa.com`) para simular una campaña de phishing autorizada y medir la concientización de los empleados.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-recon">WEB RECON</span> EXTRACTOR WEB (LINK SCRAPER)</h3>
+                <p class="text-sm text-gray-400 mb-2">Analizador de superficie de ataque web.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Realiza una petición HTTP a la URL objetivo y parsea el DOM para extraer todos los hipervínculos, fuentes de imágenes y scripts. Utiliza un proxy CORS para evitar bloqueos de navegador.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Un bug bounty hunter utiliza esta herramienta para encontrar archivos JavaScript (`.js`) ocultos o de desarrollo que los desarrolladores olvidaron quitar, los cuales a menudo contienen claves API o rutas a paneles de administración no documentados.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-recon">INFRA</span> DETECTOR DE WAF</h3>
+                <p class="text-sm text-gray-400 mb-2">Identificación de Firewalls de Aplicación Web.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Analiza las cabeceras de respuesta HTTP y cookies específicas (como `cf-ray` de Cloudflare o `x-iinfo` de Imperva) para determinar qué tecnología protege al servidor.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Antes de lanzar un escáner de vulnerabilidades (como Nessus o SQLMap), el auditor necesita saber si hay un WAF activo para ajustar la velocidad del escaneo o utilizar técnicas de evasión (bypass) para no ser bloqueado inmediatamente.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-recon">OPSEC</span> DESACORTADOR URL</h3>
+                <p class="text-sm text-gray-400 mb-2">Análisis seguro de enlaces ofuscados.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Sigue la cadena de redirecciones HTTP (301/302) de servicios como bit.ly o tinyurl y muestra el destino final sin cargar el contenido malicioso en el navegador.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Un analista de SOC recibe un reporte de un empleado sobre un SMS sospechoso con un enlace corto. Usa esta herramienta para ver a dónde lleva el enlace sin infectar su propia máquina de análisis.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-recon">HARDENING</span> ANALIZADOR DE CABECERAS</h3>
+                <p class="text-sm text-gray-400 mb-2">Auditoría de configuración de seguridad del servidor.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Verifica la presencia de headers críticos como `Content-Security-Policy` (CSP), `X-Frame-Options` y `Strict-Transport-Security` (HSTS).</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Un administrador de sistemas utiliza esta herramienta después de desplegar una nueva web para asegurarse de que el servidor está configurado para rechazar ataques de Clickjacking y forzar conexiones HTTPS seguras.
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2 -->
+        <div class="mb-12">
+            <h2 class="text-2xl text-red-500 mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-hammer"></i> SECCIÓN 2: WEAPONIZATION (ARMAMENTO)
+            </h2>
+
+            <div class="manual-card">
+                <h3><span class="tag-weapon">BRUTE FORCE</span> GENERADOR DICCIONARIOS PRO</h3>
+                <p class="text-sm text-gray-400 mb-2">Creación de wordlists personalizadas contextuales.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Motor de permutación que combina datos específicos del objetivo (nombre, mascota, año) con patrones comunes de contraseñas. Incluye modos de duración variable para generar listas masivas.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    En una auditoría interna, se descubre que la política de contraseñas es débil. El auditor genera un diccionario basado en el nombre de la empresa y el año actual (ej: `Empresa2024!`) para demostrar cuán fácil es adivinar las credenciales de los empleados.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-weapon">INJECTION</span> GENERADOR SQLi</h3>
+                <p class="text-sm text-gray-400 mb-2">Vectores de prueba para bases de datos SQL.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Provee una lista curada de payloads SQL Injection clásicos y modernos para probar bypass de autenticación y extracción de datos.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Un pentester encuentra un formulario de login antiguo. Prueba el payload `' OR '1'='1` para ver si el servidor valida incorrectamente la entrada y le permite entrar como administrador sin contraseña.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-weapon">NETWORK</span> FABRICANTE MAC (OUI)</h3>
+                <p class="text-sm text-gray-400 mb-2">Identificación de hardware de red.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Consulta la base de datos IEEE OUI para identificar al fabricante de un dispositivo basándose en los primeros 6 caracteres de su dirección MAC.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Durante un escaneo de red WiFi, se detecta un dispositivo desconocido. Al buscar su MAC, la herramienta revela que es un "Espressif Inc", lo que indica que probablemente sea un dispositivo IoT o una cámara inteligente barata, a menudo vulnerables.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-weapon">NETWORK</span> CALCULADORA DE SUBRED</h3>
+                <p class="text-sm text-gray-400 mb-2">Planificación de alcance de red.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Convierte notación CIDR (ej: /24) en máscaras de subred y calcula la cantidad de hosts útiles.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Un auditor necesita escanear toda la red interna de un cliente. El cliente le da el rango `10.0.0.0/19`. Usando la calculadora, el auditor sabe exactamente cuántas IPs (8190 hosts) debe configurar en su herramienta de escaneo.
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 3 -->
+        <div class="mb-12">
+            <h2 class="text-2xl text-blue-400 mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-user-shield"></i> SECCIÓN 3: CONTROL & BLUE TEAM
+            </h2>
+
+            <div class="manual-card">
+                <h3><span class="tag-blue">CRYPTO</span> ENCODER / DECODER</h3>
+                <p class="text-sm text-gray-400 mb-2">Manipulación de datos en tiempo real.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Transforma texto plano a formatos comunes (Base64, Hex, Binario, URL) y viceversa.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Al analizar una URL sospechosa, un analista ve un parámetro `?data=YWRtaW4=`. Usa el decodificador Base64 para revelar que dice "admin", confirmando un intento de manipulación de parámetros.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-blue">CRYPTO</span> CRIPTOANÁLISIS (FRECUENCIA)</h3>
+                <p class="text-sm text-gray-400 mb-2">Rompedor de cifrados clásicos.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Analiza la frecuencia de aparición de cada letra en un texto cifrado. Útil para ataques estadísticos contra cifrados de sustitución monoalfabética.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    En un ejercicio CTF (Capture The Flag), se proporciona un mensaje ininteligible. El análisis de frecuencia muestra que la letra 'X' es la más común, sugiriendo que 'X' corresponde a la 'E' (la letra más común en español/inglés), dando pie a descifrar el mensaje.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-weapon">EXPLOIT</span> GENERADOR XSS PERSONALIZABLE</h3>
+                <p class="text-sm text-gray-400 mb-2">Gestión de vectores Cross-Site Scripting.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Permite almacenar, editar y copiar rápidamente scripts complejos para pruebas XSS. Conectado al Panel de Admin para persistencia.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Un investigador descubre un filtro XSS que bloquea la palabra "script". Crea un payload personalizado `<img src=x onerror=alert(1)>` y lo guarda en el generador para reusarlo rápidamente en diferentes campos del formulario vulnerable.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-weapon">MALWARE</span> REPOSITORIO DE AMENAZAS</h3>
+                <p class="text-sm text-gray-400 mb-2">Base de conocimiento de firmas y scripts.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Biblioteca editable de fragmentos de código malicioso conocidos para estudio o simulación de ataques.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Un Blue Teamer quiere configurar su IDS (Sistema de Detección de Intrusos) para detectar el gusano "ILoveYou". Copia el código VBS del repositorio para estudiar su firma y crear una regla de detección precisa.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-blue">FORENSICS</span> ESTEGANOGRAFÍA (STEGO)</h3>
+                <p class="text-sm text-gray-400 mb-2">Ocultación de información.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Utiliza caracteres invisibles (Zero Width Characters) para ocultar un mensaje secreto dentro de un texto normal visible.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Validación de DLP (Data Loss Prevention). Un auditor intenta exfiltrar un "secreto" fuera de la red corporativa ocultándolo en un correo de "Lista de compras" para ver si los sistemas de seguridad detectan la fuga de información oculta.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-blue">PRIVACY</span> HUELLA DIGITAL (FINGERPRINT)</h3>
+                <p class="text-sm text-gray-400 mb-2">Auditoría de privacidad del navegador.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Recopila datos pasivos del navegador (User Agent, Resolución, Hardware, Zona Horaria) para mostrar cuán único es el usuario.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Demostración de privacidad a un cliente. Se le muestra que, incluso usando el modo incógnito, su combinación específica de hardware y configuración lo hace identificable entre millones de usuarios.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-weapon">CRACKING</span> GENERADOR LEET (MUTATOR)</h3>
+                <p class="text-sm text-gray-400 mb-2">Fortalecimiento y mutación de claves.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Aplica sustituciones "Leet Speak" (a->4, e->3), alterna mayúsculas y añade "salts" aleatorios para crear variantes complejas de una palabra base.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Un usuario quiere una contraseña segura pero recordable basada en "dragon". El mutador genera `dr4G0n_x9Z!`, aumentando exponencialmente la entropía y resistencia a fuerza bruta.
+                </div>
+            </div>
+
+            <div class="manual-card">
+                <h3><span class="tag-recon">DISCOVERY</span> API FUZZER (AUTO-REDIRECT)</h3>
+                <p class="text-sm text-gray-400 mb-2">Descubrimiento de endpoints ocultos.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Genera enlaces secuenciales o basados en listas sobre una URL base y permite abrirlos masivamente para probar su existencia.</p>
+                <div class="example-box">
+                    <strong>Caso de Uso Real:</strong><br>
+                    Se encuentra una API en `api/v1/user/100`. El auditor usa el Fuzzer con el rango 1-50. Al abrir los enlaces, descubre que el usuario `api/v1/user/1` es el administrador y la API no tiene control de acceso (IDOR), permitiendo ver sus datos.
+                </div>
+            </div>
+
+            <div class="manual-card border-l-4 border-l-green-500">
+                <h3><span class="tag-blue">LOGGING</span> DB GLOBAL</h3>
+                <p class="text-sm text-gray-400 mb-2">Registro de auditoría inmutable.</p>
+                <p class="text-sm"><strong>Funcionamiento:</strong> Conexión en tiempo real a Firebase. Cada acción realizada en el arsenal queda registrada con Timestamp, Herramienta utilizada y la IP pública del operador (parcialmente ofuscada por privacidad).</p>
+                <div class="example-box">
+                    <strong>Valor:</strong><br>
+                    Garantiza la trazabilidad de las acciones durante un ejercicio de Red Team compartido, permitiendo a los supervisores revisar qué herramientas se usaron y cuándo.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- MATRIX RAIN EFFECT ---
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        
+        const resize = () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', resize);
+        resize();
+
+        const cols = Math.floor(width / 20) + 1;
+        const ypos = Array(cols).fill(0);
+
+        function matrix() {
+            ctx.fillStyle = '#0001';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = '10pt monospace';
+
+            ypos.forEach((y, i) => {
+                const text = String.fromCharCode(Math.random() * 128);
+                const x = i * 20;
+                ctx.fillText(text, x, y);
+                if (y > 100 + Math.random() * 10000) ypos[i] = 0;
+                else ypos[i] = y + 20;
+            });
+        }
+        setInterval(matrix, 50);
+    </script>
+</body>
+</html>
