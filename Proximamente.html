@@ -114,81 +114,38 @@
             100% { transform: skew(0deg); } 
         } 
  
-        /* --- Video Security Feed --- */ 
-        .video-container { 
-            position: relative; 
-            border: 1px solid #222; 
-            background: #000; 
-            overflow: hidden; 
-            /* Static Noise Fallback Background (SI EL VIDEO FALLA, SE VE ESTO) */ 
-            background-image: url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif'); 
-            background-size: cover; 
-            background-position: center; 
-            opacity: 0.9; 
-        } 
-         
-        .video-feed video { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            /* Start visually corrupted */ 
-            filter: blur(5px) grayscale(100%) contrast(1.2) brightness(0.6);  
-            transition: filter 1s ease-out; 
-            position: relative; 
-            z-index: 5; 
-        } 
-         
-        .video-overlay { 
-            position: absolute; 
-            inset: 0; 
-            background: rgba(0, 0, 0, 0.85); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 10; 
-            transition: opacity 0.8s; 
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, #000 2px, #000 4px); 
-        } 
- 
-        .unlocked video { 
-            filter: blur(0) grayscale(0) contrast(1) brightness(1); 
-        } 
-        .unlocked .video-overlay { 
-            opacity: 0; 
-            pointer-events: none; 
-        } 
-         
-        /* Play Button Overlay */ 
-        #play-overlay { 
-            position: absolute; 
-            inset: 0; 
-            z-index: 20; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            background: rgba(0,0,0,0.4); 
-            cursor: pointer; 
-            transition: opacity 0.3s; 
-        } 
-        #play-overlay:hover i { 
-            color: #fff; 
-            transform: scale(1.1); 
-        } 
-        #play-overlay.hidden { 
-            display: none; 
-        } 
- 
-        .rec-dot { 
-            width: 8px; height: 8px; 
-            background: red; 
-            border-radius: 50%; 
-            display: inline-block; 
-            box-shadow: 0 0 5px red; 
-            animation: blink 1s infinite; 
-        } 
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } } 
- 
+        /* --- Video Player Styles --- */
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            overflow: hidden;
+            /* Approximate aspect ratio for 1020x720 (1.416) */
+            aspect-ratio: 1020/720;
+            width: 100%;
+        }
+
+        .scanlines {
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0),
+                rgba(0,0,0,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2) 100%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* Video Filter for Locked State */
+        .video-locked {
+            filter: blur(8px) grayscale(100%) contrast(1.5) brightness(0.4);
+            transition: filter 1.5s ease-out;
+        }
+
+        .video-unlocked {
+            filter: blur(0) grayscale(0) contrast(1) brightness(1);
+        }
+
         /* --- Terminal Log (Kali Style) --- */ 
         .terminal-window { 
             background-color: #050505; 
@@ -221,6 +178,7 @@
             transition: all 0.3s; 
             position: relative; 
             overflow: hidden; 
+            cursor: pointer;
         } 
         .btn-cyber:hover { 
             background: var(--alert-red); 
@@ -261,47 +219,47 @@
             </div> 
         </div> 
  
-        <!-- VIDEO MODULE (SECURE FEED) --> 
-        <div class="cyber-box p-1"> 
-            <div class="flex justify-between items-center px-3 py-1 bg-black border-b border-gray-900 text-[10px] font-mono"> 
-                <span class="text-red-700">CANAL: NODO_KALI_01 [DESCONECTADO]</span> 
-                <span class="text-red-500"><span class="rec-dot"></span> INTENTANDO RECONEXIÓN</span> 
+        <!-- REBUILT VIDEO MODULE --> 
+        <div class="cyber-box p-1" id="cyber-player-container"> 
+            <div class="flex justify-between items-center px-3 py-1 bg-black border-b border-gray-900 text-[10px] font-mono" id="player-header"> 
+                <span class="text-red-700" id="channel-status">CANAL: NODO_KALI_01 [BLOQUEADO]</span> 
+                <span class="text-red-500 flex items-center gap-1" id="connection-status">
+                    <span class="rec-dot"></span> INTENTANDO RECONEXIÓN
+                </span> 
             </div> 
              
-            <!-- Using aspect-video (16:9) to support 1280x720 video better than fixed height -->
-            <div class="video-container aspect-video w-full" id="video-wrapper"> 
-                <div class="video-feed h-full relative"> 
-                     
-                    <!-- Fallback message layer (Visible if video fails) --> 
-                    <div id="video-fallback" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-red-600 font-mono z-0 hidden"> 
-                        <i class="fa-solid fa-triangle-exclamation text-4xl mb-2 animate-pulse"></i> 
-                        <span class="font-bold tracking-widest text-lg">NO SIGNAL</span> 
-                        <span class="text-xs">SOURCE: VIDEO.MP4 NOT FOUND</span> 
-                    </div> 
-                     
-                    <!-- Manual Play Button Overlay --> 
-                    <div id="play-overlay" onclick="manualPlay()"> 
-                        <i class="fa-solid fa-play text-red-500 text-6xl opacity-70 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)] hover:text-white transition-all"></i> 
-                    </div> 
- 
-                    <!-- Main Video --> 
-                    <!-- Removed autoplay from HTML to handle it in JS --> 
-                    <video id="kali-video" loop muted playsinline class="absolute inset-0 z-10 w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('video-fallback').classList.remove('hidden');"> 
-                        <source src="video.mp4" type="video/mp4"> 
-                    </video> 
-                </div> 
- 
-                <div class="video-overlay"> 
+            <!-- Video Wrapper with specific aspect ratio -->
+            <div class="video-wrapper relative group"> 
+                
+                <!-- Video Element -->
+                <video id="main-video" class="w-full h-full object-cover video-locked z-10 absolute inset-0" playsinline muted loop autoplay> 
+                    <source src="video.mp4" type="video/mp4"> 
+                </video>
+                
+                <!-- Scanlines Overlay -->
+                <div class="absolute inset-0 scanlines z-20 opacity-30"></div>
+
+                <!-- Lock Screen Overlay -->
+                <div id="lock-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-30 transition-all duration-700 backdrop-blur-sm"> 
                     <div class="border-2 border-red-600 rounded-full p-4 mb-4 animate-pulse"> 
                         <i class="fa-solid fa-lock text-4xl text-red-600"></i> 
                     </div> 
                     <h2 class="text-3xl font-bold text-white mb-1 tracking-widest font-mono">ENCRYPTED</h2> 
-                    <p class="text-xs text-red-400 mb-8 font-mono">SE REQUIERE ENLACE SEGURO</p> 
+                    <p class="text-xs text-red-400 mb-8 font-mono tracking-widest">SE REQUIERE ENLACE SEGURO</p> 
                      
-                    <button onclick="unlockVideo()" class="btn-cyber px-8 py-3 text-xs font-bold flex items-center gap-2"> 
+                    <button id="unlock-btn" class="btn-cyber px-8 py-3 text-xs font-bold flex items-center gap-2"> 
                         <i class="fa-solid fa-key"></i> VER MENSAJE DE KALI32 
                     </button> 
                 </div> 
+
+                <!-- Fallback / Error Screen -->
+                <div id="error-screen" class="absolute inset-0 bg-black z-40 hidden flex flex-col items-center justify-center text-red-600">
+                    <i class="fa-solid fa-triangle-exclamation text-5xl mb-4 animate-pulse"></i>
+                    <span class="font-bold tracking-widest text-xl mb-1">NO SIGNAL</span> 
+                    <span class="text-xs font-mono opacity-70">ERR: VIDEO_SOURCE_MISSING</span>
+                    <span class="text-[10px] font-mono mt-4 border border-red-900 px-2 py-1 text-red-400">Intentando reconexión manual...</span>
+                </div>
+
             </div> 
         </div> 
  
@@ -383,93 +341,133 @@
             anim(); 
         })(); 
  
-        // --- 2. VIDEO CONTROL --- 
-        const vid = document.getElementById('kali-video'); 
-        const playOverlay = document.getElementById('play-overlay'); 
- 
-        function tryAutoplay() { 
-            vid.muted = true; // Needs to be muted to autoplay usually 
-            vid.play().then(() => { 
-                playOverlay.classList.add('hidden'); 
-                console.log("Video playing (autoplay)"); 
-            }).catch(e => { 
-                console.log("Autoplay failed, waiting for user interaction"); 
-                playOverlay.classList.remove('hidden'); 
-            }); 
-        } 
+        // --- CYBER PLAYER CONTROLLER ---
+        class CyberPlayer {
+            constructor() {
+                this.video = document.getElementById('main-video');
+                this.lockOverlay = document.getElementById('lock-overlay');
+                this.unlockBtn = document.getElementById('unlock-btn');
+                this.errorScreen = document.getElementById('error-screen');
+                this.channelStatus = document.getElementById('channel-status');
+                this.connectionStatus = document.getElementById('connection-status');
+                
+                this.isUnlocked = false;
+                
+                this.init();
+            }
 
-        function manualPlay() {
-            vid.muted = false; // Unmute on manual play
-            vid.play().then(() => {
-                playOverlay.classList.add('hidden');
-                console.log("Video playing (manual)");
-            }).catch(e => {
-                console.error("Manual play failed", e);
-            });
+            init() {
+                // Setup event listeners
+                this.unlockBtn.addEventListener('click', () => this.unlock());
+                
+                // Video Error Handling
+                this.video.addEventListener('error', (e) => {
+                    console.error("Video Error:", e);
+                    this.showError();
+                    window.logger.log("FAILED", "Video Stream Interrupted (ERR_SRC_404)", "kali-fail");
+                });
+
+                // Attempt autoplay (muted)
+                this.video.play().then(() => {
+                    // Video playing muted in background
+                    window.logger.log("INFO", "Video Stream Connected (Background Mode)", "kali-info");
+                }).catch(err => {
+                    console.warn("Autoplay failed:", err);
+                    window.logger.log("WARN", "Autoplay Blocked by Protocol", "kali-fail");
+                });
+            }
+
+            unlock() {
+                if (this.isUnlocked) return;
+
+                // Visual Feedback on Button
+                this.unlockBtn.innerHTML = '<i class="fa-solid fa-gear fa-spin"></i> DESENCRIPTANDO...';
+                this.unlockBtn.classList.add('bg-white', 'text-black', 'border-white');
+                
+                // Simulate decryption delay
+                setTimeout(() => {
+                    this.isUnlocked = true;
+                    
+                    // Unmute and clear filters
+                    this.video.muted = false;
+                    this.video.classList.remove('video-locked');
+                    this.video.classList.add('video-unlocked');
+                    
+                    // Hide overlay
+                    this.lockOverlay.style.opacity = '0';
+                    this.lockOverlay.style.pointerEvents = 'none'; // Prevent clicks
+
+                    // Update Header Status
+                    this.channelStatus.innerHTML = "CANAL: NODO_KALI_01 [SEGURO]";
+                    this.channelStatus.classList.remove('text-red-700');
+                    this.channelStatus.classList.add('text-green-500');
+
+                    this.connectionStatus.innerHTML = '<i class="fa-solid fa-wifi text-[8px]"></i> CONECTADO';
+                    this.connectionStatus.classList.remove('text-red-500');
+                    this.connectionStatus.classList.add('text-green-500');
+
+                    // Log success
+                    window.logger.log("OK", "Decryption Successful. Key accepted.", "kali-ok");
+                    window.logger.log("INFO", "Full Stream Access Granted.", "kali-info");
+                    
+                }, 1500);
+            }
+
+            showError() {
+                this.errorScreen.classList.remove('hidden');
+                this.errorScreen.classList.add('flex');
+                this.lockOverlay.classList.add('hidden'); // Hide lock screen if error
+                
+                // Update header
+                this.channelStatus.innerHTML = "ERROR: NO SIGNAL";
+                this.channelStatus.classList.add('animate-pulse');
+            }
         }
- 
-        function unlockVideo() { 
-            const wrapper = document.getElementById('video-wrapper'); 
-            const btn = document.querySelector('.video-overlay button'); 
-             
-            btn.innerHTML = '<i class="fa-solid fa-gear fa-spin"></i> DESENCRIPTANDO SEÑAL...'; 
-            btn.classList.add('bg-white', 'text-black', 'border-white'); 
-             
-            setTimeout(() => { 
-                wrapper.classList.add('unlocked'); 
-                vid.muted = false; // Intenta activar sonido 
-                vid.play().catch(e => console.log("Audio play blocked")); 
-                playOverlay.classList.add('hidden'); // Hide play button on unlock 
-                 
-                // Switch log styling to success 
-                addLog("OK", "Conexión establecida con Nodo Central", "kali-ok"); 
-                addLog("INFO", "Recibiendo transmisión de KALI32...", "kali-info"); 
-            }, 1500); 
-        } 
- 
-        // Auto-play attempt on load 
-        window.addEventListener('load', tryAutoplay); 
-        
-        // Also allow clicking the video to play if paused (optional, but good UX)
-        vid.addEventListener('click', () => {
-             if(vid.paused) manualPlay();
+
+        // --- LOG SYSTEM ---
+        class KaliLogger {
+            constructor() {
+                this.output = document.getElementById('console-output');
+                this.logs = [ 
+                    { status: "OK", msg: "Started Network Manager Script.", type: "kali-ok" }, 
+                    { status: "OK", msg: "Started Dispatcher daemon for systemd-networkd.", type: "kali-ok" }, 
+                    { status: "FAILED", msg: "Failed to start LSB: Leviatham Core Module.", type: "kali-fail" }, 
+                    { status: "INFO", msg: "Listening on: [::]:443 (HTTPS)", type: "kali-info" }, 
+                    { status: "OK", msg: "Reached target Network (Pre).", type: "kali-ok" }, 
+                    { status: "OK", msg: "Mounted /boot/efi.", type: "kali-ok" }, 
+                    { status: "FAILED", msg: "Failed to mount /sys/kernel/security.", type: "kali-fail" }, 
+                    { status: "DEPEND", msg: "Dependency failed for Encrypted Volumes.", type: "kali-fail" }, 
+                    { status: "OK", msg: "Started Apache2 Web Server.", type: "kali-ok" }, 
+                    { status: "INFO", msg: "KALI32 Protocol Initialized...", type: "kali-info" }, 
+                    { status: "OK", msg: "Started PostgreSQL Database.", type: "kali-ok" }, 
+                    { status: "WARN", msg: "CPU Temperature High: 92°C [THROTTLING]", type: "kali-fail" } 
+                ];
+                this.startLoop();
+            }
+
+            log(status, msg, typeClass) {
+                const div = document.createElement('div'); 
+                div.className = 'log-line'; 
+                div.innerHTML = `<span class="kali-bracket">[</span> <span class="${typeClass}">${status}</span> <span class="kali-bracket">]</span> <span class="kali-text">${msg}</span>`; 
+                this.output.appendChild(div); 
+                if(this.output.children.length > 8) this.output.removeChild(this.output.firstChild); 
+            }
+
+            startLoop() {
+                const randomLog = () => {
+                    const log = this.logs[Math.floor(Math.random() * this.logs.length)];
+                    this.log(log.status, log.msg, log.type);
+                    setTimeout(randomLog, Math.random() * 800 + 300);
+                }
+                randomLog();
+            }
+        }
+
+        // Initialize Systems
+        window.addEventListener('load', () => {
+            window.logger = new KaliLogger();
+            window.player = new CyberPlayer();
         });
- 
-        // --- 3. KALI LINUX BOOT LOGS --- 
-        const logs = [ 
-            { status: "OK", msg: "Started Network Manager Script.", type: "kali-ok" }, 
-            { status: "OK", msg: "Started Dispatcher daemon for systemd-networkd.", type: "kali-ok" }, 
-            { status: "FAILED", msg: "Failed to start LSB: Leviatham Core Module.", type: "kali-fail" }, 
-            { status: "INFO", msg: "Listening on: [::]:443 (HTTPS)", type: "kali-info" }, 
-            { status: "OK", msg: "Reached target Network (Pre).", type: "kali-ok" }, 
-            { status: "OK", msg: "Mounted /boot/efi.", type: "kali-ok" }, 
-            { status: "FAILED", msg: "Failed to mount /sys/kernel/security.", type: "kali-fail" }, 
-            { status: "DEPEND", msg: "Dependency failed for Encrypted Volumes.", type: "kali-fail" }, 
-            { status: "OK", msg: "Started Apache2 Web Server.", type: "kali-ok" }, 
-            { status: "INFO", msg: "KALI32 Protocol Initialized...", type: "kali-info" }, 
-            { status: "OK", msg: "Started PostgreSQL Database.", type: "kali-ok" }, 
-            { status: "WARN", msg: "CPU Temperature High: 92°C [THROTTLING]", type: "kali-fail" } 
-        ]; 
- 
-        function addLog(status, msg, typeClass) { 
-            const out = document.getElementById('console-output'); 
-            const div = document.createElement('div'); 
-            div.className = 'log-line'; 
-             
-            // Format: [ STATUS ] Message 
-            div.innerHTML = `<span class="kali-bracket">[</span> <span class="${typeClass}">${status}</span> <span class="kali-bracket">]</span> <span class="kali-text">${msg}</span>`; 
-             
-            out.appendChild(div); 
-             
-            if(out.children.length > 8) out.removeChild(out.firstChild); 
-        } 
- 
-        function loopLogs() { 
-            const log = logs[Math.floor(Math.random() * logs.length)]; 
-            addLog(log.status, log.msg, log.type); 
-            setTimeout(loopLogs, Math.random() * 800 + 100);  
-        } 
-        loopLogs();  
  
     </script> 
 </body> 
