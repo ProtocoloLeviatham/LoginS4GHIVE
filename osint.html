@@ -690,7 +690,7 @@
 
         // --- MODULE: PHONE (REBUILT: NO FAKE GEO, REAL TECHNICAL DATA) ---
         function generateRealisticIMEI() {
-            const tacs = ["3545678", "3589192", "3529781", "3956712", "8692912"]; 
+            const tacs = ["3545678", "3589192", "3529781", "3956712", "869291"]; 
             let imei = tacs[Math.floor(Math.random() * tacs.length)];
             for(let i=0; i<8; i++) imei += Math.floor(Math.random() * 10);
             return imei; 
@@ -715,7 +715,7 @@
                 <div><span class="text-green-500 font-bold">SGSN IP (INTERNAL):</span> ${sgsnIp}</div>
                 <div><span class="text-green-500 font-bold">ID GLOBAL (CGI):</span> 722-${Math.floor(Math.random()*999)}-${Math.floor(Math.random()*1000000)}</div>
                 <div><span class="text-green-500 font-bold">MSC/VLR (SWITCHING):</span> MSC-${vlr}-GT</div>
-                <div><span class="text-green-500 font-bold">IMEI DETECTADO:</span> ${generateRealisticIMEI()}</div>
+                <div><span class="text-green-500 font-bold">IMEI DETECTADO (Calculo Matemático):</span> ${generateRealisticIMEI()}</div>
                 <div><span class="text-green-500 font-bold">POTENCIA (RSRP):</span> ${rsrp} dBm</div>
                 <div><span class="text-green-500 font-bold">BANDA:</span> LTE ${band}</div>
                 <div><span class="text-green-500 font-bold">ESTADO:</span> ENLACE ACTIVO</div>
@@ -988,6 +988,7 @@
     </script>
 </body>
 </html>
+
 
 
 
