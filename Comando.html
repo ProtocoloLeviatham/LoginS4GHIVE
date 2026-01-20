@@ -499,7 +499,7 @@
                         <div class="bg-red-900 bg-opacity-20 p-4 border border-red-600 mb-4 text-center text-red-400 font-bold animate-pulse">¡ACCESO DE SUPERUSUARIO CONCEDIDO! PRECAUCIÓN EXTREMA.</div>
                         <div class="grid md:grid-cols-2 gap-4">
                             <a href="botnet_master.html" target="_self" class="group block bg-black border border-red-800 p-6 hover:bg-red-900 hover:bg-opacity-40 transition-all text-center"><i class="fas fa-project-diagram text-4xl text-red-600 mb-3 group-hover:scale-110 transition-transform"></i><h4 class="text-xl font-bold text-white mb-1">BOTNET S4G</h4><p class="text-xs text-red-400">Control de Enjambre</p></a>
-                            <a href="blackout_ops.html" target="_self" class="group block bg-black border border-red-800 p-6 hover:bg-red-900 hover:bg-opacity-40 transition-all text-center"><i class="fas fa-power-off text-4xl text-red-600 mb-3 group-hover:scale-110 transition-transform"></i><h4 class="text-xl font-bold text-white mb-1">BLACKOUT</h4><p class="text-xs text-red-400">Infraestructura Crítica</p></a>
+                            <a href="Proximamente.html" target="_self" class="group block bg-black border border-red-800 p-6 hover:bg-red-900 hover:bg-opacity-40 transition-all text-center"><i class="fas fa-power-off text-4xl text-red-600 mb-3 group-hover:scale-110 transition-transform"></i><h4 class="text-xl font-bold text-white mb-1">BLACKOUT</h4><p class="text-xs text-red-400">Infraestructura Crítica</p></a>
                         </div>
                         
                         <div class="relative bg-black border border-red-800 h-80 w-full overflow-hidden group mt-8">
@@ -1224,156 +1224,12 @@
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
         window.onload = function() { runBoot(); initNeuralNetwork(); animateNeural(); initTargets(); initServerFarm(); initThreatMap(); };
         
-        // 9. THREAT MAP (GLOBAL THREAT MONITOR)
-        function initThreatMap() {
-            const canvas = document.getElementById('threat-map');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const tooltip = document.getElementById('map-tooltip');
-
-            function resizeMap() {
-                canvas.width = canvas.clientWidth;
-                canvas.height = canvas.clientHeight;
-            }
-            resizeMap();
-            window.addEventListener('resize', resizeMap);
-
-            // Coordenadas aproximadas de países principales (Normalizadas 0-1)
-            const countryNodes = [
-                { name: "USA", x: 0.25, y: 0.35, threats: 45 },
-                { name: "China", x: 0.75, y: 0.35, threats: 82 },
-                { name: "Russia", x: 0.65, y: 0.20, threats: 60 },
-                { name: "Brazil", x: 0.32, y: 0.65, threats: 20 },
-                { name: "Germany", x: 0.51, y: 0.30, threats: 33 },
-                { name: "Australia", x: 0.85, y: 0.75, threats: 12 },
-                { name: "India", x: 0.68, y: 0.45, threats: 55 },
-                { name: "South Africa", x: 0.53, y: 0.75, threats: 18 },
-                { name: "Japan", x: 0.85, y: 0.35, threats: 28 },
-                { name: "UK", x: 0.48, y: 0.28, threats: 40 }
-            ];
-
-            let attacks = [];
-
-            function spawnAttack() {
-                const start = countryNodes[Math.floor(Math.random() * countryNodes.length)];
-                let end = countryNodes[Math.floor(Math.random() * countryNodes.length)];
-                while(start === end) end = countryNodes[Math.floor(Math.random() * countryNodes.length)];
-
-                // Color logic (Red=High, Yellow=Mid, Blue=Scan)
-                const typeRand = Math.random();
-                let color = '#00f3ff'; // Blue
-                if(typeRand > 0.7) color = '#ff0000'; // Red
-                else if(typeRand > 0.4) color = '#ffcc00'; // Yellow
-
-                attacks.push({
-                    sx: start.x, sy: start.y,
-                    ex: end.x, ey: end.y,
-                    progress: 0,
-                    speed: 0.005 + Math.random() * 0.01,
-                    color: color
-                });
-            }
-
-            function drawMap() {
-                // Clear with slight trail effect
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw Nodes
-                countryNodes.forEach(node => {
-                    const nx = node.x * canvas.width;
-                    const ny = node.y * canvas.height;
-                    
-                    // Dot
-                    ctx.beginPath();
-                    ctx.arc(nx, ny, 3, 0, Math.PI * 2);
-                    ctx.fillStyle = '#005500';
-                    ctx.fill();
-                    
-                    // Ring
-                    ctx.beginPath();
-                    ctx.arc(nx, ny, 5 + Math.sin(Date.now() * 0.005) * 2, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
-                    ctx.stroke();
-                });
-
-                // Draw Attacks (Arcs)
-                for (let i = attacks.length - 1; i >= 0; i--) {
-                    const atk = attacks[i];
-                    atk.progress += atk.speed;
-
-                    if (atk.progress >= 1) {
-                        attacks.splice(i, 1);
-                        continue;
-                    }
-
-                    const startX = atk.sx * canvas.width;
-                    const startY = atk.sy * canvas.height;
-                    const endX = atk.ex * canvas.width;
-                    const endY = atk.ey * canvas.height;
-
-                    // Curve control point (higher means more arch)
-                    const midX = (startX + endX) / 2;
-                    const midY = (startY + endY) / 2 - 100; // Arch height
-
-                    // Quadratic Bezier calculation
-                    const t = atk.progress;
-                    const x = (1-t)*(1-t)*startX + 2*(1-t)*t*midX + t*t*endX;
-                    const y = (1-t)*(1-t)*startY + 2*(1-t)*t*midY + t*t*endY;
-
-                    // Draw "Missile" head
-                    ctx.beginPath();
-                    ctx.arc(x, y, 2, 0, Math.PI * 2);
-                    ctx.fillStyle = atk.color;
-                    ctx.fill();
-                    
-                    // Draw Trail (fading)
-                    ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-                    ctx.quadraticCurveTo(midX, midY, x, y);
-                    ctx.strokeStyle = `rgba(${atk.color === '#ff0000' ? '255,0,0' : (atk.color === '#ffcc00' ? '255,204,0' : '0,243,255')}, ${1-t})`;
-                    ctx.lineWidth = 1;
-                    ctx.stroke();
-                }
-
-                if (Math.random() < 0.05) spawnAttack(); // Randomly spawn attacks
-                requestAnimationFrame(drawMap);
-            }
-
-            // Interaction: Tooltip
-            canvas.addEventListener('mousemove', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const mx = e.clientX - rect.left;
-                const my = e.clientY - rect.top;
-                let hit = false;
-
-                countryNodes.forEach(node => {
-                    const nx = node.x * canvas.width;
-                    const ny = node.y * canvas.height;
-                    const dist = Math.sqrt((mx - nx) ** 2 + (my - ny) ** 2);
-
-                    if (dist < 10) {
-                        tooltip.style.display = 'block';
-                        tooltip.style.left = (e.clientX + 10) + 'px';
-                        tooltip.style.top = (e.clientY + 10) + 'px';
-                        tooltip.innerHTML = `
-                            <strong>${node.name}</strong><br>
-                            STATUS: ACTIVE<br>
-                            PING: ${Math.floor(Math.random() * 100) + 10}ms<br>
-                            TARGETS: ${node.threats}
-                        `;
-                        hit = true;
-                    }
-                });
-
-                if (!hit) tooltip.style.display = 'none';
-            });
-
-            drawMap();
-        }
     </script>
+    
 </body>
+    
 </html>
+
 
 
 
