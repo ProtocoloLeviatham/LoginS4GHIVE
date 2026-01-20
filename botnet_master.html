@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botnet S4G Manager</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+<meta name="theme-color" content="#ffffff">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js for Load Viz -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-red: #ff0055;
+            --neon-green: #00ff66;
+            --kali-blue: #258ad8;
+            --kali-bg: #1f1f1f;
+            --dark-bg: #050505;
+            --panel-bg: rgba(0, 10, 20, 0.95);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-blue);
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- Login Overlay --- */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #020202; border-left: 1px solid #111; }
+        ::-webkit-scrollbar-thumb { background: #004455; border: 1px solid var(--neon-blue); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+
+        /* --- Grid Background --- */
+        .cyber-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            perspective: 500px;
+        }
+
+        /* --- Device Card --- */
+        .device-card {
+            background: rgba(0, 20, 40, 0.8);
+            border: 1px solid #004455;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .device-card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+        .device-card.offline {
+            border-color: #333;
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+        .device-card.active {
+            border-color: var(--neon-red);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+            animation: border-pulse 0.5s infinite alternate;
+        }
+        
+        .device-card.booting {
+            border-color: var(--neon-green);
+            animation: border-flash 0.2s infinite;
+        }
+
+        @keyframes border-pulse { 0% { box-shadow: 0 0 10px var(--neon-red); border-color: #500; } 100% { box-shadow: 0 0 25px var(--neon-red); border-color: var(--neon-red); } }
+        @keyframes border-flash { 0% { border-color: #fff; } 50% { border-color: var(--neon-green); } }
+
+        /* --- Status Indicator --- */
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #333; box-shadow: 0 0 5px #333;
+            transition: all 0.3s;
+        }
+        .online .status-dot { background: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
+        .attacking .status-dot { background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); animation: pulse-red 0.1s infinite; }
+        .booting .status-dot { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* --- Header Glitch --- */
+        .glitch-header {
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 2px 2px var(--neon-red), -2px -2px var(--neon-blue);
+        }
+
+        /* --- Kali Linux Terminal --- */
+        .kali-terminal {
+            font-family: 'Fira Code', monospace;
+            font-size: 10px;
+            color: #ccc;
+            background-color: #121212;
+            overflow-y: auto;
+            height: 100%;
+            position: relative;
+            padding: 5px;
+            border-left: 2px solid var(--kali-blue);
+        }
+        .kali-prompt { color: var(--neon-red); font-weight: bold; }
+        .kali-path { color: var(--kali-blue); font-weight: bold; }
+        .kali-cmd { color: #fff; }
+        .kali-success { color: var(--neon-green); }
+        .kali-error { color: var(--neon-red); }
+        .kali-info { color: #00d9ff; }
+        
+        .kali-log-line {
+            white-space: nowrap;
+            margin-bottom: 2px;
+            border-bottom: 1px solid #1a1a1a;
+            font-size: 9px;
+        }
+        
+        /* Custom Scrollbar for Terminal */
+        .kali-terminal::-webkit-scrollbar { width: 6px; }
+        .kali-terminal::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* --- Server HUD --- */
+        .server-hud {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--neon-blue);
+            box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.1);
+        }
+        .hud-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+        .hud-label { color: var(--neon-blue); font-size: 0.7rem; letter-spacing: 1px; }
+
+        .progress-bar-bg { background: #111; height: 4px; width: 100%; }
+        .progress-bar-fill { height: 100%; background: var(--neon-red); transition: width 0.2s; }
+        
+        /* Global Log Panel */
+        .audit-log {
+            font-family: 'Consolas', monospace;
+            font-size: 10px;
+            border-top: 1px solid #333;
+            background: #000;
+        }
+        .log-entry { border-bottom: 1px solid #111; padding: 2px; }
+        .log-entry:hover { background: #111; }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-overlay">
+        <div class="border border-cyan-500 p-8 bg-black/90 shadow-[0_0_50px_rgba(0,255,255,0.2)] text-center w-80">
+            <h1 class="text-3xl font-bold glitch-header mb-4 text-cyan-400">S4G AUTH</h1>
+            <p class="text-xs text-gray-500 mb-4 font-mono">SECURE ACCESS REQUIRED</p>
+            <input type="password" id="access-key" class="w-full bg-gray-900 border border-cyan-800 p-2 text-center text-cyan-400 focus:outline-none mb-4 font-mono" placeholder="ENTER ACCESS KEY">
+            <button onclick="attemptLogin()" class="w-full bg-cyan-900/50 border border-cyan-500 text-cyan-400 py-2 hover:bg-cyan-500 hover:text-black font-bold transition">DECRYPT</button>
+            <div id="login-msg" class="text-xs text-red-500 mt-2 h-4"></div>
+        </div>
+    </div>
+
+    <div class="cyber-grid"></div>
+
+    <!-- HEADER -->
+    <header class="p-4 border-b border-cyan-900 bg-black/90 sticky top-0 z-50 backdrop-blur-md flex justify-between items-center shadow-[0_0_20px_rgba(0,243,255,0.2)]">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-server text-4xl text-cyan-400 animate-pulse"></i>
+            <div>
+                <h1 class="text-3xl font-bold glitch-header tracking-widest">SERVIDOR S4G <span class="text-sm align-top bg-cyan-900 text-black px-1 font-bold">MASTER</span></h1>
+                <p class="text-[10px] text-cyan-600 tracking-[0.2em]">GLOBAL COMMAND CENTER // UPTIME: <span id="uptime">00:00:00</span></p>
+            </div>
+        </div>
+        <div class="flex gap-2 items-center">
+            <div id="firebase-status" class="text-xs text-yellow-500 font-mono border border-yellow-900 px-2 py-1 bg-black animate-pulse">SYNCING...</div>
+        </div>
+    </header>
+
+    <!-- SERVER STATUS PANEL -->
+    <section class="p-2 bg-black/60 border-b border-cyan-900/30">
+        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 p-2">
+            
+            <div class="server-hud p-3 text-center">
+                <div class="hud-label">ACTIVE NODES</div>
+                <div id="total-nodes" class="hud-value text-cyan-400">0/16</div>
+            </div>
+
+            <div class="server-hud p-3 text-center">
+                <div class="hud-label">TOTAL SWARM RAM</div>
+                <div id="total-ram" class="hud-value text-green-400">0 GB</div>
+            </div>
+
+            <div class="server-hud p-3 text-center">
+                <div class="hud-label">TOTAL STORAGE</div>
+                <div id="total-storage" class="hud-value text-purple-400">0 TB</div>
+            </div>
+
+            <div class="server-hud p-3 text-center relative overflow-hidden">
+                <div class="hud-label text-red-500">ATTACK POWER</div>
+                <div id="attack-power" class="hud-value text-red-500">0%</div>
+                <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-900">
+                    <div id="power-bar" class="h-full bg-red-600 w-0"></div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ATTACK CONTROL CENTER -->
+    <section class="p-4 border-b border-red-900/50 bg-black/80 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://media.giphy.com/media/oEI9uBYSzLpBK/giphy.gif')] opacity-5 pointer-events-none mix-blend-screen"></div>
+
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 relative z-10">
+            
+            <!-- Controls -->
+            <div class="w-full md:w-1/4 flex flex-col gap-4">
+                <div class="border border-red-800 p-4 bg-red-900/10 h-full flex flex-col justify-center">
+                    <h2 class="text-red-500 font-bold mb-2 tracking-widest text-sm border-b border-red-800 pb-1"><i class="fa-solid fa-crosshairs"></i> TARGET CONTROL</h2>
+                    
+                    <input type="text" id="target-ip" value="192.168.1.100" class="w-full bg-black border border-red-700 text-red-500 font-mono text-sm p-2 mb-2 focus:outline-none focus:shadow-[0_0_10px_red]" placeholder="IP ADDRESS OR DOMAIN">
+                    
+                    <select id="attack-method" class="w-full bg-black border border-red-700 text-red-500 font-mono text-sm p-2 mb-2">
+                        <option value="DDOS">DDOS (HTTP FLOOD)</option>
+                        <option value="DNS">DNS AMPLIFICADOR</option>
+                    </select>
+                    
+                    <div class="flex gap-2 mb-2">
+                        <button id="btn-attack" onclick="toggleAttackSimulation()" class="flex-1 bg-red-600 hover:bg-red-500 text-black font-bold py-3 text-sm tracking-wider transition-all shadow-[0_0_15px_rgba(255,0,0,0.5)]">
+                            ATTACK
+                        </button>
+                        <button onclick="startAutoTest()" class="bg-yellow-600 hover:bg-yellow-500 text-black font-bold px-2 py-3 text-xs tracking-wider transition-all" title="Auto Self-Test">
+                            <i class="fa-solid fa-robot"></i> AUTO
+                        </button>
+                    </div>
+
+                    <div id="pps-display" class="text-center mt-1 font-mono text-red-400 text-xs hidden">
+                        <div class="text-2xl font-bold font-orbitron" id="pps-value">0</div>
+                        <div class="text-[9px] text-gray-500 mb-1">PACKETS PER SECOND</div>
+                        
+                        <div class="border-t border-red-900/50 pt-1 mt-1">
+                            <div class="text-lg font-bold text-yellow-400 font-orbitron" id="bw-value">0.00</div>
+                            <div class="text-[9px] text-gray-500">TOTAL TRAFFIC OUT (Gbps)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualizer -->
+            <div class="w-full md:w-2/4 border border-cyan-900 bg-black/90 p-2 h-64 relative">
+                <canvas id="traffic-chart"></canvas>
+                <div class="absolute top-2 right-2 text-[10px] font-mono text-cyan-500 bg-black px-1 border border-cyan-900">LIVE TRAFFIC MONITOR</div>
+            </div>
+
+            <!-- Packet Log (Kali Style) -->
+            <div class="w-full md:w-1/4 border border-gray-700 bg-[#1f1f1f] h-64 flex flex-col shadow-inner">
+                <div class="bg-[#2d2d2d] text-gray-400 text-[10px] px-2 py-1 flex justify-between">
+                    <span>root@s4g-master:~</span>
+                    <span class="text-green-500">●</span>
+                </div>
+                <div id="packet-log" class="kali-terminal flex-1 p-2 font-mono text-[10px]">
+                    <div class="mb-1"><span class="kali-prompt">┌──(root💀kali)-[/opt/botnet/s4g]</span></div>
+                    <div class="mb-1"><span class="kali-prompt">└─#</span> <span class="kali-cmd">./status_check.py --verbose</span></div>
+                    <div class="kali-info">[+] System integrity check passed.</div>
+                    <div class="kali-info">[+] Node connectivity established.</div>
+                    <div class="text-gray-500">Waiting for command...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DEVICE GRID -->
+    <main class="max-w-7xl mx-auto p-4 pb-4">
+        
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-bold text-gray-500 tracking-widest flex items-center gap-2">
+                <i class="fa-solid fa-server"></i> ENJAMBRE DE DISPOSITIVOS (16 NODES)
+            </h3>
+            <div class="flex gap-2">
+                <button id="btn-all-on" onclick="toggleAll(true)" class="border border-cyan-800 text-cyan-500 px-4 py-2 text-xs font-bold hover:bg-cyan-900/30 transition shadow-[0_0_10px_rgba(0,255,255,0.1)]">ALL ON</button>
+                <button id="btn-all-off" onclick="toggleAll(false)" class="border border-red-800 text-red-500 px-4 py-2 text-xs font-bold hover:bg-red-900/30 transition shadow-[0_0_10px_rgba(255,0,0,0.1)]">ALL OFF</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4" id="device-grid">
+            <div class="text-center col-span-full py-20 text-cyan-800 animate-pulse font-mono">
+                INITIALIZING CONNECTION TO SWARM...
+            </div>
+        </div>
+    </main>
+
+    <!-- GLOBAL AUDIT LOGS -->
+    <section class="max-w-7xl mx-auto p-4 pt-0 mb-10">
+        <div class="border border-green-900 bg-black/80">
+            <div class="bg-green-900/20 px-3 py-1 text-xs text-green-500 border-b border-green-900 flex justify-between">
+                <span><i class="fa-solid fa-list-ol mr-2"></i> GLOBAL AUDIT REGISTRY</span>
+                <span id="log-count">0 EVENTS</span>
+            </div>
+            <div id="global-logs" class="audit-log h-32 overflow-y-auto text-gray-400 p-1">
+                <!-- Logs go here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- FIREBASE & LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, limit, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIGURACIÓN (REAL)
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9E1Ra6vlp9LQSZwv3L3s6PCLtqZd-vWs",
+            authDomain: "lebo-e7185.firebaseapp.com",
+            projectId: "lebo-e7185",
+            storageBucket: "lebo-e7185.firebasestorage.app",
+            messagingSenderId: "663191766186",
+            appId: "1:663191766186:web:31e08ad75c933569e27cd3"
+        };
+
+        const specs = [
+            { ram: 12, rom: 512, unit: "GB" }, { ram: 8,  rom: 256, unit: "GB" }, { ram: 12, rom: 1024, unit: "TB" }, { ram: 8,  rom: 128, unit: "GB" },
+            { ram: 12, rom: 512, unit: "GB" }, { ram: 8,  rom: 256, unit: "GB" }, { ram: 6,  rom: 128, unit: "GB" }, { ram: 6,  rom: 128, unit: "GB" },
+            { ram: 8,  rom: 256, unit: "GB" }, { ram: 8,  rom: 512, unit: "GB" }, { ram: 12, rom: 256, unit: "GB" }, { ram: 8,  rom: 256, unit: "GB" },
+            { ram: 12, rom: 256, unit: "GB" }, { ram: 12, rom: 256, unit: "GB" }, { ram: 8,  rom: 128, unit: "GB" }, { ram: 8,  rom: 128, unit: "GB" }
+        ];
+
+        let db;
+        let devicesState = {}; 
+        let isAttacking = false;
+        let chartInstance = null;
+        let logInterval = null;
+        let globalLogUnsubscribe = null;
+
+        // --- AUTHENTICATION LOGIC ---
+        window.attemptLogin = async () => {
+            const pass = document.getElementById('access-key').value;
+            const msg = document.getElementById('login-msg');
+            
+            try {
+                // Ensure auth doc exists
+                const authRef = doc(db, "botnet", "secure_access");
+                const authSnap = await getDoc(authRef);
+                
+                if (!authSnap.exists()) {
+                    // Create default password if missing (FOR SETUP ONLY)
+                    await setDoc(authRef, { key: "###" });
+                }
+                
+                // Check password
+                const serverData = authSnap.exists() ? authSnap.data() : { key: "###" };
+                
+                if (pass === serverData.key) {
+                    document.getElementById('login-overlay').style.display = 'none';
+                    // Log access
+                    window.logAction("AUTH", "Admin login successful.");
+                } else {
+                    msg.innerText = "ACCESS DENIED: INVALID KEY";
+                }
+            } catch (e) {
+                console.error("Auth Error", e);
+                // Fallback for demo if DB read fails (rare)
+                if(pass === "###") document.getElementById('login-overlay').style.display = 'none';
+                else msg.innerText = "DB CONNECTION ERROR";
+            }
+        };
+
+        // --- 70+ RANDOM SYSTEM MESSAGES ---
+        const bootMsgs = [
+            "Handshake...", "Verifying Key...", "Allocating RAM...", "Syncing Core...", "Routing Packet...", 
+            "Decrypting...", "Mounting FS...", "Ping Echo...", "Kernel Load...", "Socket Open...", 
+            "Port Bind...", "SSL Check...", "Tor Circuit...", "Masking IP...", "Spoofing MAC...", 
+            "Checking DNS...", "Cache Clear...", "Buffer Flush...", "Node Auth...", "Token Gen...",
+            "Initializing Daemon...", "Loading Modules...", "Checking Integrity...", "Updating Firmware...", "Establishing Link...",
+            "Encrypting Payload...", "Verifying Hash...", "Allocating Resources...", "Optimizing Threads...", "Clearing Logs...",
+            "Bypassing Firewall...", "Injecting Headers...", "Synchronizing Time...", "Checking Latency...", "Resolving Host...",
+            "Connecting Peer...", "Establishing VPN...", "Starting Service...", "Loading Config...", "Checking Power...",
+            "Thermal Check...", "Memory Test...", "Disk Check...", "Network Scan...", "Security Audit...",
+            "Key Exchange...", "Session Init...", "Protocol Handshake...", "Data Stream...", "Signal Lock...",
+            "Uplink Established...", "Downlink Stable...", "Ping Response...", "Packet Trace...", "Route Trace...",
+            "Hop Count...", "TTL Check...", "MTU Set...", "Fragmenting...", "Reassembling...",
+            "Hashing Data...", "Signing Packet...", "Verifying Sig...", "Access Granted...", "Node Ready..."
+        ];
+
+        // --- ATTACK LOGS DATA ---
+        const botIPs = [
+            "104.22.55.1", "185.12.33.4", "45.33.22.99", "23.99.12.11", 
+            "89.11.05.22", "91.22.41.33", "201.55.12.9", "190.11.44.2",
+            "112.5.22.99", "45.22.11.90", "88.221.44.21", "5.2.44.11"
+        ];
+        
+        const userAgents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Mozilla/5.0 (X11; Linux x86_64)",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X)",
+            "Mozilla/5.0 (Windows NT 10.0)",
+            "Python-urllib/2.7",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)"
+        ];
+
+        const dnsResolvers = ["8.8.8.8", "1.1.1.1", "208.67.222.222", "9.9.9.9", "1.0.0.1"];
+
+        function getFormattedDate() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][now.getMonth()];
+            const year = "2026"; // As per request
+            const time = now.toTimeString().split(' ')[0];
+            return `[${day}/${month}/${year}:${time} -0300]`;
+        }
+
+        function getDNSTimestamp() {
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];
+            const ms = String(now.getMilliseconds()).padStart(6, '0');
+            return `${time}.${ms}`;
+        }
+
+        // --- INIT FIREBASE ---
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            document.getElementById('firebase-status').innerHTML = '<span class="text-green-500 font-bold">● ONLINE</span>';
+            
+            const docRef = doc(db, "botnet", "swarm_status");
+            const logsRef = collection(db, "botnet_audit_logs");
+
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    devicesState = docSnap.data();
+                    updateServerStats();
+                    renderGrid();
+                } else {
+                    const initial = {};
+                    for(let i=1; i<=16; i++) initial[`SG4-${i}`] = false;
+                    setDoc(docRef, initial);
+                }
+            });
+
+            const q = query(logsRef, orderBy("timestamp", "desc"), limit(50));
+            globalLogUnsubscribe = onSnapshot(q, (snapshot) => {
+                const container = document.getElementById('global-logs');
+                container.innerHTML = '';
+                document.getElementById('log-count').innerText = snapshot.size + " EVENTS";
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const time = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleTimeString() : "--:--:--";
+                    const row = document.createElement('div');
+                    row.className = "log-entry flex gap-2 text-[9px]";
+                    let color = "text-gray-400";
+                    if(data.type === "ATTACK") color = "text-red-400 font-bold";
+                    if(data.type === "BOOT") color = "text-green-400";
+                    if(data.type === "SHUTDOWN") color = "text-yellow-600";
+                    row.innerHTML = `<span class="text-gray-600">[${time}]</span> <span class="${color}">${data.msg}</span>`;
+                    container.appendChild(row);
+                });
+            });
+
+            window.logAction = async (type, msg) => {
+                try {
+                    await addDoc(logsRef, { type: type, msg: msg, timestamp: serverTimestamp() });
+                } catch(e) { console.error(e); }
+            }
+
+            // --- AUTO TEST FEATURE ---
+            window.startAutoTest = async () => {
+                const targetInput = document.getElementById('target-ip');
+                targetInput.value = "Leviatham.site";
+                
+                if(isAttacking) window.toggleAttackSimulation(); 
+
+                const updates = {};
+                for(let i=1; i<=16; i++) {
+                    updates[`SG4-${i}`] = Math.random() > 0.5;
+                }
+                await updateDoc(docRef, updates);
+                
+                setTimeout(() => {
+                    window.toggleAttackSimulation();
+                    window.logAction("INFO", "AUTO-DIAGNOSTIC SEQUENCE INITIATED");
+                }, 2000);
+            };
+
+            window.toggleDevice = async (id) => {
+                const card = document.getElementById(`card-${id}`);
+                const statusText = document.getElementById(`status-${id}`);
+                if(card.classList.contains('booting')) return;
+                const targetState = !devicesState[id];
+                card.classList.add('booting'); 
+                const delay = Math.floor(Math.random() * 2000) + 500;
+                let msgInterval = setInterval(() => {
+                    statusText.innerText = bootMsgs[Math.floor(Math.random() * bootMsgs.length)];
+                    statusText.className = "text-[9px] text-yellow-500 animate-pulse";
+                }, 100);
+                setTimeout(async () => {
+                    clearInterval(msgInterval);
+                    card.classList.remove('booting');
+                    await updateDoc(docRef, { [id]: targetState });
+                    window.logAction(targetState ? "BOOT" : "SHUTDOWN", `Node ${id} manually toggled ${targetState ? 'ON' : 'OFF'}`);
+                }, delay);
+            };
+
+            window.toggleAll = async (state) => {
+                const btn = state ? document.getElementById('btn-all-on') : document.getElementById('btn-all-off');
+                const originalText = btn.innerText;
+                btn.disabled = true;
+                btn.innerText = "PROCESSING...";
+                const duration = Math.floor(Math.random() * 20000) + 10000;
+                const delayPerDevice = duration / 16;
+                window.logAction("INFO", `Global sequence: ${state ? 'POWER ON' : 'SHUTDOWN'} (Est. ${duration/1000}s)`);
+                const ids = Array.from({length: 16}, (_, i) => `SG4-${i+1}`);
+                for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+                let processed = 0;
+                ids.forEach((id, index) => {
+                    setTimeout(async () => {
+                        const card = document.getElementById(`card-${id}`);
+                        if(card) card.classList.add('booting');
+                        setTimeout(async () => {
+                            await updateDoc(docRef, { [id]: state });
+                            if(card) card.classList.remove('booting');
+                            processed++;
+                            if(processed === 16) { btn.disabled = false; btn.innerText = originalText; window.logAction("INFO", `Global sequence completed.`); }
+                        }, 500);
+                    }, index * delayPerDevice);
+                });
+            };
+
+        } catch (e) {
+            console.error("FB Error", e);
+            document.getElementById('firebase-status').innerHTML = '<span class="text-red-500">DB_ERROR</span>';
+        }
+
+        function updateServerStats() {
+            let activeNodes = 0; let totalRam = 0; let totalStorage = 0;
+            specs.forEach((s, i) => {
+                if (devicesState[`SG4-${i+1}`]) {
+                    activeNodes++; totalRam += s.ram; totalStorage += (s.unit === "TB" ? s.rom * 1024 : s.rom);
+                }
+            });
+            let storageStr = totalStorage + " GB";
+            if (totalStorage > 1024) storageStr = (totalStorage / 1024).toFixed(1) + " TB";
+            document.getElementById('total-nodes').innerText = `${activeNodes}/16`;
+            document.getElementById('total-ram').innerText = `${totalRam} GB`;
+            document.getElementById('total-storage').innerText = storageStr;
+            const power = Math.floor((activeNodes / 16) * 100);
+            document.getElementById('attack-power').innerText = `${power}%`;
+            document.getElementById('power-bar').style.width = `${power}%`;
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('device-grid');
+            grid.innerHTML = '';
+            specs.forEach((spec, index) => {
+                const id = `SG4-${index + 1}`;
+                const isOn = devicesState[id] === true;
+                const statusClass = isOn ? (isAttacking ? 'active' : 'online') : 'offline';
+                const textColor = isOn ? (isAttacking ? 'text-red-500' : 'text-cyan-400') : 'text-gray-600';
+                const statusMsg = isOn ? 'LINK_ESTABLISHED' : 'OFFLINE';
+                const card = document.createElement('div');
+                card.id = `card-${id}`;
+                card.className = `device-card p-3 rounded flex flex-col justify-between ${statusClass}`;
+                const romDisplay = spec.unit === "TB" ? "1.0 TB" : spec.rom + " GB";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div><span class="text-xs font-bold ${textColor} tracking-wider block">${id}</span><span class="text-[9px] text-gray-500 block">IP: 192.168.0.${100+index}</span></div>
+                        <div class="status-dot ${statusClass}"></div>
+                    </div>
+                    <div class="text-[9px] text-gray-400 font-mono mb-2 border-l-2 border-gray-800 pl-2">
+                        <div class="flex justify-between"><span>MEM:</span> <span class="text-white">${spec.ram}GB DDR5</span></div>
+                        <div class="flex justify-between"><span>STO:</span> <span class="text-white">${romDisplay}</span></div>
+                        <div class="flex justify-between mt-1"><span>LOAD:</span> <span class="text-white">${isOn ? Math.floor(Math.random()*20 + (isAttacking?60:10)) : 0}%</span></div>
+                    </div>
+                    <div class="flex justify-between items-end border-t border-gray-800 pt-2 mt-auto">
+                        <span id="status-${id}" class="text-[8px] ${isOn ? 'text-green-500' : 'text-red-900'}">${statusMsg}</span>
+                        <i onclick="window.toggleDevice('${id}')" class="fa-solid fa-power-off power-btn ${isOn ? 'power-on' : 'power-off'} text-lg hover:text-white" title="Toggle Node"></i>
+                    </div>
+                    <div class="absolute top-0 left-0 w-full h-[1px] bg-white/10 animate-[scan_2s_linear_infinite] ${isOn ? '' : 'hidden'}"></div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        const ctx = document.getElementById('traffic-chart').getContext('2d');
+        const packetLog = document.getElementById('packet-log');
+        const ppsDisplay = document.getElementById('pps-display');
+        const ppsValue = document.getElementById('pps-value');
+        const bwValue = document.getElementById('bw-value');
+        const initialData = Array(100).fill(0);
+        
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: { labels: Array(100).fill(''), datasets: [{ label: 'TRAFFIC_FLOW', data: initialData, borderColor: '#00f3ff', backgroundColor: 'rgba(0, 243, 255, 0.1)', borderWidth: 1, fill: true, tension: 0.4, pointRadius: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false, min: 0, max: 100, grid: { color: '#111' } } } }
+        });
+
+        function generateTerminalLog(type, targetIP) {
+            let msg = "";
+            const div = document.createElement('div');
+            div.className = "kali-log-line"; 
+
+            if (type === "DDOS") {
+                const ip = botIPs[Math.floor(Math.random() * botIPs.length)];
+                const agent = userAgents[Math.floor(Math.random() * userAgents.length)];
+                const status = Math.random() > 0.9 ? (Math.random() > 0.5 ? 499 : 502) : 200;
+                msg = `${ip} - - ${getFormattedDate()} "GET /login HTTP/1.1" ${status} 452 "-" "${agent}"`;
+                div.innerHTML = `<span class="text-gray-400">${msg}</span>`;
+            } else if (type === "DNS") {
+                const resolver = dnsResolvers[Math.floor(Math.random() * dnsResolvers.length)];
+                const port = Math.floor(Math.random() * 5000) + 1024;
+                const domains = ["midominio.com", "google.com", "isc.org", "gobierno.gob"];
+                const dom = domains[Math.floor(Math.random() * domains.length)];
+                msg = `${getDNSTimestamp()} IP ${resolver}.53 > ${targetIP}.${port}: ${Math.floor(Math.random()*60000)}+ [1au] ANY? ${dom}. (3072)`;
+                div.innerHTML = `<span class="text-blue-300">${msg}</span>`;
+            }
+
+            packetLog.appendChild(div);
+            packetLog.scrollTop = packetLog.scrollHeight;
+            if(packetLog.children.length > 25) packetLog.removeChild(packetLog.children[2]);
+        }
+
+        let chartInterval;
+        let timeStep = 0;
+
+        window.toggleAttackSimulation = () => {
+            const ip = document.getElementById('target-ip').value.trim();
+            if(!ip) {
+                alert("ERROR: TARGET NOT DEFINED");
+                return;
+            }
+
+            isAttacking = !isAttacking;
+            const btn = document.getElementById('btn-attack');
+            updateServerStats(); 
+
+            if (isAttacking) {
+                const method = document.getElementById('attack-method').value;
+                btn.innerHTML = 'ABORT ASSAULT';
+                btn.classList.add("bg-red-600", "text-black", "animate-pulse", "border-white");
+                ppsDisplay.classList.remove('hidden');
+                chartInstance.data.datasets[0].borderColor = '#ff0055';
+                chartInstance.data.datasets[0].backgroundColor = 'rgba(255, 0, 85, 0.2)';
+                if(window.logAction) window.logAction("ATTACK", `ASSAULT STARTED ON ${ip} USING ${method}`);
+
+                const startLine = document.createElement('div');
+                startLine.innerHTML = `<span class="kali-prompt">┌──(root💀kali)-[/opt/botnet]</span><br><span class="kali-prompt">└─#</span> <span class="kali-cmd">./attack.py --target ${ip} --mode ${method} --threads 500</span>`;
+                packetLog.appendChild(startLine);
+
+                const logType = method.includes("DNS") ? "DNS" : "DDOS";
+
+                logInterval = setInterval(() => generateTerminalLog(logType, ip), 80);
+
+                chartInterval = setInterval(() => {
+                    timeStep += 0.2;
+                    const activeCount = Object.values(devicesState).filter(v => v).length;
+                    const sine = Math.sin(timeStep) * 15; 
+                    const noise = (Math.random() - 0.5) * 50; 
+                    const spike = Math.random() > 0.9 ? 80 : 0; 
+                    
+                    const baseLoad = (activeCount * 5) + 10;
+                    const val = Math.max(0, Math.min(100, baseLoad + sine + noise + spike));
+                    
+                    chartInstance.data.datasets[0].data.shift();
+                    chartInstance.data.datasets[0].data.push(val);
+                    chartInstance.update();
+                    
+                    // PPS CALC: 15M to 20M range + fluctuation based on chart val
+                    const basePPS = 15000000;
+                    const variablePPS = Math.floor(Math.random() * 5000000);
+                    const pps = activeCount > 0 ? (basePPS + variablePPS) : 0;
+                    
+                    // Bandwidth Calc: PPS * 800 bytes * 8 bits / 1e9 (Gbps)
+                    const gbps = (pps * 800 * 8) / 1000000000;
+
+                    ppsValue.innerText = pps.toLocaleString();
+                    bwValue.innerText = gbps.toFixed(2);
+                    
+                    renderGrid(); 
+                }, 50);
+
+            } else {
+                btn.innerHTML = 'INITIATE ATTACK';
+                btn.classList.remove("bg-red-600", "text-black", "animate-pulse", "border-white");
+                ppsDisplay.classList.add('hidden');
+                chartInstance.data.datasets[0].borderColor = '#00f3ff';
+                chartInstance.data.datasets[0].backgroundColor = 'rgba(0, 243, 255, 0.1)';
+                if(window.logAction) window.logAction("INFO", `Attack sequence halted.`);
+
+                clearInterval(logInterval);
+                clearInterval(chartInterval);
+                
+                const stopLine = document.createElement('div');
+                stopLine.innerHTML = `<span class="kali-error">^C</span> <span class="text-gray-500">Attack stopped by user.</span>`;
+                packetLog.appendChild(stopLine);
+                
+                const drain = setInterval(() => {
+                    const data = chartInstance.data.datasets[0].data;
+                    if(data[data.length-1] <= 2) { clearInterval(drain); }
+                    data.shift();
+                    data.push(data[data.length-1] * 0.9);
+                    chartInstance.update();
+                }, 50);
+                renderGrid();
+            }
+        };
+
+        let sec = 0;
+        setInterval(() => {
+            sec++;
+            const h = Math.floor(sec/3600).toString().padStart(2,'0');
+            const m = Math.floor((sec%3600)/60).toString().padStart(2,'0');
+            const s = (sec%60).toString().padStart(2,'0');
+            document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
+        }, 1000);
+
+    </script>
+</body>
+</html>
