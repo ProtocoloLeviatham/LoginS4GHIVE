@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Auditoría y Telemetría de Red</title>
+    <title>Portal de Auditoría y Telemetría Legal</title>
     <style>
         :root {
             --bg-main: #0f172a;
@@ -13,7 +13,7 @@
             --text-secondary: #94a3b8;
             --accent-blue: #3b82f6;
             --accent-green: #10b981;
-            --accent-warning: #f59e0b;
+            --accent-purple: #8b5cf6;
             --warning-bg: #fff3cd;
             --warning-text: #856404;
             --warning-border: #ffeeba;
@@ -34,7 +34,6 @@
             flex-direction: column;
         }
 
-        /* Banner de Aviso Legal */
         .legal-banner {
             background-color: var(--warning-bg);
             color: var(--warning-text);
@@ -47,21 +46,22 @@
         }
 
         .container {
-            max-width: 960px;
-            margin: 40px auto;
+            max-width: 1000px;
+            margin: 30px auto;
             padding: 0 20px;
             flex: 1;
             width: 100%;
         }
 
         header {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 20px;
+            text-align: center;
         }
 
         header h1 {
-            font-size: 1.8rem;
+            font-size: 2rem;
             margin-bottom: 8px;
             color: var(--text-primary);
         }
@@ -71,7 +71,18 @@
             font-size: 0.95rem;
         }
 
-        /* Tarjeta de Telemetría */
+        .joke-tag {
+            display: inline-block;
+            margin-top: 10px;
+            background: rgba(139, 92, 246, 0.15);
+            color: #c4b5fd;
+            border: 1px solid var(--accent-purple);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
         .telemetry-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -92,7 +103,6 @@
         }
 
         .status-badge {
-            display: inline-block;
             width: 10px;
             height: 10px;
             background-color: var(--accent-green);
@@ -100,15 +110,14 @@
             box-shadow: 0 0 8px var(--accent-green);
         }
 
-        /* Grilla de Datos */
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 16px;
         }
 
         .data-item {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.75);
             border: 1px solid var(--border-color);
             padding: 16px;
             border-radius: 8px;
@@ -134,12 +143,13 @@
             word-break: break-word;
         }
 
-        .highlight-warn {
-            color: var(--accent-warning);
-            font-weight: 600;
+        .data-joke {
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            margin-top: 4px;
+            font-style: italic;
         }
 
-        /* Pie de página */
         footer {
             background-color: var(--bg-card);
             border-top: 1px solid var(--border-color);
@@ -150,121 +160,170 @@
             margin-top: auto;
         }
 
-        footer strong {
-            color: var(--text-primary);
-        }
-
         footer a {
             color: var(--accent-blue);
             text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
-    <!-- Banner Legal Integrado -->
     <div class="legal-banner">
-        AVISO LEGAL: Por motivos de seguridad y auditoría técnica, los datos de red e identificación de su dispositivo son recopilados para su visualización y registro en nuestra base de datos.
+        AVISO LEGAL: Por seguridad y auditoría transparente, detectamos la información pública de tu conexión y hardware con un clic. Todo 100% legal y sin secretos.
     </div>
 
     <div class="container">
         <header>
-            <h1>Panel de Inspección y Telemetría</h1>
-            <p>Información de diagnóstico técnica detectada desde su conexión y navegador en tiempo real.</p>
+            <h1>🔍 Panel de Auditoría y Diagnóstico</h1>
+            <p>Conoce exactamente qué información técnica revela tu navegador a cualquier sitio web.</p>
+            <div class="joke-tag">⚡ Tan prolijo que hasta tu router sonreiría ⚡</div>
         </header>
 
         <main>
             <section class="telemetry-card">
                 <div class="card-title">
                     <span class="status-badge"></span>
-                    Estado de Telemetría: Activo y Conectado
+                    Radiografía de Red & Hardware en Tiempo Real
                 </div>
 
-                <div class="data-grid" id="data-grid">
+                <div class="data-grid">
                     <div class="data-item">
                         <div class="data-label">Dirección IP (Cliente)</div>
-                        <div class="data-value" id="val-ip">Consultando red...</div>
+                        <div class="data-value" id="val-ip">Escaneando...</div>
+                        <div class="data-joke">Tu matrícula digital única 🚀</div>
                     </div>
                     <div class="data-item">
                         <div class="data-label">Proveedor / ISP</div>
-                        <div class="data-value" id="val-isp">Consultando red...</div>
+                        <div class="data-value" id="val-isp">Consultando fibra...</div>
+                        <div class="data-joke">¿Te llega bien el internet o laguea?</div>
                     </div>
                     <div class="data-item">
-                        <div class="data-label">Ubicación Geográfica</div>
-                        <div class="data-value" id="val-location">Consultando red...</div>
+                        <div class="data-label">Triangulación Geográfica</div>
+                        <div class="data-value" id="val-location">Calculando zona...</div>
+                        <div class="data-joke">Saludos por ahí cerca 🌍</div>
                     </div>
                     <div class="data-item">
-                        <div class="data-label">Sistema Operativo / Plataforma</div>
+                        <div class="data-label">Motor Gráfico (GPU WebGL)</div>
+                        <div class="data-value" id="val-gpu">Detectando GPU...</div>
+                        <div class="data-joke">¿Listo para correr juegos a 4K? 🎮</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Potencia de CPU y RAM</div>
+                        <div class="data-value" id="val-hw">Analizando núcleos...</div>
+                        <div class="data-joke">Potencia pura del sistema ⚙️</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Batería & Alimentación</div>
+                        <div class="data-value" id="val-battery">Verificando energía...</div>
+                        <div class="data-joke" id="joke-battery">¿Queda carga para un rato más? 🔋</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Conexión & Velocidad Est.</div>
+                        <div class="data-value" id="val-conn">Midiendo red...</div>
+                        <div class="data-joke">Ancho de banda local 📡</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Sistema & Pantalla</div>
                         <div class="data-value" id="val-os">Cargando...</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Resolución de Pantalla</div>
-                        <div class="data-value" id="val-screen">Cargando...</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Zona Horaria Local</div>
-                        <div class="data-value" id="val-timezone">Cargando...</div>
-                    </div>
-                    <!-- Nuevas tarjetas para estimaciones avanzadas -->
-                    <div class="data-item">
-                        <div class="data-label">Tipo de Dispositivo</div>
-                        <div class="data-value" id="val-device">Analizando...</div>
-                    </div>
-                    <div class="data-item">
-                        <div class="data-label">Radio de Precisión Geográfica</div>
-                        <div class="data-value" id="val-radius">Analizando...</div>
+                        <div class="data-joke">Tu ventana al ciberespacio 💻</div>
                     </div>
                     <div class="data-item">
                         <div class="data-label">Alerta de Proxy / VPN</div>
-                        <div class="data-value" id="val-vpn">Verificando...</div>
+                        <div class="data-value" id="val-vpn">Analizando rutas...</div>
+                        <div class="data-joke">¿Navegando a capa descubierta o con escudo? 🛡️</div>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Pie de página con aviso de derechos ARCO / supresión de datos -->
     <footer>
         <p>
-            <strong>Protección de Datos y Derecho de Supresión:</strong> Si desea solicitar la consulta o eliminación completa de su dirección IP y registros de telemetría asociados de nuestra base de datos, envíe una solicitud desde su correo a 
-            <a href="mailto:leviathamindustrias@gmail.com">leviathamindustrias@gmail.com</a> indicando su IP actual y marca de tiempo.
+            <strong>Transparencia ARCO:</strong> Si quieres consultar o solicitar que eliminemos tus datos de prueba de nuestra base de datos, envía un correo a 
+            <a href="mailto:leviathamindustrias@gmail.com">leviathamindustrias@gmail.com</a> con tu IP actual. ¡Estamos para ayudarte!
         </p>
     </footer>
 
-    <!-- Script de Recolección Directa y Transmisión al Cerebro -->
     <script>
-        (async function iniciarTelemetria() {
-            // URL de tu Cloudflare Worker ("El Cerebro")
+        // Función para extraer la Tarjeta Gráfica real de forma silenciosa via WebGL
+        function obtenerGPU() {
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (ext) {
+                        return gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+                    }
+                }
+                return "GPU Integrada / Estándar";
+            } catch (e) {
+                return "No detectada";
+            }
+        }
+
+        // Función para leer estado de la batería si el navegador lo permite
+        async function obtenerBateria() {
+            try {
+                if ('getBattery' in navigator) {
+                    const bat = await navigator.getBattery();
+                    const nivel = Math.round(bat.level * 100);
+                    const estado = bat.charging ? "⚡ Enchufado" : "🔋 Desconectado";
+                    return { texto: `${nivel}% (${estado})`, cargando: bat.charging, nivel: nivel };
+                }
+                return { texto: "No reportada por SO", cargando: false, nivel: null };
+            } catch (e) {
+                return { texto: "Sin datos de energía", cargando: false, nivel: null };
+            }
+        }
+
+        // Función para estimar red
+        function obtenerRed() {
+            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (conn) {
+                const tipo = conn.effectiveType ? conn.effectiveType.toUpperCase() : "BANDA ANCHA";
+                const velocidad = conn.downlink ? `${conn.downlink} Mbps` : "Máxima";
+                return `${tipo} (~${velocidad})`;
+            }
+            return "Conexión Directa / Wi-Fi";
+        }
+
+        (async function iniciarTelemetriaExtrema() {
             const WORKER_URL = "https://ravelonesdoxeados.system404g.workers.dev/";
 
             try {
-                // 1. Consulta directa desde el Frontend de la IP y Geo (API pública gratuita sin clave)
+                // 1. IP pública mediante API gratuita
                 let datosIP = {};
                 try {
                     const resIP = await fetch('https://ipwho.is/');
                     const jsonIP = await resIP.json();
-                    if (jsonIP && jsonIP.success) {
-                        datosIP = jsonIP;
-                    }
-                } catch (errorGeo) {
-                    console.warn("No se pudo obtener geo externa desde el cliente, se delegará al Worker:", errorGeo);
+                    if (jsonIP && jsonIP.success) datosIP = jsonIP;
+                } catch (e) {
+                    console.warn("Delegando resolución geo al Edge de Cloudflare.");
                 }
 
-                // 2. Recopilar métricas locales del dispositivo en el navegador
+                // 2. Extraer todo el hardware posible
+                const gpuInfo = obtenerGPU();
+                const batInfo = await obtenerBateria();
+                const redInfo = obtenerRed();
+                const cpuCores = navigator.hardwareConcurrency || "N/A";
+                const ramGB = navigator.deviceMemory ? `${navigator.deviceMemory} GB+` : "No especificada";
+
                 const datosDispositivo = {
                     userAgent: navigator.userAgent,
                     platform: navigator.platform || "Desconocida",
                     language: navigator.language || "es-ES",
                     screen: `${window.screen.width}x${window.screen.height} (${window.screen.colorDepth}-bit)`,
                     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    gpu: gpuInfo,
+                    cpu: `${cpuCores} Núcleos`,
+                    ram: ramGB,
+                    battery: batInfo.texto,
+                    network: redInfo
                 };
 
-                // 3. Empaquetar TODOS los datos (IP directa + ISP + Hardware) en el payload
+                // 3. Estructurar el super-payload
                 const payload = {
                     IP: datosIP.ip || "Pendiente de Edge",
                     Proveedor: datosIP.connection?.isp || datosIP.org || "No especificado",
@@ -276,59 +335,50 @@
                     Resolucion: datosDispositivo.screen,
                     UserAgent: datosDispositivo.userAgent,
                     ZonaHoraria: datosDispositivo.timeZone,
-                    HoraCaptura: datosDispositivo.timestamp
+                    HoraCaptura: datosDispositivo.timestamp,
+                    GPU: datosDispositivo.gpu,
+                    CPU_Cores: datosDispositivo.cpu,
+                    RAM_GB: datosDispositivo.ram,
+                    Bateria: datosDispositivo.battery,
+                    Red_Tipo: datosDispositivo.network
                 };
 
-                // 4. Mostrar de forma inmediata los datos capturados en el panel
+                // 4. Llenar la interfaz del usuario al instante
                 document.getElementById('val-ip').textContent = payload.IP;
                 document.getElementById('val-isp').textContent = payload.Proveedor;
                 document.getElementById('val-location').textContent = `${payload.Ciudad}, ${payload.Pais}`;
-                document.getElementById('val-os').textContent = payload.SistemaOperativo;
-                document.getElementById('val-screen').textContent = payload.Resolucion;
-                document.getElementById('val-timezone').textContent = payload.ZonaHoraria;
+                document.getElementById('val-gpu').textContent = payload.GPU;
+                document.getElementById('val-hw').textContent = `${payload.CPU_Cores} | RAM: ${payload.RAM_GB}`;
+                document.getElementById('val-battery').textContent = payload.Bateria;
+                document.getElementById('val-conn').textContent = payload.Red_Tipo;
+                document.getElementById('val-os').textContent = `${payload.SistemaOperativo} (${payload.Resolucion})`;
 
-                // 5. Enviar el paquete al Cloudflare Worker para auditoría y registro en Telegram
+                // Toque de humor dinámico según su batería
+                if (batInfo.nivel !== null && batInfo.nivel < 20 && !batInfo.cargando) {
+                    document.getElementById('joke-battery').textContent = "⚠️ ¡Enchufalo que se apaga la fiesta! 🔌";
+                }
+
+                // 5. Enviar de forma segura al Cloudflare Worker
                 const respuestaWorker = await fetch(WORKER_URL, {
                     method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 const resultado = await respuestaWorker.json();
 
-                // 6. Si el Worker responde con datos enriquecidos o estimaciones, actualizamos el panel
                 if (resultado.success && resultado.data) {
-                    // Actualizar con máxima precisión si el Worker devolvió datos cruzados
                     if (resultado.data.ip) document.getElementById('val-ip').textContent = resultado.data.ip;
                     if (resultado.data.isp) document.getElementById('val-isp').textContent = resultado.data.isp;
                     if (resultado.data.location) document.getElementById('val-location').textContent = resultado.data.location;
-
-                    // Actualizar las tarjetas de estimaciones avanzadas
-                    document.getElementById('val-device').textContent = resultado.data.deviceType || "Escritorio / General";
-                    document.getElementById('val-radius').textContent = resultado.data.radiusEstimate || "~5 km a 20 km";
-                    
-                    const vpnElem = document.getElementById('val-vpn');
-                    vpnElem.textContent = resultado.data.vpnRisk || "Conexión Directa";
-                    if ((resultado.data.vpnRisk || "").includes("Probable")) {
-                        vpnElem.classList.add("highlight-warn");
-                    }
-                } else {
-                    // Fallback si el Worker no mandó estimaciones extras
-                    document.getElementById('val-device').textContent = /mobile/i.test(navigator.userAgent) ? "Dispositivo Móvil" : "Escritorio / PC";
-                    document.getElementById('val-radius').textContent = "~5 km a 25 km (Estándar ISP)";
-                    document.getElementById('val-vpn').textContent = "Sin anomalías detectadas";
+                    document.getElementById('val-vpn').textContent = resultado.data.vpnRisk || "Conexión Directa";
                 }
 
-                console.log("Telemetría transmitida y procesada correctamente.");
-
             } catch (error) {
-                console.error("Error en la transmisión de telemetría:", error);
-                document.getElementById('val-ip').textContent = "Error de conexión con el servidor";
+                console.error("Fallo general en recolección:", error);
             }
         })();
     </script>
 </body>
 </html>
+
