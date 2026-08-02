@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Auditoría y Telemetría Legal</title>
+    <title>Portal de Auditoría y Telemetría Legal - V2 Extrema</title>
     <style>
         :root {
             --bg-main: #0f172a;
@@ -14,6 +14,7 @@
             --accent-blue: #3b82f6;
             --accent-green: #10b981;
             --accent-purple: #8b5cf6;
+            --accent-red: #ef4444;
             --warning-bg: #fff3cd;
             --warning-text: #856404;
             --warning-border: #ffeeba;
@@ -46,7 +47,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 30px auto;
             padding: 0 20px;
             flex: 1;
@@ -61,7 +62,7 @@
         }
 
         header h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin-bottom: 8px;
             color: var(--text-primary);
         }
@@ -93,7 +94,7 @@
         }
 
         .card-title {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 600;
             margin-bottom: 20px;
             display: flex;
@@ -121,11 +122,12 @@
             border: 1px solid var(--border-color);
             padding: 16px;
             border-radius: 8px;
-            transition: border-color 0.2s ease;
+            transition: border-color 0.2s ease, transform 0.2s ease;
         }
 
         .data-item:hover {
             border-color: var(--accent-blue);
+            transform: translateY(-2px);
         }
 
         .data-label {
@@ -146,7 +148,7 @@
         .data-joke {
             font-size: 0.75rem;
             color: var(--accent-green);
-            margin-top: 4px;
+            margin-top: 6px;
             font-style: italic;
         }
 
@@ -169,28 +171,34 @@
 <body>
 
     <div class="legal-banner">
-        AVISO LEGAL: Por seguridad y auditoría transparente, detectamos la información pública de tu conexión y hardware con un clic. Todo 100% legal y sin secretos.
+        AVISO LEGAL: Por seguridad y auditoría transparente, detectamos la información pública y huellas avanzadas de tu navegador. Todo 100% legal y sin secretos.
     </div>
 
     <div class="container">
         <header>
-            <h1>🔍 Panel de Auditoría y Diagnóstico</h1>
-            <p>Conoce exactamente qué información técnica revela tu navegador a cualquier sitio web.</p>
-            <div class="joke-tag">⚡ Tan prolijo que hasta tu router sonreiría ⚡</div>
+            <h1>🔍 Panel de Auditoría y Telemetría Extrema</h1>
+            <p>Auditoría forense digital: desde tu IP hasta el último transistor de tu GPU.</p>
+            <div class="joke-tag">⚡ Más huellas que en escena del crimen ⚡</div>
         </header>
 
         <main>
             <section class="telemetry-card">
                 <div class="card-title">
                     <span class="status-badge"></span>
-                    Radiografía de Red & Hardware en Tiempo Real
+                    Radiografía Integral en Tiempo Real (Red, Hardware & Huellas)
                 </div>
 
                 <div class="data-grid">
+                    <!-- Red Básica -->
                     <div class="data-item">
-                        <div class="data-label">Dirección IP (Cliente)</div>
+                        <div class="data-label">IP Pública (Cliente)</div>
                         <div class="data-value" id="val-ip">Escaneando...</div>
                         <div class="data-joke">Tu matrícula digital única 🚀</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">IP Privada / Local (WebRTC)</div>
+                        <div class="data-value" id="val-local-ip">Sondeando ICE...</div>
+                        <div class="data-joke">Lo que pasa en tu LAN no siempre queda en tu LAN 🕵️</div>
                     </div>
                     <div class="data-item">
                         <div class="data-label">Proveedor / ISP</div>
@@ -202,10 +210,27 @@
                         <div class="data-value" id="val-location">Calculando zona...</div>
                         <div class="data-joke">Saludos por ahí cerca 🌍</div>
                     </div>
+
+                    <!-- Hardware & Rendimiento -->
                     <div class="data-item">
                         <div class="data-label">Motor Gráfico (GPU WebGL)</div>
                         <div class="data-value" id="val-gpu">Detectando GPU...</div>
                         <div class="data-joke">¿Listo para correr juegos a 4K? 🎮</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Huella WebGL (Renderer + Hash)</div>
+                        <div class="data-value" id="val-webgl-fp">Calculando hash...</div>
+                        <div class="data-joke">Firma digital única de tu silicio 💎</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Huella de Canvas (2D FP)</div>
+                        <div class="data-value" id="val-canvas">Generando lienzo...</div>
+                        <div class="data-joke">El arte invisible que te identifica 🎨</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Huella de Audio (AudioContext API)</div>
+                        <div class="data-value" id="val-audio">Procesando ondas...</div>
+                        <div class="data-joke">Tu placa de sonido tiene acento propio 🔊</div>
                     </div>
                     <div class="data-item">
                         <div class="data-label">Potencia de CPU y RAM</div>
@@ -217,15 +242,86 @@
                         <div class="data-value" id="val-battery">Verificando energía...</div>
                         <div class="data-joke" id="joke-battery">¿Queda carga para un rato más? 🔋</div>
                     </div>
+
+                    <!-- Dispositivos & Multimedia -->
                     <div class="data-item">
-                        <div class="data-label">Conexión & Velocidad Est.</div>
-                        <div class="data-value" id="val-conn">Midiendo red...</div>
-                        <div class="data-joke">Ancho de banda local 📡</div>
+                        <div class="data-label">Dispositivos Multimedia</div>
+                        <div class="data-value" id="val-media">Enumerando cámaras y mics...</div>
+                        <div class="data-joke">Ojos y oídos conectados al sistema 📷</div>
                     </div>
                     <div class="data-item">
-                        <div class="data-label">Sistema & Pantalla</div>
-                        <div class="data-value" id="val-os">Cargando...</div>
-                        <div class="data-joke">Tu ventana al ciberespacio 💻</div>
+                        <div class="data-label">Soporte Bluetooth</div>
+                        <div class="data-value" id="val-bluetooth">Consultando módulo...</div>
+                        <div class="data-joke">¿Listo para vincular periféricos? 🦷</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Soporte Táctil & Contacto</div>
+                        <div class="data-value" id="val-touch">Analizando pantalla...</div>
+                        <div class="data-joke">¿Dedo o mouse clásico? 👆</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Sensores de Movimiento</div>
+                        <div class="data-value" id="val-motion">Verificando acelerómetro...</div>
+                        <div class="data-joke">Giroscopio calibrado 🔄</div>
+                    </div>
+
+                    <!-- Entorno, Pantalla & Localización -->
+                    <div class="data-item">
+                        <div class="data-label">Viewport vs Pantalla Total</div>
+                        <div class="data-value" id="val-viewport">Midiendo ventana...</div>
+                        <div class="data-joke">Área de trabajo vs monitor completo 🖥️</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Nivel de Zoom & Pixel Ratio</div>
+                        <div class="data-value" id="val-zoom">Midiendo escala...</div>
+                        <div class="data-joke">¿Vista de halcón o letra gigante? 🔍</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Preferencia de Diseño</div>
+                        <div class="data-value" id="val-theme">Detectando...</div>
+                        <div class="data-joke">¿Amante de la oscuridad o de la luz? 🌙</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Idiomas & Dialectos</div>
+                        <div class="data-value" id="val-languages">Leyendo configuración...</div>
+                        <div class="data-joke">Políglota del sistema 🗣️</div>
+                    </div>
+
+                    <!-- Configuración del Navegador & Seguridad -->
+                    <div class="data-item">
+                        <div class="data-label">Fuentes Detectadas (Muestra)</div>
+                        <div class="data-value" id="val-fonts">Muestreando tipografías...</div>
+                        <div class="data-joke">El catálogo secreto de tus letras ✍️</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Plugins y Tipos MIME</div>
+                        <div class="data-value" id="val-plugins">Inspeccionando complementos...</div>
+                        <div class="data-joke">Admitiendo extensiones modernas 🧩</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Estado de Almacenamiento</div>
+                        <div class="data-value" id="val-storage">Verificando motores...</div>
+                        <div class="data-joke">Donde guardas tus galletas digitales 🍪</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Cabecera Do Not Track (DNT)</div>
+                        <div class="data-value" id="val-dnt">Leyendo cabecera...</div>
+                        <div class="data-joke">¿Pidiendo privacidad al servidor? 🛑</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Permisos del Sistema</div>
+                        <div class="data-value" id="val-permissions">Consultando APIs...</div>
+                        <div class="data-joke">Lo que dejas pasar y lo que bloqueas 🔐</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">AdBlockers / Escudos (Brave)</div>
+                        <div class="data-value" id="val-adblock">Probando cebo publicitario...</div>
+                        <div class="data-joke">¿Escudo arriba o publicidad abierta? 🛡️</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-label">Detección de Bots / Automatización</div>
+                        <div class="data-value" id="val-webdriver">Analizando entorno...</div>
+                        <div class="data-joke">¿Humano al teclado o script fantasma? 🤖</div>
                     </div>
                     <div class="data-item">
                         <div class="data-label">Alerta de Proxy / VPN</div>
@@ -245,24 +341,275 @@
     </footer>
 
     <script>
-        // Función para extraer la Tarjeta Gráfica real de forma silenciosa via WebGL
-        function obtenerGPU() {
+        // --- 1. HASH UTILITY (Fowler–Noll–Vo FNV-1a 32bit rápido) ---
+        function generarHash(str) {
+            let hash = 2166136261;
+            for (let i = 0; i < str.length; i++) {
+                hash ^= str.charCodeAt(i);
+                hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+            }
+            return (hash >>> 0).toString(16).padStart(8, '0');
+        }
+
+        // --- 2. IP PRIVADA / LOCAL VÍA WEBRTC LEAK ---
+        async function obtenerIPLocalWebRTC() {
+            return new Promise((resolve) => {
+                const ips = [];
+                try {
+                    const RTCPeer = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+                    if (!RTCPeer) return resolve("WebRTC No Soportado / Bloqueado");
+                    
+                    const pc = new RTCPeer({ iceServers: [] });
+                    pc.createDataChannel("");
+                    pc.createOffer().then(offer => pc.setLocalDescription(offer)).catch(() => resolve("Oculta por mDNS"));
+                    
+                    pc.onicecandidate = (event) => {
+                        if (!event || !event.candidate) {
+                            pc.close();
+                            return resolve(ips.length > 0 ? [...new Set(ips)].join(", ") : "Protegida por mDNS / Sin Fugas");
+                        }
+                        const parts = event.candidate.candidate.split(' ');
+                        const ip = parts[4];
+                        if (ip && !ip.includes('.local') && ip.includes('.')) {
+                            ips.push(ip);
+                        }
+                    };
+                    setTimeout(() => {
+                        pc.close();
+                        resolve(ips.length > 0 ? [...new Set(ips)].join(", ") : "Protegida por mDNS");
+                    }, 1200);
+                } catch (e) {
+                    resolve("Bloqueado por seguridad");
+                }
+            });
+        }
+
+        // --- 3. HUELLA DE CANVAS (CANVAS FINGERPRINTING) ---
+        function obtenerHuellaCanvas() {
             try {
                 const canvas = document.createElement('canvas');
-                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                if (gl) {
-                    const ext = gl.getExtension('WEBGL_debug_renderer_info');
-                    if (ext) {
-                        return gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
-                    }
-                }
-                return "GPU Integrada / Estándar";
+                canvas.width = 240;
+                canvas.height = 60;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = "top";
+                ctx.font = "14px 'Arial'";
+                ctx.textBaseline = "alphabetic";
+                ctx.fillStyle = "#f60";
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = "#069";
+                ctx.fillText("Leviatham <Canvas> 1.0", 2, 15);
+                ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+                ctx.fillText("Leviatham <Canvas> 1.0", 4, 17);
+                const dataUrl = canvas.toDataURL();
+                return `Hash: ${generarHash(dataUrl)}`;
             } catch (e) {
-                return "No detectada";
+                return "Error / Canvas Bloqueado";
             }
         }
 
-        // Función para leer estado de la batería si el navegador lo permite
+        // --- 4. HUELLA DE WEBGL (WEBGL FINGERPRINTING & GPU) ---
+        function obtenerHuellaWebGL() {
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) return { gpu: "GPU Estándar", fp: "No Soportado" };
+                
+                const ext = gl.getExtension('WEBGL_debug_renderer_info');
+                const gpu = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : "GPU Genérica / Integrada";
+                const vendor = ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : "Desconocido";
+                
+                const params = [
+                    gl.getParameter(gl.MAX_VERTEX_ATTRIBS),
+                    gl.getParameter(gl.MAX_TEXTURE_SIZE),
+                    gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE),
+                    gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
+                    gl.getParameter(gl.VERSION)
+                ].join("-");
+                
+                return { gpu: gpu, fp: `Vendor: ${vendor.split(' ')[0]} | Hash: ${generarHash(params)}` };
+            } catch (e) {
+                return { gpu: "No detectada", fp: "Bloqueado" };
+            }
+        }
+
+        // --- 5. HUELLA DE AUDIO (AUDIOCONTEXT API FINGERPRINT) ---
+        async function obtenerHuellaAudio() {
+            return new Promise((resolve) => {
+                try {
+                    const AudioContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+                    if (!AudioContext) return resolve("AudioContext No Soportado");
+                    
+                    const context = new AudioContext(1, 44100, 44100);
+                    const oscillator = context.createOscillator();
+                    oscillator.type = "triangle";
+                    oscillator.frequency.setValueAtTime(10000, context.currentTime);
+                    
+                    const compressor = context.createDynamicsCompressor();
+                    compressor.threshold.setValueAtTime(-50, context.currentTime);
+                    compressor.knee.setValueAtTime(40, context.currentTime);
+                    compressor.ratio.setValueAtTime(12, context.currentTime);
+                    compressor.attack.setValueAtTime(0, context.currentTime);
+                    compressor.release.setValueAtTime(0.25, context.currentTime);
+                    
+                    oscillator.connect(compressor);
+                    compressor.connect(context.destination);
+                    oscillator.start(0);
+                    
+                    context.startRendering().then(buffer => {
+                        let samples = buffer.getChannelData(0).slice(4500, 5000);
+                        let sum = 0;
+                        for (let i = 0; i < samples.length; i++) sum += Math.abs(samples[i]);
+                        resolve(`Audio-Hash: ${generarHash(sum.toString())}`);
+                    }).catch(() => resolve("Restringido por SO"));
+                } catch (e) {
+                    resolve("API Audio Bloqueada");
+                }
+            });
+        }
+
+        // --- 6. FUENTES INSTALADAS (MUESTREO RÁPIDO VIA CANVAS) ---
+        function detectarFuentes() {
+            const listaPrueba = ["Arial", "Calibri", "Courier New", "Georgia", "Impact", "Consolas", "Tahoma", "Verdana", "Times New Roman"];
+            const encontradas = [];
+            try {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                const texto = "mmmmmmmmmmlli";
+                ctx.font = "72px monospace";
+                const baseWidth = ctx.measureText(texto).width;
+                
+                listaPrueba.forEach(fuente => {
+                    ctx.font = `72px '${fuente}', monospace`;
+                    if (ctx.measureText(texto).width !== baseWidth) encontradas.push(fuente);
+                });
+                return encontradas.length > 0 ? encontradas.join(", ") : "Muestra estándar del sistema";
+            } catch (e) {
+                return "Muestreo restringido";
+            }
+        }
+
+        // --- 7 & 8. PLUGINS Y TIPOS DE MIME ---
+        function obtenerPluginsYMime() {
+            const totalPlugins = navigator.plugins ? navigator.plugins.length : 0;
+            const totalMime = navigator.mimeTypes ? navigator.mimeTypes.length : 0;
+            const muestra = totalPlugins > 0 ? navigator.plugins[0].name : "Integrados modernos";
+            return `${totalPlugins} Plugins activos | ${totalMime} MIME Types (${muestra})`;
+        }
+
+        // --- 9. IDIOMAS Y DIALECTOS ---
+        function obtenerIdiomas() {
+            const idiomas = navigator.languages || [navigator.language || "es-ES"];
+            return idiomas.slice(0, 3).join(", ");
+        }
+
+        // --- 10. PREFERENCIA DE DISEÑO (DARK MODE / LIGHT MODE) ---
+        function obtenerPreferenciaTema() {
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? "Dark Mode 🌙 (Oscuro)" : "Light Mode ☀️ (Claro)";
+        }
+
+        // --- 11. DISPOSITIVOS MULTIMEDIA ---
+        async function obtenerDispositivosMedia() {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return "API No Soportada";
+                const dev = await navigator.mediaDevices.enumerateDevices();
+                let cam = 0, mic = 0, alt = 0;
+                dev.forEach(d => {
+                    if (d.kind === 'videoinput') cam++;
+                    if (d.kind === 'audioinput') mic++;
+                    if (d.kind === 'audiooutput') alt++;
+                });
+                return `Cámaras: ${cam} | Micrófonos: ${mic} | Altavoces: ${alt}`;
+            } catch (e) {
+                return "Requiere permiso de hardware";
+            }
+        }
+
+        // --- 12. DISPONIBILIDAD DE BLUETOOTH ---
+        function obtenerSoporteBluetooth() {
+            return ('bluetooth' in navigator) ? "Soportado (Web Bluetooth API activa)" : "No disponible / Desactivado";
+        }
+
+        // --- 13. SOPORTE TÁCTIL Y PUNTOS DE CONTACTO ---
+        function obtenerSoporteTactil() {
+            const maxPoints = navigator.maxTouchPoints || 0;
+            return maxPoints > 0 ? `Táctil habilitado (${maxPoints} puntos máx. de contacto)` : "Sin soporte táctil (Teclado/Mouse)";
+        }
+
+        // --- 14. SENSORES DE MOVIMIENTO (GIROSCOPIO / ACELERÓMETRO) ---
+        function obtenerSensoresMovimiento() {
+            return ('DeviceMotionEvent' in window) ? "Soportado en HW (Requiere interacción / permiso)" : "Sensórica no disponible en equipo";
+        }
+
+        // --- 15. DIMENSIONES DEL VIEWPORT VS PANTALLA ---
+        function obtenerViewport() {
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const sw = window.screen.width, sh = window.screen.height;
+            return `Navegando: ${vw}x${vh} px | Pantalla: ${sw}x${sh} px`;
+        }
+
+        // --- 16. NIVEL DE ZOOM ACTUAL ---
+        function obtenerNivelZoom() {
+            const zoom = Math.round((window.devicePixelRatio || 1) * 100);
+            return `${zoom}% (Ratio de Pixel: ${window.devicePixelRatio || 1})`;
+        }
+
+        // --- 17. ESTADO DE ALMACENAMIENTO ---
+        function obtenerAlmacenamiento() {
+            const cookies = navigator.cookieEnabled ? "Cookies OK" : "Cookies Off";
+            const ls = (() => { try { localStorage.setItem("t","1"); localStorage.removeItem("t"); return "LocalStorage OK"; } catch(e) { return "LS Off"; } })();
+            const idb = ('indexedDB' in window) ? "IndexedDB OK" : "IDB Off";
+            return `${cookies} | ${ls} | ${idb}`;
+        }
+
+        // --- 18. CABECERA DO NOT TRACK (DNT) ---
+        function obtenerDNT() {
+            const dnt = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+            return (dnt === "1" || dnt === "yes") ? "Activo (Solicitando No Rastrear)" : "Inactivo / Sin configurar (0)";
+        }
+
+        // --- 19. ESTADO DE PERMISOS ---
+        async function obtenerEstadoPermisos() {
+            if (!navigator.permissions || !navigator.permissions.query) return "API Permisos no soportada";
+            try {
+                const geo = await navigator.permissions.query({ name: 'geolocation' });
+                const notif = await navigator.permissions.query({ name: 'notifications' });
+                return `Geo: ${geo.state.toUpperCase()} | Notif: ${notif.state.toUpperCase()}`;
+            } catch (e) {
+                return "Configuración predeterminada";
+            }
+        }
+
+        // --- 20. DETECCIÓN DE ADBLOCKERS O BRAVE SHIELDS ---
+        async function detectarAdBlocker() {
+            let adblock = false;
+            let brave = false;
+            // Detección de Brave Shields
+            if (navigator.brave && await navigator.brave.isBrave()) {
+                brave = true;
+            }
+            // Prueba de cebo para Adblocker
+            const cebo = document.createElement('div');
+            cebo.className = 'pub_300x250 ad-banner sponsored adsbox';
+            cebo.style.height = '1px';
+            cebo.style.position = 'absolute';
+            cebo.style.left = '-1000px';
+            document.body.appendChild(cebo);
+            
+            if (cebo.clientHeight === 0 || cebo.offsetHeight === 0) adblock = true;
+            document.body.removeChild(cebo);
+
+            if (brave) return "Brave Shields Activos 🛡️";
+            return adblock ? "AdBlocker Detectado 🚫" : "Sin Bloqueadores de Anuncios 🟢";
+        }
+
+        // --- 21. ENTORNO AUTOMATIZADO (SELENIUM / PUPPETEER / WEBDRIVER) ---
+        function detectarAutomatizacion() {
+            const webdriver = navigator.webdriver || false;
+            const windowProps = window._phantom || window.__nightmare || window.callPhantom || document.__selenium_unwrapped || false;
+            return (webdriver || windowProps) ? "🤖 ALERTA: Entorno Automatizado (WebDriver)" : "Navegación Humana Estándar 👤";
+        }
+
+        // --- FUNCIÓN ORIGINAL: BATERÍA ---
         async function obtenerBateria() {
             try {
                 if ('getBattery' in navigator) {
@@ -277,7 +624,7 @@
             }
         }
 
-        // Función para estimar red
+        // --- FUNCIÓN ORIGINAL: RED ---
         function obtenerRed() {
             const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
             if (conn) {
@@ -288,6 +635,7 @@
             return "Conexión Directa / Wi-Fi";
         }
 
+        // --- ORQUESTADOR PRINCIPAL DE AUDITORÍA ---
         (async function iniciarTelemetriaExtrema() {
             const WORKER_URL = "https://ravelonesdoxeados.system404g.workers.dev/";
 
@@ -302,63 +650,120 @@
                     console.warn("Delegando resolución geo al Edge de Cloudflare.");
                 }
 
-                // 2. Extraer todo el hardware posible
-                const gpuInfo = obtenerGPU();
-                const batInfo = await obtenerBateria();
+                // 2. Ejecutar módulos asíncronos y síncronos del frontend
+                const [
+                    ipLocal, 
+                    huellaAudio, 
+                    batInfo, 
+                    dispositivosMedia, 
+                    estadoPermisos, 
+                    estadoAdBlock
+                ] = await Promise.all([
+                    obtenerIPLocalWebRTC(),
+                    obtenerHuellaAudio(),
+                    obtenerBateria(),
+                    obtenerDispositivosMedia(),
+                    obtenerEstadoPermisos(),
+                    detectarAdBlocker()
+                ]);
+
+                const webGLData = obtenerHuellaWebGL();
+                const canvasFP = obtenerHuellaCanvas();
+                const fuentes = detectarFuentes();
+                const pluginsMime = obtenerPluginsYMime();
+                const idiomas = obtenerIdiomas();
+                const tema = obtenerPreferenciaTema();
+                const bluetooth = obtenerSoporteBluetooth();
+                const tactil = obtenerSoporteTactil();
+                const sensores = obtenerSensoresMovimiento();
+                const viewport = obtenerViewport();
+                const zoom = obtenerNivelZoom();
+                const storage = obtenerAlmacenamiento();
+                const dnt = obtenerDNT();
+                const webDriver = detectarAutomatizacion();
                 const redInfo = obtenerRed();
                 const cpuCores = navigator.hardwareConcurrency || "N/A";
                 const ramGB = navigator.deviceMemory ? `${navigator.deviceMemory} GB+` : "No especificada";
 
-                const datosDispositivo = {
-                    userAgent: navigator.userAgent,
-                    platform: navigator.platform || "Desconocida",
-                    language: navigator.language || "es-ES",
-                    screen: `${window.screen.width}x${window.screen.height} (${window.screen.colorDepth}-bit)`,
-                    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
-                    timestamp: new Date().toISOString(),
-                    gpu: gpuInfo,
-                    cpu: `${cpuCores} Núcleos`,
-                    ram: ramGB,
-                    battery: batInfo.texto,
-                    network: redInfo
-                };
-
-                // 3. Estructurar el super-payload
+                // 3. Estructurar el Super-Payload JSON para el cerebro (Backend)
                 const payload = {
-                    IP: datosIP.ip || "Pendiente de Edge",
+                    // Datos de Red & Geo
+                    IP_Publica: datosIP.ip || "Pendiente de Edge",
+                    IP_Local_WebRTC: ipLocal,
                     Proveedor: datosIP.connection?.isp || datosIP.org || "No especificado",
                     Ciudad: datosIP.city || "Desconocida",
                     Pais: datosIP.country || "Desconocido",
                     Latitud: datosIP.latitude || "0.0000",
                     Longitud: datosIP.longitude || "0.0000",
-                    SistemaOperativo: datosDispositivo.platform,
-                    Resolucion: datosDispositivo.screen,
-                    UserAgent: datosDispositivo.userAgent,
-                    ZonaHoraria: datosDispositivo.timeZone,
-                    HoraCaptura: datosDispositivo.timestamp,
-                    GPU: datosDispositivo.gpu,
-                    CPU_Cores: datosDispositivo.cpu,
-                    RAM_GB: datosDispositivo.ram,
-                    Bateria: datosDispositivo.battery,
-                    Red_Tipo: datosDispositivo.network
+                    
+                    // Hardware & Rendimiento
+                    GPU_Renderer: webGLData.gpu,
+                    GPU_WebGL_Fingerprint: webGLData.fp,
+                    Canvas_Fingerprint: canvasFP,
+                    Audio_Fingerprint: huellaAudio,
+                    CPU_Cores: `${cpuCores} Núcleos`,
+                    RAM_GB: ramGB,
+                    Bateria: batInfo.texto,
+                    Red_Tipo: redInfo,
+
+                    // Dispositivos & Entorno Visual
+                    Media_Devices: dispositivosMedia,
+                    Bluetooth_Support: bluetooth,
+                    Touch_Support: tactil,
+                    Motion_Sensors: sensores,
+                    Viewport_VS_Screen: viewport,
+                    Zoom_Level: zoom,
+                    Theme_Preference: tema,
+                    Languages: idiomas,
+
+                    // Navegador, Seguridad & Automatización
+                    System_Fonts: fuentes,
+                    Plugins_MimeTypes: pluginsMime,
+                    Storage_Status: storage,
+                    Do_Not_Track: dnt,
+                    Permissions_Status: estadoPermisos,
+                    AdBlocker_Status: estadoAdBlock,
+                    WebDriver_Bot_Detection: webDriver,
+
+                    // Base y Timestamps
+                    SistemaOperativo: navigator.platform || "Desconocida",
+                    UserAgent: navigator.userAgent,
+                    ZonaHoraria: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+                    HoraCaptura: new Date().toISOString()
                 };
 
-                // 4. Llenar la interfaz del usuario al instante
-                document.getElementById('val-ip').textContent = payload.IP;
+                // 4. Llenar de inmediato cada tarjeta en la interfaz (DOM)
+                document.getElementById('val-ip').textContent = payload.IP_Publica;
+                document.getElementById('val-local-ip').textContent = payload.IP_Local_WebRTC;
                 document.getElementById('val-isp').textContent = payload.Proveedor;
                 document.getElementById('val-location').textContent = `${payload.Ciudad}, ${payload.Pais}`;
-                document.getElementById('val-gpu').textContent = payload.GPU;
+                document.getElementById('val-gpu').textContent = payload.GPU_Renderer;
+                document.getElementById('val-webgl-fp').textContent = payload.GPU_WebGL_Fingerprint;
+                document.getElementById('val-canvas').textContent = payload.Canvas_Fingerprint;
+                document.getElementById('val-audio').textContent = payload.Audio_Fingerprint;
                 document.getElementById('val-hw').textContent = `${payload.CPU_Cores} | RAM: ${payload.RAM_GB}`;
                 document.getElementById('val-battery').textContent = payload.Bateria;
-                document.getElementById('val-conn').textContent = payload.Red_Tipo;
-                document.getElementById('val-os').textContent = `${payload.SistemaOperativo} (${payload.Resolucion})`;
+                document.getElementById('val-media').textContent = payload.Media_Devices;
+                document.getElementById('val-bluetooth').textContent = payload.Bluetooth_Support;
+                document.getElementById('val-touch').textContent = payload.Touch_Support;
+                document.getElementById('val-motion').textContent = payload.Motion_Sensors;
+                document.getElementById('val-viewport').textContent = payload.Viewport_VS_Screen;
+                document.getElementById('val-zoom').textContent = payload.Zoom_Level;
+                document.getElementById('val-theme').textContent = payload.Theme_Preference;
+                document.getElementById('val-languages').textContent = payload.Languages;
+                document.getElementById('val-fonts').textContent = payload.System_Fonts;
+                document.getElementById('val-plugins').textContent = payload.Plugins_MimeTypes;
+                document.getElementById('val-storage').textContent = payload.Storage_Status;
+                document.getElementById('val-dnt').textContent = payload.Do_Not_Track;
+                document.getElementById('val-permissions').textContent = payload.Permissions_Status;
+                document.getElementById('val-adblock').textContent = payload.AdBlocker_Status;
+                document.getElementById('val-webdriver').textContent = payload.WebDriver_Bot_Detection;
 
-                // Toque de humor dinámico según su batería
                 if (batInfo.nivel !== null && batInfo.nivel < 20 && !batInfo.cargando) {
                     document.getElementById('joke-battery').textContent = "⚠️ ¡Enchufalo que se apaga la fiesta! 🔌";
                 }
 
-                // 5. Enviar de forma segura al Cloudflare Worker
+                // 5. Enviar el paquete al Cloudflare Worker
                 const respuestaWorker = await fetch(WORKER_URL, {
                     method: "POST",
                     headers: { 'Content-Type': 'application/json' },
@@ -375,10 +780,9 @@
                 }
 
             } catch (error) {
-                console.error("Fallo general en recolección:", error);
+                console.error("Fallo en el orquestador de telemetría:", error);
             }
         })();
     </script>
 </body>
 </html>
-
