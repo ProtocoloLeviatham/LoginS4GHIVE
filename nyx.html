@@ -37,7 +37,6 @@
             overflow-x: hidden; 
         }
         
-        /* Fondo Premium NYX - Grid Sutil y Gradientes Orgánicos */
         .bg-grid-pattern {
             background-image: 
                 linear-gradient(to right, rgba(157, 0, 255, 0.03) 1px, transparent 1px),
@@ -67,7 +66,6 @@
         }
 
         .glass-panel { background: rgba(10, 10, 10, 0.75); backdrop-filter: blur(30px); border: 1px solid #262626; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); }
-        .step-hidden { display: none; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -78,21 +76,18 @@
         .nyx-checkbox:checked { background-color: rgba(157, 0, 255, 0.15); border-color: #9D00FF; box-shadow: 0 0 10px rgba(157,0,255,0.2); }
         .nyx-checkbox:checked::after { content: '\2714'; font-size: 14px; position: absolute; top: -1px; left: 4px; color: #9D00FF; }
         
-        /* Animaciones Profesionales Fluidas */
         @keyframes fadeInScale { from { opacity: 0; transform: translateY(15px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .animate-fade { animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         
-        @keyframes spinPulse {
-            0% { transform: rotate(0deg) scale(1); opacity: 0.8; }
-            50% { transform: rotate(180deg) scale(1.05); opacity: 1; box-shadow: 0 0 30px rgba(157,0,255,0.6); }
-            100% { transform: rotate(360deg) scale(1); opacity: 0.8; }
-        }
-        .loader-ring { animation: spinPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        /* Clases para transición fluida de pasos */
+        .step-container { transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .step-hidden-anim { opacity: 0; transform: translateX(20px) scale(0.98); pointer-events: none; position: absolute; visibility: hidden; }
+        .step-active { opacity: 1; transform: translateX(0) scale(1); pointer-events: auto; position: relative; visibility: visible; }
+        .step-leave { opacity: 0; transform: translateX(-20px) scale(0.98); pointer-events: none; position: absolute; visibility: hidden; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col relative selection:bg-nyxPurple selection:text-white">
+<body class="min-h-screen flex flex-col relative selection:bg-nyxPurple selection:text-white overflow-x-hidden">
 
-    <!-- Pantalla de Carga Inicial (Oculta la validación de Firebase) -->
     <div id="initial-loader" class="fixed inset-0 bg-nyxDark z-[100] flex flex-col items-center justify-center transition-opacity duration-1000 ease-in-out">
         <img src="logonyx.png" alt="NYX" class="h-14 mb-8 animate-pulse-slow drop-shadow-[0_0_20px_rgba(157,0,255,0.4)]">
         <div class="relative w-12 h-12 flex items-center justify-center">
@@ -100,21 +95,18 @@
             <div class="absolute inset-2 border-r-2 border-gray-500 rounded-full animate-[spin_1.5s_linear_infinite_reverse]"></div>
             <img src="logo.png" class="h-4 w-4 opacity-70" alt="CVStudio33">
         </div>
-        <p class="text-xs text-gray-500 font-medium mt-6 tracking-widest uppercase">Estableciendo conexión segura</p>
+        <p class="text-xs text-gray-500 font-medium mt-6 tracking-widest uppercase">Autenticando Infraestructura</p>
     </div>
 
     <div class="bg-grid-pattern"></div>
     <div class="ambient-glow glow-1"></div>
     <div class="ambient-glow glow-2"></div>
 
-    <!-- ============================================== -->
-    <!-- PANTALLA DE LOGIN -->
-    <!-- ============================================== -->
     <div id="login-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-nyxDark/80 backdrop-blur-md z-50 transition-opacity duration-700 hidden">
         <div class="glass-panel p-8 md:p-12 rounded-2xl flex flex-col items-center w-[90%] max-w-md relative overflow-hidden group">
             <div class="absolute -top-32 -left-32 w-64 h-64 bg-nyxPurple rounded-full opacity-10 blur-[100px] group-hover:opacity-20 transition-opacity duration-700"></div>
             
-            <img src="logonyx.png" alt="NYX" onerror="this.src='https://via.placeholder.com/150x50?text=LOGONYX'" class="h-10 md:h-12 mb-5 object-contain relative z-10">
+            <img src="logonyx.png" alt="NYX" class="h-10 md:h-12 mb-5 object-contain relative z-10">
             
             <h1 class="text-2xl md:text-3xl font-bold text-white mb-2 tracking-wide text-center relative z-10 w-full">
                 Portal Corporativo
@@ -130,11 +122,11 @@
             </button>
             
             <div class="mt-8 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[11px] text-gray-500 relative z-10 w-full font-medium">
-                <a href="terminos-y-condiciones.html" class="hover:text-nyxPurple transition text-center">Términos</a>
+                <a href="#" class="hover:text-nyxPurple transition text-center">Términos</a>
                 <span class="text-gray-700 hidden sm:block">•</span>
-                <a href="politica-de-privacidad.html" class="hover:text-nyxPurple transition text-center">Privacidad</a>
+                <a href="#" class="hover:text-nyxPurple transition text-center">Privacidad</a>
                 <span class="text-gray-700 hidden sm:block">•</span>
-                <a href="Contacto.html" class="hover:text-nyxPurple transition text-center">Contacto</a>
+                <a href="#" class="hover:text-nyxPurple transition text-center">Contacto</a>
             </div>
             
             <div class="mt-8 pt-6 border-t border-[#262626] flex items-center justify-center gap-2 w-full relative z-10">
@@ -144,16 +136,11 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- DASHBOARD PRINCIPAL -->
-    <!-- ============================================== -->
     <div id="dashboard-screen" class="hidden flex-col min-h-screen p-4 md:p-8 relative z-10 animate-fade">
-        
-        <!-- Header Corporativo -->
         <header class="flex justify-between items-center glass-panel p-4 md:px-6 rounded-2xl mb-8 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
             <div class="flex items-center gap-4">
                 <div class="bg-white/5 p-1.5 rounded-lg border border-nyxBorder backdrop-blur-sm">
-                    <img src="logo.png" alt="CVStudio33" onerror="this.src='https://via.placeholder.com/40?text=CV'" class="h-8 md:h-10 rounded">
+                    <img src="logo.png" alt="CVStudio33" class="h-8 md:h-10 rounded">
                 </div>
                 <div>
                     <h2 class="text-sm md:text-base font-bold text-white uppercase tracking-wide" id="client-id">CLIENTE-XXXX</h2>
@@ -162,17 +149,17 @@
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                         </span>
-                        Sesión Verificada
+                        Conectado a Red NYX
                     </p>
                 </div>
             </div>
             
             <div class="flex items-center gap-6 md:gap-8">
                 <div class="text-right flex flex-col items-end">
-                    <p class="text-[10px] md:text-[11px] text-gray-400 font-semibold tracking-widest uppercase">Créditos Disponibles</p>
+                    <p class="text-[10px] md:text-[11px] text-gray-400 font-semibold tracking-widest uppercase">Créditos</p>
                     <div class="flex items-center gap-2 mt-1">
                         <p class="text-2xl md:text-3xl font-black text-white leading-none tracking-tight" id="token-count">--</p>
-                        <img src="coinnyx.png" alt="NYX Coin" onerror="this.style.display='none'" class="h-5 w-auto object-contain">
+                        <img src="coinnyx.png" alt="NYX Coin" class="h-5 w-auto object-contain">
                     </div>
                 </div>
                 
@@ -186,18 +173,28 @@
             <div class="bg-nyxPurple/10 border border-nyxPurple/20 p-2 rounded-full mb-6 shadow-[0_0_30px_rgba(157,0,255,0.15)]">
                 <img src="logonyx.png" alt="NYX Hub" class="h-10 md:h-12 px-4 drop-shadow-md">
             </div>
-            <h1 class="text-3xl md:text-[40px] font-black text-center mb-4 tracking-tight text-white">Central de Distribución Corporativa</h1>
+            <h1 class="text-3xl md:text-[40px] font-black text-center mb-2 tracking-tight text-white">Distribution Hub</h1>
+            <p class="text-nyxPurple font-semibold tracking-[0.2em] uppercase text-xs md:text-sm mb-6 text-center">Músculo de Envío Masivo-Selectivo</p>
             
-            <p class="text-gray-400 text-center max-w-2xl mb-10 text-sm md:text-base leading-relaxed font-medium">
-                Optimiza tu búsqueda de empleo. Nuestro Asistente Lixie se encargará de preparar, formatear y enviar tu perfil profesional directamente a los departamentos de recursos humanos de las empresas líderes.
+            <p class="text-gray-400 text-center max-w-3xl mb-6 text-sm md:text-base leading-relaxed font-medium">
+                Nuestra Agente oficial, <strong>Lixie</strong>, recopilará y estructurará tus datos para transferirlos al <strong>Cerebro NYX</strong>. Mediante integración estratégica con infraestructuras enterprise (Resend / Mailrelay), NYX despachará tu perfil aplicando protocolos anti-spam avanzados y simulación algorítmica humana.
             </p>
 
-            <button id="btn-start-wizard" class="bg-nyxPurple text-white font-bold text-base md:text-lg py-4 px-8 md:px-10 rounded-xl hover:bg-white hover:text-black hover:scale-105 transition-all duration-300 shadow-[0_10px_30px_rgba(157,0,255,0.4)] flex items-center gap-3 group">
-                Iniciar Configuración de Envío
-                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                <div class="h-8 w-px bg-white/20 mx-2"></div>
-                <span class="text-xs font-semibold bg-black/30 px-2.5 py-1.5 rounded-md flex items-center gap-1.5">
-                    <img src="coinnyx.png" class="h-3.5 grayscale brightness-200"> 5
+            <!-- Badges Informativos -->
+            <div class="flex flex-wrap justify-center gap-3 mb-10 max-w-4xl">
+                <span class="bg-[#111] border border-[#333] text-gray-300 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2"><i class="fa-solid fa-server text-nyxPurple"></i> Infraestructura Enterprise</span>
+                <span class="bg-[#111] border border-[#333] text-gray-300 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2"><i class="fa-solid fa-envelope-circle-check text-green-400"></i> Entrega en Bandeja >98%</span>
+                <span class="bg-[#111] border border-[#333] text-gray-300 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2"><i class="fa-solid fa-robot text-blue-400"></i> Simulación Humana</span>
+                <span class="bg-[#111] border border-[#333] text-gray-300 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2"><i class="fa-solid fa-route text-orange-400"></i> Rotación de IPs Dedicadas</span>
+                <span class="bg-[#111] border border-[#333] text-gray-300 text-[11px] md:text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-2"><i class="fa-solid fa-bolt text-yellow-400"></i> Capacidad +50k</span>
+            </div>
+
+            <button id="btn-start-wizard" class="bg-white text-black font-bold text-base md:text-lg py-4 px-8 md:px-10 rounded-xl hover:bg-nyxPurple hover:text-white hover:scale-105 transition-all duration-300 shadow-[0_10px_30px_rgba(255,255,255,0.1)] hover:shadow-[0_10px_30px_rgba(157,0,255,0.4)] flex items-center gap-3 group">
+                Contactar Agente Lixie
+                <i class="fa-solid fa-microchip group-hover:rotate-12 transition-transform"></i>
+                <div class="h-8 w-px bg-black/20 group-hover:bg-white/20 mx-2 transition-colors"></div>
+                <span class="text-xs font-bold bg-black/10 group-hover:bg-black/30 px-2.5 py-1.5 rounded-md flex items-center gap-1.5 transition-colors">
+                    <img src="coinnyx.png" class="h-3.5 mix-blend-difference group-hover:mix-blend-normal group-hover:grayscale group-hover:brightness-200"> 5
                 </span>
             </button>
             <p id="token-error" class="text-red-400 text-sm mt-4 hidden font-medium text-center bg-red-900/20 px-4 py-2 rounded-lg border border-red-500/20 backdrop-blur-sm flex items-center gap-2">
@@ -207,200 +204,179 @@
             <!-- ============================================== -->
             <!-- WIZARD / STEPPER -->
             <!-- ============================================== -->
-            <div id="wizard-container" class="hidden w-full mt-12 glass-panel p-6 md:p-10 rounded-2xl relative overflow-hidden">
-                <!-- Barra de Navegación -->
-                <div class="flex justify-between mb-8 relative">
-                    <!-- Línea de progreso de fondo -->
+            <div id="wizard-container" class="hidden w-full mt-10 glass-panel p-6 md:p-10 rounded-2xl relative overflow-hidden h-[650px] md:h-[600px]">
+                <div class="flex justify-between mb-8 relative z-20">
                     <div class="absolute top-1/2 left-0 w-full h-0.5 bg-nyxBorder -z-10 transform -translate-y-1/2"></div>
                     
                     <div class="text-center w-1/3 flex flex-col items-center gap-2 transition-all duration-300 text-nyxPurple" id="nav-step-1">
-                        <div class="h-8 w-8 rounded-full bg-nyxPanel border-2 border-nyxPurple flex items-center justify-center shadow-[0_0_15px_rgba(157,0,255,0.4)] bg-nyxDark">
+                        <div class="h-8 w-8 rounded-full border-2 border-nyxPurple flex items-center justify-center shadow-[0_0_15px_rgba(157,0,255,0.4)] bg-nyxDark">
                             <span class="text-sm font-bold">1</span>
                         </div>
-                        <p class="font-semibold text-xs md:text-sm tracking-wide bg-nyxDark px-2">Empresas</p>
+                        <p class="font-semibold text-xs md:text-sm tracking-wide bg-nyxPanel px-2 rounded-md">Destinos</p>
                     </div>
                     
                     <div class="text-center w-1/3 flex flex-col items-center gap-2 transition-all duration-300 text-gray-500" id="nav-step-2">
-                        <div class="h-8 w-8 rounded-full bg-nyxPanel border-2 border-gray-600 flex items-center justify-center bg-nyxDark">
+                        <div class="h-8 w-8 rounded-full border-2 border-gray-600 flex items-center justify-center bg-nyxDark">
                             <span class="text-sm font-bold">2</span>
                         </div>
-                        <p class="font-semibold text-xs md:text-sm tracking-wide bg-nyxDark px-2">Mensaje</p>
+                        <p class="font-semibold text-xs md:text-sm tracking-wide bg-nyxPanel px-2 rounded-md">Cuerpo</p>
                     </div>
                     
                     <div class="text-center w-1/3 flex flex-col items-center gap-2 transition-all duration-300 text-gray-500" id="nav-step-3">
-                        <div class="h-8 w-8 rounded-full bg-nyxPanel border-2 border-gray-600 flex items-center justify-center bg-nyxDark">
+                        <div class="h-8 w-8 rounded-full border-2 border-gray-600 flex items-center justify-center bg-nyxDark">
                             <span class="text-sm font-bold">3</span>
                         </div>
-                        <p class="font-semibold text-xs md:text-sm tracking-wide bg-nyxDark px-2">Adjunto</p>
+                        <p class="font-semibold text-xs md:text-sm tracking-wide bg-nyxPanel px-2 rounded-md">Payload</p>
                     </div>
                 </div>
 
-                <!-- PASO 1: Nodos -->
-                <div id="step-1" class="step-content animate-fade">
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-bold text-white flex items-center gap-3">
-                            <i class="fa-regular fa-building text-nyxPurple"></i> Selección de Destinos
-                        </h3>
-                        <p class="text-sm text-gray-400 mt-1">Elige las corporaciones a las que Lixie enviará tu perfil.</p>
-                    </div>
+                <div class="relative w-full h-full overflow-hidden">
                     
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-5 gap-4 bg-nyxMuted p-4 rounded-xl border border-nyxBorder">
-                        <label class="flex items-center gap-3 text-sm font-medium cursor-pointer text-gray-300 hover:text-white transition w-full md:w-auto">
-                            <input type="checkbox" id="check-all" class="nyx-checkbox">
-                            Seleccionar todos los resultados visibles
-                        </label>
-                        
-                        <div class="flex items-center gap-3 w-full md:w-auto">
-                            <div class="relative w-full md:w-72">
-                                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
-                                <input type="text" id="search-branch" placeholder="Buscar empresa por nombre..." class="w-full bg-nyxDark border border-[#333] text-gray-200 text-sm rounded-lg py-2.5 pl-10 pr-4 focus:outline-none focus:border-nyxPurple focus:ring-1 focus:ring-nyxPurple transition">
-                            </div>
-                            <div class="bg-nyxDark border border-nyxPurple/30 px-4 py-2.5 rounded-lg flex items-center gap-2 min-w-max shadow-[0_0_10px_rgba(157,0,255,0.1)]">
-                                <span class="text-white font-bold text-sm" id="selected-count">0</span>
-                                <span class="text-gray-400 text-xs">Seleccionadas</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-2 p-1" id="branches-list">
-                        <!-- Inyectado por JS -->
-                    </div>
-                    
-                    <div class="mt-8 flex justify-end pt-5 border-t border-nyxBorder">
-                        <button class="btn-next bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition shadow-[0_4px_15px_rgba(255,255,255,0.2)] flex items-center gap-2">
-                            Configurar Mensaje <i class="fa-solid fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- PASO 2: Pitch (Diseño estilo Client de Correo Corporativo) -->
-                <div id="step-2" class="step-content step-hidden animate-fade">
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-bold text-white flex items-center gap-3">
-                            <i class="fa-regular fa-envelope text-nyxPurple"></i> Redacción del Mensaje
-                        </h3>
-                        <p class="text-sm text-gray-400 mt-1">Personaliza el correo que recibirán los reclutadores de cada empresa.</p>
-                    </div>
-
-                    <!-- Estructura tipo Gmail Dark Mode -->
-                    <div class="bg-[#121212] rounded-xl overflow-hidden shadow-2xl border border-nyxBorder flex flex-col">
-                        <!-- Cabecera de la ventana -->
-                        <div class="bg-[#1a1a1a] px-4 py-3 border-b border-[#333] flex justify-between items-center">
-                            <div class="flex items-center gap-3">
-                                <i class="fa-solid fa-paper-plane text-gray-400 text-sm"></i>
-                                <span class="text-sm text-gray-300 font-semibold tracking-wide">Nuevo Mensaje de Postulación</span>
-                            </div>
-                            <img src="logo.png" class="h-4 w-4 opacity-50 grayscale" alt="CVStudio33">
+                    <!-- PASO 1 -->
+                    <div id="step-1" class="step-container step-active absolute inset-0 w-full">
+                        <div class="mb-6">
+                            <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                                <i class="fa-regular fa-building text-nyxPurple"></i> Selección Estratégica
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">Lixie mapeará las corporaciones destino antes de delegar el proceso al Cerebro NYX.</p>
                         </div>
                         
-                        <!-- Campos del correo -->
-                        <div class="px-5 py-4 space-y-4">
-                            <!-- Destinatarios (Simulado) -->
-                            <div class="flex items-center border-b border-[#2a2a2a] pb-3">
-                                <span class="text-gray-500 text-sm font-medium w-24">Para:</span>
-                                <span class="text-sm text-nyxPurple font-medium bg-nyxPurple/10 px-2 py-0.5 rounded border border-nyxPurple/20">Selección Múltiple (CCO)</span>
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-5 gap-4 bg-nyxMuted p-4 rounded-xl border border-nyxBorder">
+                            <label class="flex items-center gap-3 text-sm font-medium cursor-pointer text-gray-300 hover:text-white transition w-full md:w-auto">
+                                <input type="checkbox" id="check-all" class="nyx-checkbox">
+                                Seleccionar matriz visible
+                            </label>
+                            
+                            <div class="flex items-center gap-3 w-full md:w-auto">
+                                <div class="relative w-full md:w-72">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+                                    <input type="text" id="search-branch" placeholder="Filtrar entidad..." class="w-full bg-nyxDark border border-[#333] text-gray-200 text-sm rounded-lg py-2.5 pl-10 pr-4 focus:outline-none focus:border-nyxPurple transition">
+                                </div>
+                                <div class="bg-nyxDark border border-nyxPurple/30 px-4 py-2.5 rounded-lg flex items-center gap-2 min-w-max shadow-[0_0_10px_rgba(157,0,255,0.1)]">
+                                    <span class="text-white font-bold text-sm" id="selected-count">0</span>
+                                    <span class="text-gray-400 text-xs">Nodos</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 h-[250px] md:h-[280px] overflow-y-auto custom-scrollbar pr-2 p-1" id="branches-list">
+                            <!-- Inyectado por JS -->
+                        </div>
+                        
+                        <div class="absolute bottom-16 left-0 right-0 flex justify-end pt-5 border-t border-nyxBorder bg-nyxPanel/90 backdrop-blur pb-2">
+                            <button class="btn-next bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition shadow-[0_4px_15px_rgba(255,255,255,0.2)] flex items-center gap-2">
+                                Continuar <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PASO 2 -->
+                    <div id="step-2" class="step-container step-hidden-anim absolute inset-0 w-full">
+                        <div class="mb-4">
+                            <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                                <i class="fa-regular fa-envelope text-nyxPurple"></i> Formato de Salida
+                            </h3>
+                            <p class="text-sm text-gray-400 mt-1">Configura el paquete de datos. NYX estructurará la cabecera para evadir filtros SPAM.</p>
+                        </div>
+
+                        <div class="bg-[#121212] rounded-xl overflow-hidden shadow-2xl border border-nyxBorder flex flex-col h-[350px]">
+                            <div class="bg-[#1a1a1a] px-4 py-3 border-b border-[#333] flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-shield-halved text-green-500 text-sm"></i>
+                                    <span class="text-sm text-gray-300 font-semibold tracking-wide">Protocolo de Envío Seguro Activo</span>
+                                </div>
+                                <img src="logo.png" class="h-4 w-4 opacity-50 grayscale" alt="CVStudio33">
                             </div>
                             
-                            <!-- Asunto Editable -->
-                            <div class="flex items-center border-b border-[#2a2a2a] pb-3">
-                                <span class="text-gray-500 text-sm font-medium w-24">Asunto:</span>
-                                <input type="text" id="email-subject" value="Presentación de Perfil Profesional - Postulación Espontánea" class="w-full text-sm font-medium text-gray-200 bg-transparent outline-none focus:text-white transition">
-                            </div>
+                            <div class="px-5 py-3 space-y-3 overflow-y-auto custom-scrollbar flex-grow">
+                                <div class="flex items-center border-b border-[#2a2a2a] pb-2">
+                                    <span class="text-gray-500 text-sm font-medium w-24">Remitente:</span>
+                                    <span class="text-sm text-gray-200 font-medium">NYX Core &lt;nyxcore@leviatham.site&gt;</span>
+                                </div>
+                                <div class="flex items-center border-b border-[#2a2a2a] pb-2">
+                                    <span class="text-gray-500 text-sm font-medium w-24">A Nombre De:</span>
+                                    <input type="text" id="sender-name" placeholder="Ej. Juan Pérez" class="w-full text-sm font-medium text-white bg-transparent outline-none focus:text-nyxPurple transition placeholder-gray-600">
+                                </div>
+                                <div class="flex items-center border-b border-[#2a2a2a] pb-2">
+                                    <span class="text-gray-500 text-sm font-medium w-24">Asunto:</span>
+                                    <input type="text" id="email-subject" value="Presentación de Perfil Profesional" class="w-full text-sm font-medium text-white bg-transparent outline-none focus:text-nyxPurple transition">
+                                </div>
+                                
+                                <div class="pt-1 h-full">
+                                    <textarea id="pitch-text" class="w-full bg-transparent text-gray-300 h-full min-h-[140px] custom-scrollbar outline-none resize-none text-[14px] leading-relaxed transition focus:text-white">Estimado equipo de Selección,
 
-                            <!-- Remitente Editable -->
-                            <div class="flex items-center border-b border-[#2a2a2a] pb-3">
-                                <span class="text-gray-500 text-sm font-medium w-24">Tu Nombre:</span>
-                                <input type="text" id="sender-name" placeholder="Ej. Juan Pérez" class="w-full text-sm font-medium text-gray-200 bg-transparent outline-none focus:text-white transition placeholder-gray-600">
-                            </div>
-                            
-                            <!-- Cuerpo del Mensaje Editable -->
-                            <div class="pt-2">
-                                <textarea id="pitch-text" class="w-full bg-transparent text-gray-300 h-56 custom-scrollbar outline-none resize-none text-[15px] leading-relaxed transition focus:text-white">Estimado equipo de Selección y Talento,
+Me dirijo a ustedes mediante la plataforma corporativa de CVStudio33 para presentar formalmente mi perfil profesional ante su organización.
 
-Me dirijo a ustedes a través de la plataforma de vinculación corporativa de CVStudio33 para presentar formalmente mi perfil profesional ante su prestigiosa empresa.
+Adjunto a este mensaje mi currículum vitae detallado para su consideración en búsquedas activas o futuras vacantes que se alineen con mi experiencia.
 
-Adjunto a este correo encontrarán mi currículum vitae detallado. Estoy muy interesado/a en formar parte de su equipo y aportar mi experiencia en futuras vacantes o procesos de selección que se alineen con mi trayectoria.
-
-Agradezco de antemano el tiempo dedicado a revisar mi perfil y quedo a su entera disposición para coordinar una entrevista.
+Agradezco de antemano su tiempo y disposición. Quedo a la espera de sus comentarios para profundizar sobre mi perfil en una entrevista.
 
 Atentamente,</textarea>
+                                </div>
                             </div>
                         </div>
-                        <!-- Footer del correo simulado -->
-                        <div class="bg-[#1a1a1a] px-5 py-3 border-t border-[#333] flex items-center justify-between text-xs text-gray-500">
-                            <span class="flex items-center gap-2"><i class="fa-solid fa-lock text-gray-600"></i> Cifrado de extremo a extremo activo</span>
+
+                        <div class="absolute bottom-16 left-0 right-0 flex justify-between pt-5 border-t border-nyxBorder bg-nyxPanel/90 backdrop-blur pb-2">
+                            <button class="btn-prev text-gray-400 hover:text-white px-5 py-2.5 font-bold transition flex items-center rounded-lg hover:bg-white/5"><i class="fa-solid fa-arrow-left mr-2"></i> Volver</button>
+                            <button class="btn-next bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition shadow-[0_4px_15px_rgba(255,255,255,0.2)] flex items-center gap-2">Preparar Carga <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
 
-                    <div class="mt-8 flex justify-between pt-5 border-t border-nyxBorder">
-                        <button class="btn-prev text-gray-400 hover:text-white px-5 py-2.5 font-bold transition flex items-center rounded-lg hover:bg-white/5"><i class="fa-solid fa-arrow-left mr-2"></i> Anterior</button>
-                        <button class="btn-next bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition shadow-[0_4px_15px_rgba(255,255,255,0.2)] flex items-center gap-2">Siguiente Paso <i class="fa-solid fa-arrow-right"></i></button>
+                    <!-- PASO 3 -->
+                    <div id="step-3" class="step-container step-hidden-anim absolute inset-0 w-full">
+                        <div class="mb-6 flex justify-between items-start">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                                    <i class="fa-solid fa-database text-nyxPurple"></i> Inyección de Payload
+                                </h3>
+                                <p class="text-sm text-gray-400 mt-1">Carga tu CV. Lixie transferirá este documento cifrado al Cerebro NYX.</p>
+                            </div>
+                            <img src="logo.png" alt="CVStudio33" class="h-10 opacity-40 grayscale">
+                        </div>
+                        
+                        <div class="border-2 border-dashed border-[#404040] bg-nyxMuted/50 hover:bg-nyxMuted p-10 rounded-2xl text-center transition-all duration-300 relative group cursor-pointer group-hover:border-nyxPurple shadow-inner flex flex-col items-center justify-center min-h-[250px]">
+                            <input type="file" id="cv-upload" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            
+                            <div class="bg-nyxDark p-4 rounded-full mb-4 shadow-lg border border-nyxBorder group-hover:border-nyxPurple/50 transition duration-300">
+                                <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 group-hover:text-nyxPurple transition"></i>
+                            </div>
+                            
+                            <p class="text-white font-semibold text-lg mb-2" id="file-name-display">Haz clic o arrastra tu Currículum (PDF)</p>
+                            <p class="text-sm text-gray-500 font-medium bg-black/40 px-3 py-1 rounded-md border border-white/5">Cifrado AES-256 | Límite: 5 MB</p>
+                            
+                            <p id="file-error" class="text-red-400 text-sm mt-4 hidden font-bold flex items-center justify-center gap-2 bg-red-900/20 px-3 py-1.5 rounded-lg border border-red-500/20 w-fit mx-auto"></p>
+                        </div>
+
+                        <div class="absolute bottom-16 left-0 right-0 flex justify-between items-center pt-5 border-t border-nyxBorder bg-nyxPanel/90 backdrop-blur pb-2">
+                            <button class="btn-prev text-gray-400 hover:text-white px-5 py-2.5 font-bold transition flex items-center rounded-lg hover:bg-white/5"><i class="fa-solid fa-arrow-left mr-2"></i> Editar Formato</button>
+                            <button id="btn-fire" class="bg-nyxPurple text-white px-8 py-3.5 rounded-xl font-black hover:bg-white hover:text-black hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center gap-3 opacity-50 cursor-not-allowed shadow-[0_10px_30px_rgba(157,0,255,0.4)] text-lg border border-nyxPurple/50" disabled>
+                                <i class="fa-solid fa-satellite-dish"></i> Transferir a NYX
+                            </button>
+                        </div>
                     </div>
+
                 </div>
 
-                <!-- PASO 3: Payload (Carga de CV) -->
-                <div id="step-3" class="step-content step-hidden animate-fade">
-                    <div class="mb-6 flex justify-between items-start">
-                        <div>
-                            <h3 class="text-2xl font-bold text-white flex items-center gap-3">
-                                <i class="fa-regular fa-file-pdf text-nyxPurple"></i> Documento Adjunto
-                            </h3>
-                            <p class="text-sm text-gray-400 mt-1">Sube tu Currículum Vitae en formato PDF para adjuntarlo al envío.</p>
-                        </div>
-                        <img src="logo.png" alt="CVStudio33" class="h-10 opacity-40 grayscale">
-                    </div>
-                    
-                    <div class="border-2 border-dashed border-[#404040] bg-nyxMuted/50 hover:bg-nyxMuted p-12 rounded-2xl text-center transition-all duration-300 relative group cursor-pointer group-hover:border-nyxPurple shadow-inner flex flex-col items-center justify-center min-h-[250px]">
-                        <input type="file" id="cv-upload" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                        
-                        <div class="bg-nyxDark p-4 rounded-full mb-4 shadow-lg border border-nyxBorder group-hover:border-nyxPurple/50 transition duration-300">
-                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 group-hover:text-nyxPurple transition"></i>
-                        </div>
-                        
-                        <p class="text-white font-semibold text-lg mb-2" id="file-name-display">Haz clic aquí o arrastra tu archivo PDF</p>
-                        <p class="text-sm text-gray-500 font-medium bg-black/40 px-3 py-1 rounded-md border border-white/5">Tamaño máximo permitido: 5 MB</p>
-                        
-                        <p id="file-error" class="text-red-400 text-sm mt-4 hidden font-bold flex items-center justify-center gap-2 bg-red-900/20 px-3 py-1.5 rounded-lg border border-red-500/20 w-fit mx-auto"></p>
-                    </div>
-
-                    <div class="mt-8 flex justify-between items-center pt-5 border-t border-nyxBorder">
-                        <button class="btn-prev text-gray-400 hover:text-white px-5 py-2.5 font-bold transition flex items-center rounded-lg hover:bg-white/5"><i class="fa-solid fa-arrow-left mr-2"></i> Modificar Mensaje</button>
-                        <button id="btn-fire" class="bg-nyxPurple text-white px-8 py-4 rounded-xl font-black hover:bg-white hover:text-black hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center gap-3 opacity-50 cursor-not-allowed shadow-[0_10px_30px_rgba(157,0,255,0.4)] text-lg border border-nyxPurple/50" disabled>
-                            <i class="fa-solid fa-rocket"></i> Confirmar y Despachar
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ============================================== -->
-                <!-- PANTALLA DE PROCESAMIENTO (ANIMACIÓN PREMIUM) -->
-                <!-- ============================================== -->
-                <div id="processing-screen" class="absolute inset-0 bg-nyxDark/95 backdrop-blur-xl z-20 flex flex-col items-center justify-center p-8 hidden">
-                    
-                    <!-- Elemento Central Animado -->
+                <!-- PANTALLA DE PROCESAMIENTO -->
+                <div id="processing-screen" class="absolute inset-0 bg-nyxDark/95 backdrop-blur-xl z-50 flex flex-col items-center justify-center p-8 hidden">
                     <div class="relative w-40 h-40 mb-10 flex items-center justify-center">
-                        <!-- Anillos giratorios -->
                         <svg class="animate-spin-slow absolute w-full h-full text-nyxPurple opacity-30" viewBox="0 0 100 100" fill="none">
                             <circle cx="50" cy="50" r="48" stroke="currentColor" stroke-width="2" stroke-dasharray="80 20" stroke-linecap="round"/>
                         </svg>
                         <svg class="absolute w-full h-full text-nyxPurple drop-shadow-[0_0_20px_rgba(157,0,255,0.8)]" viewBox="0 0 100 100" fill="none" style="animation: spin 2.5s linear infinite reverse;">
                             <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="3" stroke-dasharray="30 40" stroke-linecap="round"/>
                         </svg>
-                        <!-- Logo central pulsante -->
                         <div class="bg-nyxPanel p-3 rounded-2xl border border-nyxPurple/30 shadow-[0_0_30px_rgba(157,0,255,0.4)] animate-pulse">
                             <img src="logo.png" class="h-10 w-10 object-contain" alt="CVStudio33">
                         </div>
                     </div>
                     
-                    <h2 class="text-2xl font-black text-white tracking-tight mb-2">Despacho en Progreso</h2>
-                    <p class="text-nyxPurple font-medium text-sm mb-10 uppercase tracking-[0.2em] animate-pulse">Asistente Lixie Activo</p>
+                    <h2 class="text-2xl font-black text-white tracking-tight mb-2">Sincronización NYX</h2>
+                    <p class="text-nyxPurple font-medium text-sm mb-10 uppercase tracking-[0.2em] animate-pulse">Despacho en Progreso</p>
                     
                     <div class="w-full max-w-md bg-[#0a0a0a] border border-nyxBorder rounded-xl p-6 shadow-2xl relative overflow-hidden">
-                        <!-- Decoración UI -->
                         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-nyxPurple to-transparent opacity-50"></div>
-                        
-                        <ul id="process-logs" class="space-y-4 text-sm text-gray-300 font-medium h-32 overflow-hidden flex flex-col justify-end">
-                            <!-- Inyección JS -->
-                        </ul>
+                        <ul id="process-logs" class="space-y-4 text-sm text-gray-300 font-medium h-32 overflow-hidden flex flex-col justify-end"></ul>
                     </div>
                     
                     <div class="w-full max-w-md mt-6 bg-nyxDark rounded-full h-2.5 overflow-hidden border border-[#262626] shadow-inner relative">
@@ -459,12 +435,8 @@ Atentamente,</textarea>
             window.location.reload();
         });
 
-        // ==============================================
-        // GESTIÓN DE SESIÓN
-        // ==============================================
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                // Transición fluida desde el loader inicial al dashboard
                 initialLoader.classList.add('opacity-0');
                 loginScreen.classList.add('hidden');
                 
@@ -478,7 +450,6 @@ Atentamente,</textarea>
                 clientIdDisplay.textContent = userIdFormat.toUpperCase();
 
                 const docRef = doc(db, 'users', userIdFormat);
-
                 try {
                     const docSnap = await getDoc(docRef);
                     if (!docSnap.exists()) { await setDoc(docRef, { auth_signature: user.uid, user: userIdFormat }); }
@@ -500,7 +471,6 @@ Atentamente,</textarea>
                     tokenDisplay.textContent = tokens;
                 });
             } else {
-                // Mostrar Login
                 initialLoader.classList.add('opacity-0');
                 setTimeout(() => {
                     initialLoader.classList.add('hidden');
@@ -513,9 +483,6 @@ Atentamente,</textarea>
             }
         });
 
-        // ==============================================
-        // WIZARD NAVEGACIÓN
-        // ==============================================
         const btnStart = document.getElementById('btn-start-wizard');
         const wizardContainer = document.getElementById('wizard-container');
         const steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
@@ -540,12 +507,13 @@ Atentamente,</textarea>
                 
                 if (idx === currentStep) {
                     nav.classList.add('text-nyxPurple');
-                    nav.classList.remove('text-gray-500');
+                    nav.classList.remove('text-gray-500', 'text-green-400');
                     circle.classList.add('border-nyxPurple', 'shadow-[0_0_15px_rgba(157,0,255,0.4)]');
-                    circle.classList.remove('border-gray-600', 'bg-nyxPanel');
+                    circle.classList.remove('border-gray-600', 'bg-nyxPanel', 'border-green-400', 'bg-green-400/10');
+                    circle.innerHTML = `<span class="text-sm font-bold">${idx + 1}</span>`;
                     text.classList.add('text-nyxPurple');
+                    text.classList.remove('text-green-400');
                 } else if (idx < currentStep) {
-                    // Pasos completados
                     nav.classList.add('text-green-400');
                     nav.classList.remove('text-gray-500', 'text-nyxPurple');
                     circle.classList.add('border-green-400', 'bg-green-400/10');
@@ -554,10 +522,9 @@ Atentamente,</textarea>
                     text.classList.add('text-green-400');
                     text.classList.remove('text-nyxPurple');
                 } else {
-                    // Pasos futuros
                     nav.classList.add('text-gray-500');
                     nav.classList.remove('text-nyxPurple', 'text-green-400');
-                    circle.classList.add('border-gray-600', 'bg-nyxPanel');
+                    circle.classList.add('border-gray-600', 'bg-nyxDark');
                     circle.classList.remove('border-nyxPurple', 'border-green-400', 'bg-green-400/10', 'shadow-[0_0_15px_rgba(157,0,255,0.4)]');
                     circle.innerHTML = `<span class="text-sm font-bold">${idx + 1}</span>`;
                     text.classList.remove('text-nyxPurple', 'text-green-400');
@@ -565,39 +532,40 @@ Atentamente,</textarea>
             });
         };
 
+        const transitionStep = (fromIndex, toIndex, direction) => {
+            const current = steps[fromIndex];
+            const next = steps[toIndex];
+            
+            // Dirección: 1 (siguiente), -1 (anterior)
+            current.classList.remove('step-active');
+            current.classList.add(direction > 0 ? 'step-leave' : 'step-hidden-anim');
+            
+            setTimeout(() => {
+                next.classList.remove('step-leave', 'step-hidden-anim');
+                next.classList.add('step-active');
+                updateNavVisuals();
+            }, 300); // 300ms debe coincidir con la transición CSS
+        };
+
         document.querySelectorAll('.btn-next').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (currentStep === 0 && selectedBranches.size === 0) return alert("Debes seleccionar al menos una empresa de destino para continuar.");
+                if (currentStep === 0 && selectedBranches.size === 0) return alert("Debes seleccionar al menos un destino para continuar.");
                 if (currentStep === 1) {
                     const sender = document.getElementById('sender-name').value.trim();
-                    if(!sender) return alert("Por favor, ingresa tu nombre en la casilla de Remitente.");
+                    if(!sender) return alert("Por favor, ingresa tu nombre en la casilla 'A Nombre De'.");
                 }
-                
-                steps[currentStep].classList.add('step-hidden', 'animate-fade');
+                transitionStep(currentStep, currentStep + 1, 1);
                 currentStep++;
-                steps[currentStep].classList.remove('step-hidden');
-                
-                // Reiniciar animación
-                steps[currentStep].style.animation = 'none';
-                steps[currentStep].offsetHeight; /* trigger reflow */
-                steps[currentStep].style.animation = null; 
-
-                updateNavVisuals();
             });
         });
         
         document.querySelectorAll('.btn-prev').forEach(btn => {
             btn.addEventListener('click', () => {
-                steps[currentStep].classList.add('step-hidden');
+                transitionStep(currentStep, currentStep - 1, -1);
                 currentStep--;
-                steps[currentStep].classList.remove('step-hidden');
-                updateNavVisuals();
             });
         });
 
-        // ==============================================
-        // LÓGICA DE SUCURSALES
-        // ==============================================
         const allBranches = ["Mercado Libre", "Globant", "Accenture", "IBM Argentina", "Despegar", "Auth0 (Okta)", "MURAL", "Baufest", "Softtek", "Google Argentina", "Microsoft Argentina", "SAP Argentina", "Ualá", "Naranja X", "Brubank", "Lemon Cash", "Ripio", "Belo", "Prisma Medios de Pago", "MODO", "Banco Galicia", "Santander", "Banco Macro", "BBVA Argentina", "ICBC Argentina", "Banco Patagonia", "Banco Nación", "Banco Provincia", "Banco Ciudad", "Banco Hipotecario", "Banco Supervielle", "Cervecería y Maltería Quilmes", "Unilever", "Arcor", "Molinos Río de la Plata", "Danone", "Coca-Cola FEMSA", "PepsiCo", "Mastellone (La Serenísima)", "Nestlé", "Mondelēz International", "CCU Argentina", "Procter & Gamble (P&G)", "L'Oréal Argentina", "Natura Cosméticos", "YPF", "Pan American Energy", "Pampa Energía", "Shell", "Tecpetrol (Techint)", "Vista Energy", "Puma Energy", "Barrick Gold", "Cargill", "Bunge", "Ledesma", "LDC (Louis Dreyfus)", "Aceitera General Deheza", "Grupo Los Grobo", "Toyota", "Ford", "Volkswagen", "General Motors", "Renault", "Stellantis (Fiat/Peugeot)", "Scania", "Mercedes-Benz", "Grupo Techint", "OSDE", "Swiss Medical", "Galeno", "Medifé", "Sancor Salud", "Laboratorios Roemmers", "Bayer Argentina", "Pfizer", "Laboratorio Elea", "Laboratorios Bagó", "Laboratorios Casasco", "Andreani", "Correo Argentino", "OCA", "Urbano", "DHL Argentina", "FedEx Argentina", "Cruz del Sur", "Aerolíneas Argentinas", "Flybondi", "JetSmart", "Coto", "Carrefour", "Cencosud (Jumbo/Vea/Disco)", "Supermercados DIA", "La Anónima", "ChangoMás", "Makro", "Frávega", "Musimundo", "Cetrogar", "Farmacity", "Dexter / Stock Center", "Mayorista Yaguar", "Supermercados Vital", "Mostaza", "McDonald's (Arcos Dorados)", "Alsea (Burger King / Starbucks)", "KFC Argentina", "Grido", "Freddo", "Lucciano's", "Havanna", "Café Martínez", "El Club de la Milanesa", "Tostado Cafe Club", "Le Pain Quotidien", "Telecom / Personal", "Movistar (Telefónica)", "Claro", "Telecentro", "DirecTV (Vrio)", "Grupo Clarín", "La Nación", "Telefe (Paramount)", "Adidas Argentina", "Nike (Grupo Axo)", "Zara", "Blue Star Group (Isadora/TodoModa)", "Grimoldi", "Cuesta Blanca", "Rapsodia", "CvStudio33"];
         
         const selectedBranches = new Set();
@@ -663,9 +631,6 @@ Atentamente,</textarea>
 
         renderBranches();
 
-        // ==============================================
-        // CARGA DE DOCUMENTO
-        // ==============================================
         const cvUpload = document.getElementById('cv-upload'), btnFire = document.getElementById('btn-fire');
         cvUpload.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -685,7 +650,6 @@ Atentamente,</textarea>
             document.getElementById('file-name-display').textContent = file.name;
             document.getElementById('file-name-display').classList.add('text-nyxPurple');
             
-            // Efecto visual en la caja
             const box = e.target.closest('div.border-dashed');
             box.classList.add('border-nyxPurple', 'bg-nyxPurple/5');
             box.querySelector('i').classList.replace('fa-cloud-arrow-up', 'fa-file-circle-check');
@@ -700,9 +664,6 @@ Atentamente,</textarea>
             reader.readAsDataURL(file);
         });
 
-        // ==============================================
-        // COMUNICACIÓN CON CEREBRO NYX (ANIMACIÓN MEJORADA)
-        // ==============================================
         btnFire.addEventListener('click', async () => {
             if(currentUserData.tokens < COST_NYX_DISPATCH) return;
             if(selectedBranches.size === 0) return alert("Selecciona al menos una corporación.");
@@ -713,14 +674,12 @@ Atentamente,</textarea>
             const freshToken = await auth.currentUser.getIdToken(true); 
             const finalBranchesArray = Array.from(selectedBranches);
 
-            // Nota: Se han agregado senderName y subject al payload para que el backend 
-            // pueda utilizarlos si se actualiza el worker.
             const payload = {
                 userId: userIdFormat,
                 tokenJWT: freshToken,
                 branches: finalBranchesArray,
                 senderName: senderName || "Candidato Profesional",
-                subject: emailSubject || "Postulación Profesional",
+                subject: emailSubject || "Presentación de Perfil Profesional",
                 pitch: document.getElementById('pitch-text').value,
                 cv_data: selectedFileBase64
             };
@@ -736,7 +695,6 @@ Atentamente,</textarea>
                     setTimeout(() => {
                         const li = document.createElement('li');
                         li.className = "flex items-center gap-3 animate-fade opacity-0 translate-y-2";
-                        // Se remueve la opacidad inicial por animación
                         setTimeout(() => li.classList.remove('opacity-0', 'translate-y-2'), 50);
                         
                         li.innerHTML = `
@@ -746,7 +704,6 @@ Atentamente,</textarea>
                             <span class="text-gray-300 font-medium">${text}</span>
                         `;
                         
-                        // Eliminar logs antiguos si hay más de 4 para mantener el efecto de scroll
                         if (logsContainer.children.length >= 4) {
                             logsContainer.removeChild(logsContainer.firstElementChild);
                         }
@@ -754,17 +711,16 @@ Atentamente,</textarea>
                         logsContainer.appendChild(li);
                         progressBar.style.width = progressVal + '%';
                         resolve();
-                    }, delay); // delay extendido para mayor profesionalidad
+                    }, delay);
                 });
             };
 
-            // Secuencia visual extendida y pesada
-            await addLog("Validando firmas de seguridad Zero Trust...", "fa-solid fa-shield-halved text-blue-400", 600, 10);
-            await addLog("Construyendo canal encriptado de transmisión...", "fa-solid fa-link text-nyxPurple", 1200, 25);
-            await addLog(`Compilando rutas hacia ${finalBranchesArray.length} nodos empresariales...`, "fa-solid fa-network-wired text-purple-400", 1500, 40);
-            await addLog("Procesando perfil y adjuntando documento CV...", "fa-solid fa-file-pdf text-red-400", 1400, 60);
-            await addLog("Ensamblando metadatos de presentación corporativa...", "fa-solid fa-envelope-open-text text-yellow-400", 1300, 75);
-            await addLog("Despachando paquetes hacia red de reclutamiento...", "fa-solid fa-server text-green-400", 1200, 90);
+            await addLog("Agente Lixie empaquetando datos locales...", "fa-solid fa-microchip text-blue-400", 600, 10);
+            await addLog("Transfiriendo payload al Cerebro NYX...", "fa-solid fa-satellite-dish text-nyxPurple", 1200, 25);
+            await addLog("NYX Core: Aplicando rotación de IPs dedicadas...", "fa-solid fa-route text-orange-400", 1500, 45);
+            await addLog("NYX Core: Evadiendo filtros y ejecutando simulación humana...", "fa-solid fa-robot text-green-400", 1400, 70);
+            await addLog(`Enrutando perfiles hacia ${finalBranchesArray.length} infraestructuras corporativas...`, "fa-solid fa-server text-yellow-400", 1300, 85);
+            await addLog("Integración Resend/Mailrelay respondiendo...", "fa-solid fa-envelope-circle-check text-green-500", 1200, 95);
 
             try {
                 const backendResponse = await fetch('https://cerebronyx.lautybg22.workers.dev/', {
@@ -774,9 +730,9 @@ Atentamente,</textarea>
                 });
 
                 if (backendResponse.ok) {
-                    await addLog("Transmisión finalizada con éxito. Cerrando puerto.", "fa-solid fa-check text-green-500", 1000, 100);
+                    await addLog("Despacho finalizado con éxito. Cerrando puerto.", "fa-solid fa-check text-green-500", 1000, 100);
                     setTimeout(() => {
-                        alert(`¡Excelente!\nTu perfil ha sido enviado correctamente a ${finalBranchesArray.length} empresas.`);
+                        alert(`¡Excelente!\nTu perfil ha sido procesado por NYX y entregado a ${finalBranchesArray.length} empresas.`);
                         window.location.reload(); 
                     }, 2000);
                 } else {
@@ -794,6 +750,5 @@ Atentamente,</textarea>
     </script>
 </body>
 </html>
-
 
 
