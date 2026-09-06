@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NYX Distribution Hub - Corporativo</title>
+    <title>NYX Distribution Hub - CVStudio33</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -11,266 +11,313 @@
             theme: {
                 extend: {
                     colors: { 
-                        appBg: '#000000',
-                        appCard: '#0f0f0f',
-                        appBorder: '#1f1f1f',
-                        nyxAccent: '#8a2be2', // Un morado más sobrio y profesional
-                        textMain: '#f2f2f2',
-                        textMuted: '#888888'
+                        nyxDark: '#000000', 
+                        nyxPanel: '#0a0a0a', 
+                        nyxBorder: '#1f1f1f',
+                        nyxMuted: '#141414',
+                        nyxText: '#e5e5e5'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body { 
             background-color: #000000; 
-            color: #f2f2f2; 
-            font-family: 'Inter', system-ui, sans-serif;
+            color: #e5e5e5; 
+            overflow-x: hidden; 
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Scrollbar nativo y limpio */
+        /* Fondo minimalista profesional */
+        .bg-pattern {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .glass-card { 
+            background: rgba(10, 10, 10, 0.95); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid #1f1f1f; 
+            border-radius: 24px;
+        }
+        
+        .step-hidden { display: none; }
+        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
         
-        /* Checkbox iOS Style */
-        .nyx-checkbox { appearance: none; width: 20px; height: 20px; border: 1.5px solid #333; border-radius: 5px; background: #000; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-        .nyx-checkbox:checked { background: #8a2be2; border-color: #8a2be2; }
-        .nyx-checkbox:checked::after { content: '\2713'; color: white; font-size: 12px; font-weight: bold; }
+        .nyx-checkbox { 
+            appearance: none; 
+            background-color: #0a0a0a; 
+            border: 1px solid #333; 
+            width: 20px; 
+            height: 20px; 
+            border-radius: 6px; 
+            position: relative; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            flex-shrink: 0; 
+        }
+        .nyx-checkbox:checked { 
+            background-color: #ffffff; 
+            border-color: #ffffff; 
+        }
+        .nyx-checkbox:checked::after { 
+            content: ''; 
+            position: absolute;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid #000;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
         
-        /* Transiciones de App */
-        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .fade-in { animation: fadeIn 0.3s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .hidden-step { display: none !important; }
+        @keyframes slideUpFade { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .animate-fade { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col relative selection:bg-nyxAccent selection:text-white">
+<body class="min-h-screen flex flex-col relative selection:bg-white selection:text-black">
+
+    <div class="bg-pattern"></div>
 
     <!-- PANTALLA DE CARGA INICIAL -->
-    <div id="initial-loader" class="fixed inset-0 bg-appBg z-[100] flex flex-col items-center justify-center transition-opacity duration-700">
-        <img src="logonyx.png" alt="NYX" class="h-10 mb-6 opacity-90">
-        <div class="h-1 w-24 bg-appBorder rounded-full overflow-hidden">
-            <div class="h-full bg-nyxAccent w-1/2 rounded-full animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+    <div id="initial-loader" class="fixed inset-0 bg-nyxDark z-[100] flex flex-col items-center justify-center transition-opacity duration-700">
+        <img src="logonyx.png" alt="NYX" class="h-12 mb-6 animate-pulse">
+        <div class="w-48 h-1 bg-nyxBorder rounded-full overflow-hidden">
+            <div class="h-full bg-white w-1/2 rounded-full animate-[pulse_1.5s_ease-in-out_infinite]"></div>
         </div>
+        <p class="text-xs text-gray-500 font-medium mt-4 tracking-widest uppercase">Autenticando Red</p>
     </div>
 
-    <!-- ============================================== -->
-    <!-- LOGIN (Minimalista Empresarial) -->
-    <!-- ============================================== -->
-    <div id="login-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-appBg z-50 transition-opacity duration-700 hidden">
-        <div class="w-full max-w-sm px-6 flex flex-col items-center text-center">
-            <img src="logonyx.png" alt="NYX" class="h-12 mb-8">
-            <h1 class="text-xl font-bold text-white mb-2">Acceso Corporativo</h1>
-            <p class="text-sm text-textMuted mb-10 leading-relaxed">
-                Inicia sesión para gestionar el enrutamiento de tu perfil profesional.
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-nyxDark z-50 transition-opacity duration-700 hidden px-4">
+        <div class="glass-card p-8 md:p-10 flex flex-col items-center w-full max-w-sm shadow-2xl relative">
+            <img src="logonyx.png" alt="NYX" class="h-10 mb-8 object-contain">
+            
+            <h1 class="text-xl md:text-2xl font-bold text-white mb-2 text-center">Acceso Corporativo</h1>
+            <p class="text-sm text-gray-400 mb-8 text-center leading-relaxed">
+                Gestión automatizada de perfiles. Identifícate para acceder al hub de distribución.
             </p>
             
-            <button id="btn-login" class="w-full bg-white text-black font-semibold py-3.5 rounded-xl flex items-center justify-center gap-3 active:scale-[0.98] transition-transform text-sm">
+            <button id="btn-login" class="w-full bg-white text-black font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-200 transition duration-300 text-sm">
                 <svg class="h-5 w-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Continuar con Google
+                Ingresar con Google Workspace
             </button>
             
-            <div class="mt-8 flex flex-col items-center opacity-50">
-                <img src="logo.png" class="h-4 w-4 grayscale mb-2">
-                <p class="text-[10px] text-textMuted uppercase tracking-wider">Infraestructura CvStudio33</p>
+            <div class="mt-8 pt-6 border-t border-nyxBorder flex flex-col items-center w-full">
+                <img src="logo.png" class="h-4 w-4 opacity-50 grayscale mb-2" alt="CVStudio33">
+                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Powered by CVStudio33</span>
             </div>
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- DASHBOARD Y WIZARD NATIVO -->
-    <!-- ============================================== -->
-    <div id="dashboard-screen" class="hidden flex-col h-screen overflow-hidden bg-appBg w-full max-w-2xl mx-auto relative">
+    <!-- DASHBOARD PRINCIPAL -->
+    <div id="dashboard-screen" class="hidden flex-col min-h-screen p-4 md:p-6 relative z-10 animate-fade mx-auto w-full max-w-4xl">
         
-        <!-- Top Bar (Estilo App Nativa) -->
-        <header class="flex justify-between items-center px-5 py-4 border-b border-appBorder bg-appBg/95 backdrop-blur-md z-20 shrink-0">
+        <!-- Header Móvil/Clean -->
+        <header class="flex justify-between items-center glass-card p-4 md:px-6 mb-8">
             <div class="flex items-center gap-3">
-                <img src="logo.png" alt="CVStudio33" class="h-7 w-7 rounded">
+                <img src="logo.png" alt="CVStudio33" class="h-8 md:h-10 rounded object-contain opacity-90">
                 <div class="flex flex-col">
-                    <span class="text-xs font-semibold text-white tracking-wide" id="client-id">CLIENTE-XXXX</span>
-                    <span class="text-[10px] text-[#00FF41]">Conexión Segura</span>
+                    <h2 class="text-xs md:text-sm font-bold text-white uppercase tracking-wider" id="client-id">CLIENTE-XXXX</h2>
+                    <span class="text-[10px] text-gray-400">Portal Conectado</span>
                 </div>
             </div>
             
-            <div class="flex items-center gap-4">
-                <!-- Créditos Limpios y Autoajustables -->
-                <div class="bg-appCard border border-appBorder px-3 py-1.5 rounded-full flex items-center gap-2">
-                    <span class="text-sm font-bold text-white leading-none mt-0.5" id="token-count">--</span>
-                    <img src="coinnyx.png" alt="NYX Coin" class="h-4 w-auto object-contain">
+            <div class="flex items-center gap-4 md:gap-6">
+                <div class="flex flex-col items-end">
+                    <span class="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Créditos Disponibles</span>
+                    <div class="flex items-center gap-1.5 bg-nyxMuted px-3 py-1.5 rounded-lg border border-nyxBorder">
+                        <span class="text-lg md:text-xl font-bold text-white leading-none" id="token-count">--</span>
+                        <img src="coinnyx.png" alt="Coin" class="h-4 w-4 md:h-5 md:w-5 object-contain">
+                    </div>
                 </div>
-                <button id="btn-logout" class="text-textMuted hover:text-white transition" title="Cerrar Sesión">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <button id="btn-logout" class="text-gray-400 hover:text-white transition" title="Cerrar Sesión">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 </button>
             </div>
         </header>
 
-        <!-- Contenido Desplazable -->
-        <main class="flex-grow overflow-y-auto custom-scrollbar relative">
+        <main class="flex-grow flex flex-col items-center w-full">
             
-            <!-- VISTA HOME (Presentación Institucional) -->
-            <div id="home-view" class="px-5 py-10 flex flex-col items-center text-center slide-up">
-                <img src="logonyx.png" alt="NYX Hub" class="h-12 mb-8">
+            <!-- Presentación NYX -->
+            <div class="flex flex-col items-center w-full px-2 text-center mb-8">
+                <img src="logonyx.png" alt="NYX Hub" class="h-10 md:h-12 mb-6 object-contain">
+                <h1 class="text-2xl md:text-4xl font-bold mb-3 tracking-tight text-white">NYX Distribution Hub</h1>
                 
-                <h1 class="text-2xl md:text-3xl font-bold text-white mb-3">Distribución Hub</h1>
-                
-                <p class="text-sm text-textMuted mb-8 leading-relaxed max-w-md">
-                    Gestión automática de envíos corporativos. NYX procesa grandes volúmenes garantizando tasas de entrega superiores al 98% mediante protocolos institucionales que evitan bloqueos en bandejas de RRHH.
+                <p class="text-gray-400 max-w-2xl mb-8 text-sm md:text-base leading-relaxed font-normal px-2">
+                    Herramienta corporativa para la distribución automatizada de perfiles profesionales. Diseñada para conectar de manera directa y profesional tu currículum con los departamentos de recursos humanos más importantes.
                 </p>
 
-                <div class="w-full max-w-md bg-appCard border border-appBorder rounded-2xl p-5 mb-10 text-left">
-                    <div class="flex items-center gap-3 mb-4">
-                        <i class="fa-solid fa-server text-nyxAccent"></i>
-                        <span class="text-sm font-semibold">Infraestructura Activa</span>
-                    </div>
-                    <ul class="space-y-3 text-xs text-textMuted">
-                        <li class="flex items-start gap-2"><i class="fa-solid fa-check text-nyxAccent mt-0.5"></i> Capacidad de enrutamiento múltiple simultáneo.</li>
-                        <li class="flex items-start gap-2"><i class="fa-solid fa-check text-nyxAccent mt-0.5"></i> Formato de presentación institucional anti-spam.</li>
-                        <li class="flex items-start gap-2"><i class="fa-solid fa-check text-nyxAccent mt-0.5"></i> Entrega encriptada con validación de dominios.</li>
-                    </ul>
-                </div>
-
-                <a href="NyxTegnologia.html" class="text-xs text-nyxAccent hover:underline mb-8">Leer Documentación Oficial</a>
-
-                <button id="btn-start-wizard" class="w-full max-w-md bg-white text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
-                    Comenzar Despacho
-                    <span class="ml-2 px-2 py-1 bg-black/10 rounded text-xs flex items-center gap-1">
-                        <img src="coinnyx.png" class="h-3 grayscale brightness-0"> 5
+                <button id="btn-start-wizard" class="bg-white text-black font-semibold text-sm md:text-base py-3.5 px-8 rounded-xl hover:bg-gray-200 transition-all duration-300 shadow-lg flex items-center justify-center gap-3 w-full sm:w-auto">
+                    Iniciar Distribución
+                    <span class="bg-black/10 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+                        <img src="coinnyx.png" class="h-3 w-3 object-contain"> 5
                     </span>
                 </button>
-                <p id="token-error" class="text-red-400 text-xs mt-4 hidden text-center"></p>
+                <p id="token-error" class="text-red-400 text-xs mt-4 hidden font-medium"></p>
             </div>
 
-            <!-- VISTA WIZARD -->
-            <div id="wizard-container" class="hidden flex-col w-full px-5 py-6">
+            <!-- WIZARD -->
+            <div id="wizard-container" class="hidden w-full glass-card p-5 md:p-8 relative overflow-hidden mb-10">
                 
-                <!-- Indicador de Pasos Móvil -->
-                <div class="flex justify-between items-center mb-8 px-2">
-                    <span class="text-xs font-semibold text-textMuted" id="step-indicator-text">Paso 1 de 3</span>
-                    <div class="flex gap-1.5">
-                        <div id="dot-1" class="h-1.5 w-6 bg-nyxAccent rounded-full transition-all"></div>
-                        <div id="dot-2" class="h-1.5 w-1.5 bg-appBorder rounded-full transition-all"></div>
-                        <div id="dot-3" class="h-1.5 w-1.5 bg-appBorder rounded-full transition-all"></div>
+                <!-- Barra de Progreso Minimalista -->
+                <div class="flex justify-between items-center mb-8 border-b border-nyxBorder pb-6">
+                    <div class="flex flex-col items-center w-1/3 opacity-100 transition-opacity" id="nav-step-1">
+                        <span class="text-xs md:text-sm font-semibold text-white mb-1">Destinos</span>
+                        <div class="h-1 w-full max-w-[40px] bg-white rounded-full"></div>
+                    </div>
+                    <div class="flex flex-col items-center w-1/3 opacity-40 transition-opacity" id="nav-step-2">
+                        <span class="text-xs md:text-sm font-semibold text-white mb-1">Mensaje</span>
+                        <div class="h-1 w-full max-w-[40px] bg-white rounded-full"></div>
+                    </div>
+                    <div class="flex flex-col items-center w-1/3 opacity-40 transition-opacity" id="nav-step-3">
+                        <span class="text-xs md:text-sm font-semibold text-white mb-1">Adjunto</span>
+                        <div class="h-1 w-full max-w-[40px] bg-white rounded-full"></div>
                     </div>
                 </div>
 
                 <!-- PASO 1: Empresas -->
-                <div id="step-1" class="slide-up">
-                    <div class="flex items-center gap-3 mb-6">
-                        <img src="logonyx.png" class="h-5 object-contain">
-                        <h3 class="text-lg font-bold text-white">Selección de Destinos</h3>
-                    </div>
-                    
-                    <div class="sticky top-0 bg-appBg pt-2 pb-4 z-10">
-                        <div class="relative w-full mb-3">
-                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-textMuted text-sm"></i>
-                            <input type="text" id="search-branch" placeholder="Buscar empresa..." class="w-full bg-appCard border border-appBorder text-white text-sm rounded-xl py-3.5 pl-10 pr-4 focus:outline-none focus:border-nyxAccent transition">
-                        </div>
-                        <div class="flex justify-between items-center bg-appCard border border-appBorder p-3 rounded-xl">
-                            <label class="flex items-center gap-3 text-xs text-textMuted cursor-pointer">
-                                <input type="checkbox" id="check-all" class="nyx-checkbox">
-                                Seleccionar todo
-                            </label>
-                            <span class="text-xs font-bold bg-appBorder px-2 py-1 rounded text-white"><span id="selected-count">0</span> elegidas</span>
+                <div id="step-1" class="step-content animate-fade">
+                    <div class="mb-6 flex items-center gap-3">
+                        <img src="logonyx.png" class="h-5 object-contain" alt="NYX">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-bold text-white">Selección de Empresas</h3>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1">Elige los departamentos de RRHH destino.</p>
                         </div>
                     </div>
                     
-                    <div class="flex flex-col gap-2 max-h-[45vh] overflow-y-auto custom-scrollbar pb-24" id="branches-list">
-                        <!-- Inyectado por JS -->
-                    </div>
-                    
-                    <div class="fixed bottom-0 left-0 w-full p-4 bg-appBg/95 backdrop-blur border-t border-appBorder flex justify-center z-20">
-                        <button class="btn-next w-full max-w-2xl bg-white text-black py-3.5 rounded-xl font-bold active:scale-[0.98] transition-transform">Siguiente</button>
-                    </div>
-                </div>
-
-                <!-- PASO 2: Datos del Candidato (Anti-Spam) -->
-                <div id="step-2" class="hidden-step slide-up">
-                    <div class="flex items-center gap-3 mb-6">
-                        <img src="logonyx.png" class="h-5 object-contain">
-                        <h3 class="text-lg font-bold text-white">Parámetros de Presentación</h3>
-                    </div>
-
-                    <div class="bg-appCard border border-appBorder rounded-2xl p-5 flex flex-col gap-5 mb-24">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-5 gap-4 bg-nyxMuted p-3 md:p-4 rounded-xl border border-nyxBorder">
+                        <label class="flex items-center gap-3 text-sm font-medium cursor-pointer text-gray-300 w-full sm:w-auto">
+                            <input type="checkbox" id="check-all" class="nyx-checkbox">
+                            Seleccionar todos
+                        </label>
                         
-                        <div>
-                            <label class="block text-xs font-medium text-textMuted mb-2">Nombre y Apellido del Candidato (Requerido)</label>
-                            <input type="text" id="candidate-name" placeholder="Ej. Juan Pérez" class="w-full bg-appBg border border-appBorder text-white text-sm rounded-xl py-3 px-4 focus:outline-none focus:border-nyxAccent transition">
-                        </div>
-
-                        <div class="w-full h-px bg-appBorder"></div>
-
-                        <!-- Previsualización del Correo de forma limpia -->
-                        <div>
-                            <span class="block text-[10px] uppercase tracking-wide text-textMuted mb-3">Previsualización de Estructura Institucional</span>
-                            
-                            <div class="space-y-3 bg-appBg border border-appBorder rounded-xl p-4">
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-[10px] text-textMuted">Emisor (Fijo y Seguro)</span>
-                                    <span class="text-xs font-semibold text-nyxAccent">NYX Hub - CvStudio33</span>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-[10px] text-textMuted">Asunto</span>
-                                    <input type="text" id="email-subject" readonly class="text-xs font-semibold text-white bg-transparent outline-none w-full" value="Presentación de perfil profesional: [Nombre del Candidato]">
-                                </div>
-                                <div class="flex flex-col gap-1 mt-2">
-                                    <span class="text-[10px] text-textMuted mb-1">Cuerpo del Mensaje (Formato Automático)</span>
-                                    <textarea id="pitch-text" readonly class="w-full bg-transparent text-textMuted text-xs leading-relaxed outline-none resize-none h-40 custom-scrollbar">Hola, equipo de Selección:
-
-A través de la plataforma de distribución de CvStudio33, el/la profesional [Nombre del Candidato] ha seleccionado a su empresa por su atractivo empleador y desea postularse de manera espontánea para sus búsquedas activas o futuras.
-
-Adjunto a este correo encontrarán su currículum vitae para que puedan evaluarlo e incorporarlo a su base de talento.
-
-El candidato queda a su entera disposición para ampliar cualquier información en una entrevista.
-
-Saludos cordiales,
-NYX Distribución Hub
-Gestión Automática | CvStudio33</textarea>
-                                </div>
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <div class="relative w-full sm:w-64">
+                                <svg class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                <input type="text" id="search-branch" placeholder="Buscar..." class="w-full bg-nyxDark border border-nyxBorder text-white text-sm rounded-lg py-2 pl-9 pr-3 focus:outline-none focus:border-gray-500 transition">
+                            </div>
+                            <div class="bg-white text-black px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-sm min-w-max">
+                                <span class="font-bold text-sm" id="selected-count">0</span>
                             </div>
                         </div>
                     </div>
-
-                    <div class="fixed bottom-0 left-0 w-full p-4 bg-appBg/95 backdrop-blur border-t border-appBorder flex justify-center gap-3 z-20">
-                        <button class="btn-prev w-1/3 max-w-[120px] bg-appCard text-white border border-appBorder py-3.5 rounded-xl font-bold active:scale-[0.98]">Atrás</button>
-                        <button class="btn-next w-2/3 max-w-[400px] bg-white text-black py-3.5 rounded-xl font-bold active:scale-[0.98]">Continuar</button>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3 max-h-[350px] overflow-y-auto custom-scrollbar pr-2" id="branches-list">
+                        <!-- Inyectado por JS -->
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end pt-5 border-t border-nyxBorder">
+                        <button class="btn-next w-full sm:w-auto bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition text-sm">
+                            Siguiente Paso
+                        </button>
                     </div>
                 </div>
 
-                <!-- PASO 3: Adjunto y Despacho -->
-                <div id="step-3" class="hidden-step slide-up">
-                    <div class="flex items-center gap-3 mb-6">
-                        <img src="logo.png" class="h-6 w-6 rounded object-cover">
-                        <h3 class="text-lg font-bold text-white">Documento Oficial</h3>
+                <!-- PASO 2: Mensaje -->
+                <div id="step-2" class="step-content step-hidden animate-fade">
+                    <div class="mb-6 flex items-center gap-3">
+                        <img src="logo.png" class="h-5 object-contain grayscale opacity-80" alt="CVStudio33">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-bold text-white">Parámetros del Mensaje</h3>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1">Configuración del comunicado corporativo.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-nyxDark rounded-xl border border-nyxBorder p-4 md:p-6 space-y-5">
+                        
+                        <!-- Input Nombre del Candidato -->
+                        <div class="flex flex-col pb-4 border-b border-nyxBorder">
+                            <label class="text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Tu Nombre Completo</label>
+                            <input type="text" id="candidate-name" placeholder="Ej: Juan Pérez" class="w-full bg-nyxMuted border border-[#333] text-white text-sm rounded-lg p-3 outline-none focus:border-white transition" required>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row md:items-center pb-4 border-b border-nyxBorder gap-2 md:gap-4">
+                            <label class="text-gray-500 text-xs font-semibold uppercase tracking-wide md:w-24">Emisor:</label>
+                            <input type="text" id="sender-name" value="NYX Hub - CvStudio33" readonly class="w-full bg-transparent text-white text-sm font-medium outline-none cursor-not-allowed">
+                        </div>
+
+                        <div class="flex flex-col md:flex-row md:items-center pb-4 border-b border-nyxBorder gap-2 md:gap-4">
+                            <label class="text-gray-500 text-xs font-semibold uppercase tracking-wide md:w-24">Asunto:</label>
+                            <input type="text" id="email-subject" value="Presentación de perfil profesional: [Nombre del Candidato]" readonly class="w-full bg-transparent text-white text-sm font-medium outline-none cursor-not-allowed">
+                        </div>
+
+                        <div class="flex flex-col pt-2">
+                            <label class="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">Cuerpo del Mensaje (Previsualización):</label>
+                            <textarea id="pitch-text" class="w-full bg-nyxMuted text-gray-300 h-64 md:h-56 p-4 rounded-lg outline-none resize-none text-sm leading-relaxed border border-[#333] cursor-not-allowed" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex flex-col sm:flex-row justify-between gap-4 pt-5 border-t border-nyxBorder">
+                        <button class="btn-prev w-full sm:w-auto text-gray-400 hover:text-white px-5 py-3 font-semibold transition bg-nyxMuted rounded-xl border border-nyxBorder text-sm order-2 sm:order-1">Anterior</button>
+                        <button class="btn-next w-full sm:w-auto bg-white text-black px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition text-sm order-1 sm:order-2">Confirmar Mensaje</button>
+                    </div>
+                </div>
+
+                <!-- PASO 3: Adjunto -->
+                <div id="step-3" class="step-content step-hidden animate-fade">
+                    <div class="mb-6 flex items-center gap-3">
+                        <img src="logonyx.png" class="h-5 object-contain" alt="NYX">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-bold text-white">Documento Adjunto</h3>
+                            <p class="text-xs md:text-sm text-gray-500 mt-1">Carga tu Currículum Vitae en formato PDF.</p>
+                        </div>
                     </div>
                     
-                    <div class="border border-dashed border-appBorder bg-appCard hover:border-nyxAccent transition-colors rounded-2xl p-8 flex flex-col items-center justify-center text-center relative min-h-[250px]">
+                    <div class="border border-dashed border-[#444] bg-nyxDark hover:bg-nyxMuted p-10 rounded-2xl text-center transition-all duration-300 relative group cursor-pointer flex flex-col items-center justify-center min-h-[220px]">
                         <input type="file" id="cv-upload" accept="application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                         
-                        <div class="h-12 w-12 bg-appBg border border-appBorder rounded-full flex items-center justify-center mb-4">
-                            <i class="fa-solid fa-arrow-up-from-bracket text-textMuted" id="upload-icon"></i>
-                        </div>
+                        <img src="logo.png" class="h-12 w-12 object-contain opacity-50 group-hover:opacity-100 transition duration-300 mb-4" alt="Upload">
                         
-                        <p class="text-sm font-semibold text-white mb-1" id="file-name-display">Selecciona tu archivo PDF</p>
-                        <p class="text-[10px] text-textMuted">Máximo 5MB</p>
+                        <p class="text-white font-medium text-sm md:text-base mb-2" id="file-name-display">Seleccionar documento PDF</p>
+                        <p class="text-xs text-gray-500">Límite de tamaño: 5 MB</p>
                         
                         <p id="file-error" class="text-red-400 text-xs mt-4 hidden font-medium"></p>
                     </div>
 
-                    <div class="fixed bottom-0 left-0 w-full p-4 bg-appBg/95 backdrop-blur border-t border-appBorder flex justify-center gap-3 z-20">
-                        <button class="btn-prev w-1/3 max-w-[120px] bg-appCard text-white border border-appBorder py-3.5 rounded-xl font-bold active:scale-[0.98]">Atrás</button>
-                        <button id="btn-fire" class="w-2/3 max-w-[400px] bg-nyxAccent text-white py-3.5 rounded-xl font-bold active:scale-[0.98] transition-all opacity-50 cursor-not-allowed" disabled>
-                            Despachar CV
+                    <div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 pt-5 border-t border-nyxBorder">
+                        <button class="btn-prev w-full sm:w-auto text-gray-400 hover:text-white px-5 py-3 font-semibold transition bg-nyxMuted rounded-xl border border-nyxBorder text-sm order-2 sm:order-1">Modificar Mensaje</button>
+                        <button id="btn-fire" class="w-full sm:w-auto bg-white text-black px-8 py-3.5 rounded-xl font-bold hover:bg-gray-200 transition duration-300 opacity-50 cursor-not-allowed text-sm order-1 sm:order-2" disabled>
+                            Ejecutar Distribución
                         </button>
+                    </div>
+                </div>
+
+                <!-- PANTALLA DE PROCESAMIENTO CORPORATIVO -->
+                <div id="processing-screen" class="absolute inset-0 bg-[#000000] z-20 flex flex-col items-center justify-center p-6 hidden">
+                    
+                    <img src="logonyx.png" class="h-10 md:h-12 mb-8 animate-pulse object-contain" alt="NYX">
+                    
+                    <h2 class="text-lg md:text-xl font-semibold text-white mb-2 text-center">Plataforma de Distribución NYX</h2>
+                    <p class="text-gray-500 text-xs md:text-sm mb-12 text-center tracking-widest uppercase">Procesamiento Corporativo Activo</p>
+                    
+                    <div class="w-full max-w-md bg-nyxPanel border border-nyxBorder rounded-2xl p-6 shadow-2xl">
+                        
+                        <div class="w-full bg-[#1a1a1a] rounded-full h-1.5 mb-6 overflow-hidden">
+                            <div id="progress-bar" class="bg-white h-full w-0 transition-all duration-[1500ms] ease-out"></div>
+                        </div>
+                        
+                        <ul id="process-logs" class="space-y-4 text-xs md:text-sm text-gray-400 h-40 overflow-hidden flex flex-col justify-end">
+                            <!-- Inyección JS -->
+                        </ul>
                     </div>
                 </div>
 
@@ -278,33 +325,7 @@ Gestión Automática | CvStudio33</textarea>
         </main>
     </div>
 
-    <!-- ============================================== -->
-    <!-- MODAL DE PROCESAMIENTO (Estilo Empresarial Limpio) -->
-    <!-- ============================================== -->
-    <div id="processing-screen" class="fixed inset-0 bg-appBg/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center px-6 transition-opacity duration-500 hidden">
-        <div class="w-full max-w-sm flex flex-col items-center text-center">
-            
-            <img src="logonyx.png" class="h-8 mb-10 opacity-80 animate-pulse">
-            
-            <div class="w-full bg-appCard border border-appBorder rounded-2xl p-6 mb-8 text-left relative overflow-hidden">
-                <span class="text-xs font-bold text-white uppercase tracking-wider mb-4 block">Proceso de Enrutamiento</span>
-                
-                <p id="process-status" class="text-sm text-textMuted mb-5 h-10">Iniciando sistema corporativo...</p>
-                
-                <!-- Barra de progreso limpia -->
-                <div class="w-full h-1.5 bg-appBg rounded-full overflow-hidden">
-                    <div id="progress-bar" class="h-full bg-nyxAccent w-0 transition-all duration-500 ease-out"></div>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2 opacity-50">
-                <img src="logo.png" class="h-3 w-3 grayscale">
-                <span class="text-[10px] text-textMuted uppercase tracking-wider">Infraestructura Segura CvStudio33</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDKs & Lógica Principal Intacta -->
+    <!-- FIREBASE & LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -333,14 +354,12 @@ Gestión Automática | CvStudio33</textarea>
         const initialLoader = document.getElementById('initial-loader');
         const loginScreen = document.getElementById('login-screen');
         const dashboardScreen = document.getElementById('dashboard-screen');
-        const homeView = document.getElementById('home-view');
-        const wizardContainer = document.getElementById('wizard-container');
         const clientIdDisplay = document.getElementById('client-id');
         const tokenDisplay = document.getElementById('token-count');
-        const tokenErrorText = document.getElementById('token-error');
+        const tokenError = document.getElementById('token-error');
 
         document.getElementById('btn-login').addEventListener('click', async () => {
-            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (e) { alert("Autenticación cancelada o fallida."); }
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (e) { alert("Autenticación cancelada."); }
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => {
@@ -367,7 +386,6 @@ Gestión Automática | CvStudio33</textarea>
                 clientIdDisplay.textContent = userIdFormat.toUpperCase();
 
                 const docRef = doc(db, 'users', userIdFormat);
-
                 try {
                     const docSnap = await getDoc(docRef);
                     if (!docSnap.exists()) { await setDoc(docRef, { auth_signature: user.uid, user: userIdFormat }); }
@@ -393,7 +411,7 @@ Gestión Automática | CvStudio33</textarea>
                 setTimeout(() => {
                     initialLoader.classList.add('hidden');
                     loginScreen.classList.remove('hidden');
-                    setTimeout(() => loginScreen.classList.remove('opacity-0'), 100);
+                    setTimeout(() => loginScreen.classList.remove('opacity-0'), 50);
                 }, 700);
                 
                 dashboardScreen.classList.add('hidden');
@@ -402,90 +420,85 @@ Gestión Automática | CvStudio33</textarea>
         });
 
         // ==============================================
-        // WIZARD NAVEGACIÓN Y LÓGICA UI
+        // LÓGICA DE ACTUALIZACIÓN DEL MENSAJE (PASO 2)
+        // ==============================================
+        const candidateInput = document.getElementById('candidate-name');
+        const subjectInput = document.getElementById('email-subject');
+        const pitchTextarea = document.getElementById('pitch-text');
+
+        const baseSubject = "Presentación de perfil profesional: [Nombre del Candidato]";
+        const basePitch = `Hola, equipo de Selección:\n\nA través de la plataforma de distribución de CvStudio33, el/la profesional [Nombre del Candidato] ha seleccionado a su empresa por su atractivo empleador y desea postularse de manera espontánea para sus búsquedas activas o futuras.\n\nAdjunto a este correo encontrarán su currículum vitae para que puedan evaluarlo e incorporarlo a su base de talento.\n\nEl candidato queda a su entera disposición para ampliar cualquier información en una entrevista.\n\nSaludos cordiales,\nNYX Distribución Hub\nGestión Automática | CvStudio33`;
+
+        pitchTextarea.value = basePitch;
+
+        candidateInput.addEventListener('input', (e) => {
+            const name = e.target.value.trim() || "[Nombre del Candidato]";
+            subjectInput.value = baseSubject.replace("[Nombre del Candidato]", name);
+            pitchTextarea.value = basePitch.replace("[Nombre del Candidato]", name);
+        });
+
+        // ==============================================
+        // WIZARD NAVEGACIÓN
         // ==============================================
         const btnStart = document.getElementById('btn-start-wizard');
+        const wizardContainer = document.getElementById('wizard-container');
         const steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
-        const stepText = document.getElementById('step-indicator-text');
+        const navSteps = [document.getElementById('nav-step-1'), document.getElementById('nav-step-2'), document.getElementById('nav-step-3')];
         let currentStep = 0;
 
         btnStart.addEventListener('click', () => {
             if(currentUserData.tokens < COST_NYX_DISPATCH) {
-                tokenErrorText.innerText = `Saldo insuficiente. Tienes ${currentUserData.tokens}, se requieren ${COST_NYX_DISPATCH}.`;
-                tokenErrorText.classList.remove('hidden'); return;
+                tokenError.innerText = `Saldo insuficiente. Créditos actuales: ${currentUserData.tokens}`;
+                tokenError.classList.remove('hidden'); return;
             }
-            homeView.classList.add('hidden');
+            tokenError.classList.add('hidden');
             wizardContainer.classList.remove('hidden');
-            wizardContainer.classList.add('flex');
+            btnStart.parentElement.classList.add('hidden');
         });
 
-        const updateDots = () => {
-            stepText.innerText = `Paso ${currentStep + 1} de 3`;
-            for(let i = 0; i < 3; i++) {
-                const dot = document.getElementById(`dot-${i+1}`);
-                if(i === currentStep) {
-                    dot.className = "h-1.5 w-6 bg-nyxAccent rounded-full transition-all";
-                } else if (i < currentStep) {
-                    dot.className = "h-1.5 w-1.5 bg-white rounded-full transition-all";
+        const updateNavVisuals = () => {
+            navSteps.forEach((nav, idx) => {
+                if (idx <= currentStep) {
+                    nav.classList.replace('opacity-40', 'opacity-100');
                 } else {
-                    dot.className = "h-1.5 w-1.5 bg-appBorder rounded-full transition-all";
+                    nav.classList.replace('opacity-100', 'opacity-40');
                 }
-            }
+            });
         };
 
-        document.querySelectorAll('.btn-next').forEach((btn, index) => {
+        document.querySelectorAll('.btn-next').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (currentStep === 0 && selectedBranches.size === 0) return alert("Selecciona al menos una empresa.");
-                
                 if (currentStep === 1) {
-                    const name = document.getElementById('candidate-name').value.trim();
-                    if(!name) return alert("Por favor, ingresa tu Nombre y Apellido.");
+                    if (!candidateInput.value.trim()) {
+                        candidateInput.focus();
+                        return alert("Por favor ingresa tu nombre completo.");
+                    }
                 }
                 
-                steps[currentStep].classList.add('hidden-step');
+                steps[currentStep].classList.add('step-hidden', 'animate-fade');
                 currentStep++;
-                steps[currentStep].classList.remove('hidden-step');
-                updateDots();
-                window.scrollTo(0,0);
+                steps[currentStep].classList.remove('step-hidden');
+                
+                steps[currentStep].style.animation = 'none';
+                steps[currentStep].offsetHeight;
+                steps[currentStep].style.animation = null; 
+
+                updateNavVisuals();
             });
         });
         
         document.querySelectorAll('.btn-prev').forEach(btn => {
             btn.addEventListener('click', () => {
-                steps[currentStep].classList.add('hidden-step');
+                steps[currentStep].classList.add('step-hidden');
                 currentStep--;
-                steps[currentStep].classList.remove('hidden-step');
-                updateDots();
-                window.scrollTo(0,0);
+                steps[currentStep].classList.remove('step-hidden');
+                updateNavVisuals();
             });
         });
 
         // ==============================================
-        // LÓGICA DEL PASO 2: GENERADOR ANTI-SPAM
-        // ==============================================
-        const candidateInput = document.getElementById('candidate-name');
-        const emailSubject = document.getElementById('email-subject');
-        const pitchText = document.getElementById('pitch-text');
-
-        candidateInput.addEventListener('input', (e) => {
-            const name = e.target.value.trim() || "[Nombre del Candidato]";
-            
-            emailSubject.value = `Presentación de perfil profesional: ${name}`;
-            
-            pitchText.value = `Hola, equipo de Selección:
-
-A través de la plataforma de distribución de CvStudio33, el/la profesional ${name} ha seleccionado a su empresa por su atractivo empleador y desea postularse de manera espontánea para sus búsquedas activas o futuras.
-
-Adjunto a este correo encontrarán su currículum vitae para que puedan evaluarlo e incorporarlo a su base de talento.
-
-El candidato queda a su entera disposición para ampliar cualquier información en una entrevista.
-Saludos cordiales,
-NYX Distribución Hub
-Gestión Automática | CvStudio33`;
-        });
-
-        // ==============================================
-        // LÓGICA DE SUCURSALES (PASO 1)
+        // LÓGICA DE SUCURSALES (EMPRESAS)
         // ==============================================
         const allBranches = ["Mercado Libre", "Globant", "Accenture", "IBM Argentina", "Despegar", "Auth0 (Okta)", "MURAL", "Baufest", "Softtek", "Google Argentina", "Microsoft Argentina", "SAP Argentina", "Ualá", "Naranja X", "Brubank", "Lemon Cash", "Ripio", "Belo", "Prisma Medios de Pago", "MODO", "Banco Galicia", "Santander", "Banco Macro", "BBVA Argentina", "ICBC Argentina", "Banco Patagonia", "Banco Nación", "Banco Provincia", "Banco Ciudad", "Banco Hipotecario", "Banco Supervielle", "Cervecería y Maltería Quilmes", "Unilever", "Arcor", "Molinos Río de la Plata", "Danone", "Coca-Cola FEMSA", "PepsiCo", "Mastellone (La Serenísima)", "Nestlé", "Mondelēz International", "CCU Argentina", "Procter & Gamble (P&G)", "L'Oréal Argentina", "Natura Cosméticos", "YPF", "Pan American Energy", "Pampa Energía", "Shell", "Tecpetrol (Techint)", "Vista Energy", "Puma Energy", "Barrick Gold", "Cargill", "Bunge", "Ledesma", "LDC (Louis Dreyfus)", "Aceitera General Deheza", "Grupo Los Grobo", "Toyota", "Ford", "Volkswagen", "General Motors", "Renault", "Stellantis (Fiat/Peugeot)", "Scania", "Mercedes-Benz", "Grupo Techint", "OSDE", "Swiss Medical", "Galeno", "Medifé", "Sancor Salud", "Laboratorios Roemmers", "Bayer Argentina", "Pfizer", "Laboratorio Elea", "Laboratorios Bagó", "Laboratorios Casasco", "Andreani", "Correo Argentino", "OCA", "Urbano", "DHL Argentina", "FedEx Argentina", "Cruz del Sur", "Aerolíneas Argentinas", "Flybondi", "JetSmart", "Coto", "Carrefour", "Cencosud (Jumbo/Vea/Disco)", "Supermercados DIA", "La Anónima", "ChangoMás", "Makro", "Frávega", "Musimundo", "Cetrogar", "Farmacity", "Dexter / Stock Center", "Mayorista Yaguar", "Supermercados Vital", "Mostaza", "McDonald's (Arcos Dorados)", "Alsea (Burger King / Starbucks)", "KFC Argentina", "Grido", "Freddo", "Lucciano's", "Havanna", "Café Martínez", "El Club de la Milanesa", "Tostado Cafe Club", "Le Pain Quotidien", "Telecom / Personal", "Movistar (Telefónica)", "Claro", "Telecentro", "DirecTV (Vrio)", "Grupo Clarín", "La Nación", "Telefe (Paramount)", "Adidas Argentina", "Nike (Grupo Axo)", "Zara", "Blue Star Group (Isadora/TodoModa)", "Grimoldi", "Cuesta Blanca", "Rapsodia", "CvStudio33", "Prosegur", "Securitas", "G4S Argentina", "USS Seguridad", "Brújula Seguridad", "PwC Argentina", "Deloitte Argentina", "EY Argentina", "KPMG Argentina", "BDO Argentina", "ManpowerGroup", "Randstad Argentina", "Adecco Argentina", "Grupo Gestión", "Bayton", "Sodimac", "Easy", "Megatone", "Naldo", "Castillo", "Hospital Italiano", "Hospital Alemán", "Sanatorio Finochietto", "Grupo Omint", "Sancor Seguros", "La Caja de Ahorro y Seguro", "Mapfre Argentina", "Zurich Argentina", "Allianz Argentina", "Balanz Capital", "InvertirOnline", "Bull Market Brokers", "Banco Comafi", "American Express Argentina", "Visa Argentina", "Mastercard Argentina", "Vates", "Epidata", "CoreBI", "Etermax", "Veritran", "Technisys", "Endava", "TASA Logística", "Plaza Logística", "Celsur Logística", "Flecha Bus", "Vía Bariloche", "Loma Negra", "Holcim Argentina", "Acindar", "Aluar", "Fate", "Pirelli Argentina", "Bridgestone Argentina", "Grupo FV", "Ferrum", "Durlock", "San Miguel Global", "Morixe", "Marolio", "Maxiconsumo", "Diarco", "YPF Agro", "Subway Argentina", "Wendy's Argentina", "Dean & Dennys", "Fabric Sushi", "Cinemark Hoyts", "Cinepolis Argentina", "TyC Sports", "ESPN Argentina", "Infobae", "Editorial Perfil", "Torneos", "Aeropuertos Argentina 2000", "Nippon Car", "Kavak Argentina", "Arredo", "Simones", "Topper Argentina", "Grupo Dass (Fila/Umbro)", "Puma Argentina", "Under Armour Argentina", "Newsan", "BGH", "Mirgor", "Exo", "Banghó", "Red Link", "Interbanking", "Rapipago (Gire)", "Pago Fácil (Western Union)", "Provincia NET", "Garantizar", "Acindar Pymes"];
         
@@ -500,11 +513,11 @@ Gestión Automática | CvStudio33`;
             filtered.forEach((b, i) => {
                 const isChecked = selectedBranches.has(b) ? 'checked' : '';
                 const div = document.createElement('div'); 
-                div.className = `flex justify-between items-center bg-appCard border ${isChecked ? 'border-nyxAccent' : 'border-appBorder'} p-3 rounded-xl transition-colors`;
+                div.className = `flex items-center gap-3 bg-nyxDark p-2.5 rounded-lg border ${isChecked ? 'border-white' : 'border-nyxBorder'} transition-all duration-200`;
                 
                 div.innerHTML = `
-                    <label for="b-${i}" class="text-xs text-white font-medium cursor-pointer w-full">${b}</label>
                     <input type="checkbox" id="b-${i}" value="${b}" class="nyx-checkbox branch-checkbox" ${isChecked}>
+                    <label for="b-${i}" class="text-xs md:text-sm cursor-pointer w-full text-gray-300 font-medium truncate">${b}</label>
                 `;
                 branchesList.appendChild(div);
             });
@@ -516,10 +529,10 @@ Gestión Automática | CvStudio33`;
                 const container = e.target.closest('div');
                 if (e.target.checked) {
                     selectedBranches.add(e.target.value);
-                    container.classList.replace('border-appBorder', 'border-nyxAccent');
+                    container.classList.replace('border-nyxBorder', 'border-white');
                 } else {
                     selectedBranches.delete(e.target.value);
-                    container.classList.replace('border-nyxAccent', 'border-appBorder');
+                    container.classList.replace('border-white', 'border-nyxBorder');
                 }
                 countDisplay.textContent = selectedBranches.size;
             }
@@ -534,10 +547,10 @@ Gestión Automática | CvStudio33`;
                 const container = cb.closest('div');
                 if(isChecked) {
                     selectedBranches.add(cb.value);
-                    container.classList.replace('border-appBorder', 'border-nyxAccent');
+                    container.classList.replace('border-nyxBorder', 'border-white');
                 } else {
                     selectedBranches.delete(cb.value);
-                    container.classList.replace('border-nyxAccent', 'border-appBorder');
+                    container.classList.replace('border-white', 'border-nyxBorder');
                 }
             });
             countDisplay.textContent = selectedBranches.size;
@@ -555,8 +568,9 @@ Gestión Automática | CvStudio33`;
             
             if (!file) return;
 
-            if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith('.pdf') || file.size > 5242880) {
-                document.getElementById('file-error').innerText = "Solo PDF menor a 5MB.";
+            const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith('.pdf');
+            if (!isPdf || file.size > 5242880) {
+                document.getElementById('file-error').innerText = "El archivo debe ser PDF y menor a 5MB.";
                 document.getElementById('file-error').classList.remove('hidden'); 
                 cvUpload.value = ''; 
                 return;
@@ -564,11 +578,10 @@ Gestión Automática | CvStudio33`;
             
             document.getElementById('file-error').classList.add('hidden');
             document.getElementById('file-name-display').textContent = file.name;
-            document.getElementById('file-name-display').classList.add('text-nyxAccent');
             
-            document.getElementById('upload-icon').classList.replace('fa-arrow-up-from-bracket', 'fa-check');
-            document.getElementById('upload-icon').classList.replace('text-textMuted', 'text-nyxAccent');
-            e.target.closest('div').classList.add('border-nyxAccent');
+            const box = e.target.closest('div.border-dashed');
+            box.classList.replace('border-[#444]', 'border-white');
+            box.querySelector('img').classList.replace('opacity-50', 'opacity-100');
             
             const reader = new FileReader();
             reader.onload = (ev) => { 
@@ -580,73 +593,98 @@ Gestión Automática | CvStudio33`;
         });
 
         // ==============================================
-        // COMUNICACIÓN Y ANIMACIÓN DE DESPACHO
+        // EJECUCIÓN CORPORATIVA (SIMULACIÓN LIMPIA)
         // ==============================================
         btnFire.addEventListener('click', async () => {
-            if(currentUserData.tokens < COST_NYX_DISPATCH || selectedBranches.size === 0) return;
+            if(currentUserData.tokens < COST_NYX_DISPATCH) return;
+            if(selectedBranches.size === 0) return alert("Selecciona al menos una corporación.");
+            
+            const senderName = document.getElementById('sender-name').value.trim();
+            const emailSubject = document.getElementById('email-subject').value.trim();
+            const pitch = document.getElementById('pitch-text').value;
 
             const freshToken = await auth.currentUser.getIdToken(true); 
             const finalBranchesArray = Array.from(selectedBranches);
 
-            // Payload exacto sin tocar infra. Emisor hardcodeado como solicitó el usuario.
             const payload = {
                 userId: userIdFormat,
                 tokenJWT: freshToken,
                 branches: finalBranchesArray,
-                senderName: "NYX Hub - CvStudio33",
-                subject: emailSubject.value,
-                pitch: pitchText.value,
+                senderName: senderName,
+                subject: emailSubject,
+                pitch: pitch,
                 cv_data: selectedFileBase64
             };
 
             const procScreen = document.getElementById('processing-screen');
-            const statusText = document.getElementById('process-status');
+            const logsContainer = document.getElementById('process-logs');
             const progressBar = document.getElementById('progress-bar');
             
             procScreen.classList.remove('hidden');
             
-            // Animación corporativa limpia usando un array
-            const executionLogs = [
-                { text: "Iniciando protocolo de vinculación corporativa...", progress: 15, delay: 1000 },
-                { text: "Aplicando formato institucional CvStudio33...", progress: 30, delay: 1200 },
-                { text: "Cifrando documento adjunto (AES-256)...", progress: 50, delay: 1500 },
-                { text: `Compilando rutas hacia ${finalBranchesArray.length} servidores de RRHH...`, progress: 75, delay: 1300 },
-                { text: "Despachando paquetes de datos estructurados...", progress: 90, delay: 1200 }
+            // Secuencia Corporativa Larga y Profesional
+            const processSteps = [
+                { msg: "Inicializando plataforma de distribución corporativa...", prog: 10, delay: 1000 },
+                { msg: "Validando credenciales y permisos de enrutamiento...", prog: 20, delay: 1200 },
+                { msg: "Analizando estructura del documento adjunto (PDF)...", prog: 35, delay: 1500 },
+                { msg: "Cifrando paquete de datos (End-to-End Encryption)...", prog: 45, delay: 1200 },
+                { msg: "Configurando directivas Anti-Spam y protocolos SMTP...", prog: 55, delay: 1600 },
+                { msg: `Abriendo canales hacia ${finalBranchesArray.length} departamentos de RRHH...`, prog: 70, delay: 1400 },
+                { msg: "Procesando envíos concurrentes mediante infraestructura NYX...", prog: 85, delay: 2000 },
+                { msg: "Confirmando recepción en servidores de destino...", prog: 95, delay: 1500 }
             ];
 
-            for (const log of executionLogs) {
-                await new Promise(resolve => setTimeout(resolve, log.delay));
-                statusText.innerText = log.text;
-                progressBar.style.width = `${log.progress}%`;
-            }
+            const runSimulation = async () => {
+                for (const step of processSteps) {
+                    await new Promise(resolve => setTimeout(resolve, step.delay));
+                    
+                    const li = document.createElement('li');
+                    li.className = "flex items-center gap-3 animate-fade text-white font-medium";
+                    li.innerHTML = `
+                        <div class="h-2 w-2 bg-white rounded-full flex-shrink-0"></div> 
+                        <span>${step.msg}</span>
+                    `;
+                    
+                    if (logsContainer.children.length >= 4) {
+                        logsContainer.removeChild(logsContainer.firstElementChild);
+                    }
+                    
+                    logsContainer.appendChild(li);
+                    progressBar.style.width = step.prog + '%';
+                }
+            };
+
+            // Ejecutamos la simulación UI en paralelo con el Fetch real
+            const backendRequest = fetch('https://cerebronyx.lautybg22.workers.dev/', {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(payload)
+            });
 
             try {
-                const backendResponse = await fetch('https://cerebronyx.lautybg22.workers.dev/', {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload)
-                });
+                await runSimulation(); // Esperamos que termine la animación visual
+                const backendResponse = await backendRequest; // Verificamos el resultado del backend
 
                 if (backendResponse.ok) {
-                    progressBar.style.width = "100%";
-                    statusText.innerText = "Verificando recepción exitosa en bandejas corporativas...";
-                    statusText.classList.add('text-green-400');
+                    progressBar.style.width = '100%';
+                    const li = document.createElement('li');
+                    li.className = "flex items-center gap-3 animate-fade text-white font-bold mt-2";
+                    li.innerHTML = `<div class="h-3 w-3 bg-white rounded-sm flex-shrink-0"></div> <span>Distribución completada exitosamente.</span>`;
+                    if (logsContainer.children.length >= 4) logsContainer.removeChild(logsContainer.firstElementChild);
+                    logsContainer.appendChild(li);
+
                     setTimeout(() => {
-                        alert("Presentación institucional completada y enviada correctamente.");
+                        alert(`Operación Exitosa.\nEl perfil ha sido distribuido correctamente a ${finalBranchesArray.length} corporaciones.`);
                         window.location.reload(); 
-                    }, 1500);
+                    }, 2000);
                 } else {
                     const err = await backendResponse.text();
-                    progressBar.classList.replace('bg-nyxAccent', 'bg-red-500');
-                    statusText.innerText = `Falla en servidor remoto: ${err}`;
-                    statusText.classList.add('text-red-400');
-                    setTimeout(() => window.location.reload(), 3000);
+                    alert(`Falla en servidor remoto: ${err}`);
+                    window.location.reload();
                 }
             } catch (error) {
-                progressBar.classList.replace('bg-nyxAccent', 'bg-red-500');
-                statusText.innerText = "Error crítico de conexión. Operación abortada.";
-                statusText.classList.add('text-red-400');
-                setTimeout(() => window.location.reload(), 3000);
+                alert("Error crítico de red. Operación abortada.");
+                window.location.reload();
             }
         });
     </script>
