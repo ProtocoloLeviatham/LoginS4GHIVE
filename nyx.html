@@ -35,7 +35,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Fondo minimalista profesional */
         .bg-pattern {
             background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
             background-size: 24px 24px;
@@ -91,39 +90,82 @@
             to { opacity: 1; transform: translateY(0); } 
         }
         .animate-fade { animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes toastSlideDown {
+            from { opacity: 0; transform: translate(-50%, -100%); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .animate-toast { animation: toastSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        /* Escáner de Procesamiento */
+        .scanner-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: scan 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            opacity: 0.5;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative selection:bg-white selection:text-black">
 
     <div class="bg-pattern"></div>
 
+    <!-- CONTENEDOR DE NOTIFICACIONES NYX -->
+    <div id="nyx-toast-container" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[200] flex flex-col gap-3 w-[90%] max-w-sm pointer-events-none"></div>
+
     <!-- PANTALLA DE CARGA INICIAL -->
     <div id="initial-loader" class="fixed inset-0 bg-nyxDark z-[100] flex flex-col items-center justify-center transition-opacity duration-700">
-        <img src="logonyx.png" alt="NYX" class="h-12 mb-6 animate-pulse">
+        <img src="logonyx.png" alt="NYX" class="h-12 mb-6 animate-pulse object-contain">
         <div class="w-48 h-1 bg-nyxBorder rounded-full overflow-hidden">
             <div class="h-full bg-white w-1/2 rounded-full animate-[pulse_1.5s_ease-in-out_infinite]"></div>
         </div>
-        <p class="text-xs text-gray-500 font-medium mt-4 tracking-widest uppercase">Autenticando Red</p>
+        <p class="text-[10px] text-gray-500 font-bold mt-4 tracking-widest uppercase">Autenticando Red Corporativa</p>
     </div>
 
     <!-- PANTALLA DE LOGIN -->
-    <div id="login-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-nyxDark z-50 transition-opacity duration-700 hidden px-4">
-        <div class="glass-card p-8 md:p-10 flex flex-col items-center w-full max-w-sm shadow-2xl relative">
-            <img src="logonyx.png" alt="NYX" class="h-10 mb-8 object-contain">
+    <div id="login-screen" class="absolute inset-0 flex flex-col items-center justify-center bg-nyxDark z-50 transition-opacity duration-700 hidden px-4 py-8 overflow-y-auto">
+        <div class="glass-card p-8 md:p-10 flex flex-col items-center w-full max-w-md shadow-2xl relative my-auto">
             
-            <h1 class="text-xl md:text-2xl font-bold text-white mb-2 text-center">Acceso Corporativo</h1>
-            <p class="text-sm text-gray-400 mb-8 text-center leading-relaxed">
-                Gestión automatizada de perfiles. Identifícate para acceder al hub de distribución.
+            <img src="logonyx.png" alt="NYX" class="h-10 mb-6 object-contain">
+            <h1 class="text-xl md:text-2xl font-bold text-white mb-2 text-center tracking-wide uppercase">ACCESO</h1>
+            
+            <p class="text-xs md:text-sm text-gray-400 mb-10 text-center leading-relaxed px-2 font-medium">
+                Te damos la bienvenida. Inicia sesión para acceder a tu plataforma de inteligencia laboral y gestionar tu perfil corporativo.
             </p>
             
-            <button id="btn-login" class="w-full bg-white text-black font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-200 transition duration-300 text-sm">
+            <button id="btn-login" class="w-full bg-white text-black font-semibold py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-200 transition duration-300 text-sm shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                 <svg class="h-5 w-5" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Ingresar con Google Workspace
             </button>
             
+            <div class="mt-8 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[10px] md:text-xs text-gray-500 w-full">
+                <a href="Terminos-y-condiciones.html" class="hover:text-white transition">Términos y condiciones</a>
+                <span class="text-[#333] hidden sm:inline">|</span>
+                <a href="politica-de-privacidad.html" class="hover:text-white transition">Política de privacidad</a>
+                <span class="text-[#333] hidden sm:inline">|</span>
+                <a href="politica-de-cookies.html" class="hover:text-white transition">Política de cookies</a>
+                <span class="text-[#333] hidden sm:inline">|</span>
+                <a href="Contacto.html" class="hover:text-white transition">Contacto</a>
+            </div>
+
             <div class="mt-8 pt-6 border-t border-nyxBorder flex flex-col items-center w-full">
-                <img src="logo.png" class="h-4 w-4 opacity-50 grayscale mb-2" alt="CVStudio33">
-                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Powered by CVStudio33</span>
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    <span class="text-[10px] text-gray-500 text-center font-medium">Acceso seguro y encriptado. Protegido bajo infraestructura corporativa.</span>
+                </div>
+                <div class="flex items-center gap-1.5 opacity-50 hover:opacity-100 transition">
+                    <img src="logo.png" class="h-3.5 w-3.5 grayscale" alt="CVStudio33">
+                    <span class="text-[9px] text-white font-bold uppercase tracking-wider">Powered by CVStudio33</span>
+                </div>
             </div>
         </div>
     </div>
@@ -131,25 +173,27 @@
     <!-- DASHBOARD PRINCIPAL -->
     <div id="dashboard-screen" class="hidden flex-col min-h-screen p-4 md:p-6 relative z-10 animate-fade mx-auto w-full max-w-4xl">
         
-        <!-- Header Móvil/Clean -->
+        <!-- Header -->
         <header class="flex justify-between items-center glass-card p-4 md:px-6 mb-8">
             <div class="flex items-center gap-3">
                 <img src="logo.png" alt="CVStudio33" class="h-8 md:h-10 rounded object-contain opacity-90">
                 <div class="flex flex-col">
                     <h2 class="text-xs md:text-sm font-bold text-white uppercase tracking-wider" id="client-id">CLIENTE-XXXX</h2>
-                    <span class="text-[10px] text-gray-400">Portal Conectado</span>
+                    <span class="text-[10px] text-green-500 font-medium flex items-center gap-1">
+                        <span class="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></span> Portal Conectado
+                    </span>
                 </div>
             </div>
             
             <div class="flex items-center gap-4 md:gap-6">
                 <div class="flex flex-col items-end">
                     <span class="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Créditos Disponibles</span>
-                    <div class="flex items-center gap-1.5 bg-nyxMuted px-3 py-1.5 rounded-lg border border-nyxBorder">
+                    <div class="flex items-center gap-1.5 bg-nyxMuted px-3 py-1.5 rounded-lg border border-nyxBorder shadow-inner">
                         <span class="text-lg md:text-xl font-bold text-white leading-none" id="token-count">--</span>
                         <img src="coinnyx.png" alt="Coin" class="h-4 w-4 md:h-5 md:w-5 object-contain">
                     </div>
                 </div>
-                <button id="btn-logout" class="text-gray-400 hover:text-white transition" title="Cerrar Sesión">
+                <button id="btn-logout" class="text-gray-500 hover:text-white transition" title="Cerrar Sesión">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                 </button>
             </div>
@@ -158,7 +202,7 @@
         <main class="flex-grow flex flex-col items-center w-full">
             
             <!-- Presentación NYX -->
-            <div class="flex flex-col items-center w-full px-2 text-center mb-8">
+            <div class="flex flex-col items-center w-full px-2 text-center mb-8" id="presentation-section">
                 <img src="logonyx.png" alt="NYX Hub" class="h-10 md:h-12 mb-6 object-contain">
                 <h1 class="text-2xl md:text-4xl font-bold mb-3 tracking-tight text-white">NYX Distribution Hub</h1>
                 
@@ -166,19 +210,17 @@
                     Herramienta corporativa para la distribución automatizada de perfiles profesionales. Diseñada para conectar de manera directa y profesional tu currículum con los departamentos de recursos humanos más importantes.
                 </p>
 
-                <button id="btn-start-wizard" class="bg-white text-black font-semibold text-sm md:text-base py-3.5 px-8 rounded-xl hover:bg-gray-200 transition-all duration-300 shadow-lg flex items-center justify-center gap-3 w-full sm:w-auto">
+                <button id="btn-start-wizard" class="bg-white text-black font-semibold text-sm md:text-base py-3.5 px-8 rounded-xl hover:bg-gray-200 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)] flex items-center justify-center gap-3 w-full sm:w-auto">
                     Iniciar Distribución
                     <span class="bg-black/10 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
                         <img src="coinnyx.png" class="h-3 w-3 object-contain"> 5
                     </span>
                 </button>
-                <p id="token-error" class="text-red-400 text-xs mt-4 hidden font-medium"></p>
             </div>
 
             <!-- WIZARD -->
             <div id="wizard-container" class="hidden w-full glass-card p-5 md:p-8 relative overflow-hidden mb-10">
                 
-                <!-- Barra de Progreso Minimalista -->
                 <div class="flex justify-between items-center mb-8 border-b border-nyxBorder pb-6">
                     <div class="flex flex-col items-center w-1/3 opacity-100 transition-opacity" id="nav-step-1">
                         <span class="text-xs md:text-sm font-semibold text-white mb-1">Destinos</span>
@@ -242,9 +284,8 @@
                         </div>
                     </div>
 
-                    <div class="bg-nyxDark rounded-xl border border-nyxBorder p-4 md:p-6 space-y-5">
+                    <div class="bg-nyxDark rounded-xl border border-nyxBorder p-4 md:p-6 space-y-5 relative">
                         
-                        <!-- Input Nombre del Candidato -->
                         <div class="flex flex-col pb-4 border-b border-nyxBorder">
                             <label class="text-gray-400 text-xs font-semibold mb-2 uppercase tracking-wide">Tu Nombre Completo</label>
                             <input type="text" id="candidate-name" placeholder="Ej: Juan Pérez" class="w-full bg-nyxMuted border border-[#333] text-white text-sm rounded-lg p-3 outline-none focus:border-white transition" required>
@@ -261,8 +302,14 @@
                         </div>
 
                         <div class="flex flex-col pt-2">
-                            <label class="text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">Cuerpo del Mensaje (Previsualización):</label>
-                            <textarea id="pitch-text" class="w-full bg-nyxMuted text-gray-300 h-64 md:h-56 p-4 rounded-lg outline-none resize-none text-sm leading-relaxed border border-[#333] cursor-not-allowed" readonly></textarea>
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Cuerpo del Mensaje:</label>
+                                <span class="text-[10px] text-gray-400 bg-nyxMuted px-2 py-1 rounded border border-[#333]">
+                                    <svg class="w-3 h-3 inline mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    Es recomendable dejar el mensaje predeterminado para mayor efectividad
+                                </span>
+                            </div>
+                            <textarea id="pitch-text" class="w-full bg-nyxMuted text-gray-300 h-64 md:h-56 p-4 rounded-lg outline-none resize-none text-sm leading-relaxed border border-[#333] focus:border-white transition focus:text-white custom-scrollbar"></textarea>
                         </div>
                     </div>
 
@@ -289,8 +336,6 @@
                         
                         <p class="text-white font-medium text-sm md:text-base mb-2" id="file-name-display">Seleccionar documento PDF</p>
                         <p class="text-xs text-gray-500">Límite de tamaño: 5 MB</p>
-                        
-                        <p id="file-error" class="text-red-400 text-xs mt-4 hidden font-medium"></p>
                     </div>
 
                     <div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 pt-5 border-t border-nyxBorder">
@@ -301,21 +346,24 @@
                     </div>
                 </div>
 
-                <!-- PANTALLA DE PROCESAMIENTO CORPORATIVO -->
+                <!-- PANTALLA DE PROCESAMIENTO CORPORATIVO (MEJORADA) -->
                 <div id="processing-screen" class="absolute inset-0 bg-[#000000] z-20 flex flex-col items-center justify-center p-6 hidden">
                     
-                    <img src="logonyx.png" class="h-10 md:h-12 mb-8 animate-pulse object-contain" alt="NYX">
+                    <img src="logonyx.png" class="h-10 md:h-12 mb-6 animate-pulse object-contain" alt="NYX">
                     
-                    <h2 class="text-lg md:text-xl font-semibold text-white mb-2 text-center">Plataforma de Distribución NYX</h2>
-                    <p class="text-gray-500 text-xs md:text-sm mb-12 text-center tracking-widest uppercase">Procesamiento Corporativo Activo</p>
+                    <h2 class="text-lg md:text-xl font-bold text-white mb-2 text-center tracking-tight">NYX Distribution Core</h2>
+                    <p class="text-gray-500 text-xs md:text-sm mb-10 text-center tracking-[0.2em] uppercase font-medium">Procesamiento Activo</p>
                     
-                    <div class="w-full max-w-md bg-nyxPanel border border-nyxBorder rounded-2xl p-6 shadow-2xl">
+                    <div class="w-full max-w-md bg-nyxPanel border border-nyxBorder rounded-2xl p-6 shadow-2xl relative overflow-hidden">
                         
-                        <div class="w-full bg-[#1a1a1a] rounded-full h-1.5 mb-6 overflow-hidden">
-                            <div id="progress-bar" class="bg-white h-full w-0 transition-all duration-[1500ms] ease-out"></div>
+                        <!-- Efecto Escáner -->
+                        <div class="scanner-line"></div>
+                        
+                        <div class="w-full bg-[#1a1a1a] rounded-full h-1.5 mb-6 overflow-hidden relative z-10">
+                            <div id="progress-bar" class="bg-white h-full w-0 transition-all duration-[1500ms] ease-out shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
                         </div>
                         
-                        <ul id="process-logs" class="space-y-4 text-xs md:text-sm text-gray-400 h-40 overflow-hidden flex flex-col justify-end">
+                        <ul id="process-logs" class="space-y-4 text-[11px] md:text-sm text-gray-400 h-40 overflow-hidden flex flex-col justify-end font-mono relative z-10">
                             <!-- Inyección JS -->
                         </ul>
                     </div>
@@ -323,6 +371,18 @@
 
             </div>
         </main>
+    </div>
+
+    <!-- MODAL DE ÉXITO PERSONALIZADO NYX -->
+    <div id="nyx-success-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[300] flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-500 px-4">
+        <div class="bg-nyxPanel border border-nyxBorder p-8 md:p-10 rounded-2xl flex flex-col items-center max-w-sm w-full shadow-[0_0_40px_rgba(255,255,255,0.05)] text-center transform scale-95 transition-transform duration-500" id="nyx-success-card">
+            <div class="h-16 w-16 bg-white rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-xl md:text-2xl font-bold text-white mb-2">Distribución Exitosa</h2>
+            <p class="text-sm text-gray-400 mb-8" id="nyx-success-msg">El perfil ha sido distribuido correctamente a las corporaciones seleccionadas.</p>
+            <button id="btn-close-success" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition text-sm">Entendido</button>
+        </div>
     </div>
 
     <!-- FIREBASE & LÓGICA -->
@@ -351,15 +411,67 @@
         let selectedFileBase64 = null;
         let unsubscribeSnapshot = null;
 
+        // ==============================================
+        // SISTEMA DE NOTIFICACIONES NYX (Reemplazo de alert)
+        // ==============================================
+        const showNyxNotification = (message, type = 'error') => {
+            const container = document.getElementById('nyx-toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'error' ? 'bg-[#1a0f0f]' : 'bg-nyxPanel';
+            const borderColor = type === 'error' ? 'border-red-900' : 'border-nyxBorder';
+            const textColor = type === 'error' ? 'text-red-400' : 'text-white';
+            const icon = type === 'error' 
+                ? `<svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`
+                : `<img src="logonyx.png" class="h-3.5 object-contain">`;
+
+            toast.className = `flex items-center gap-3 ${bgColor} ${borderColor} border p-3.5 rounded-xl shadow-2xl animate-toast pointer-events-auto`;
+            toast.innerHTML = `
+                <div class="flex-shrink-0 flex items-center justify-center">${icon}</div>
+                <p class="text-[11px] md:text-xs font-medium ${textColor} leading-tight">${message}</p>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, -10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => {
+                    if(container.contains(toast)) container.removeChild(toast);
+                }, 300);
+            }, 4000);
+        };
+
+        const showSuccessModal = (message) => {
+            const modal = document.getElementById('nyx-success-modal');
+            const card = document.getElementById('nyx-success-card');
+            document.getElementById('nyx-success-msg').innerText = message;
+            
+            modal.classList.remove('hidden');
+            // Timeout to allow display block to render before opacity transition
+            setTimeout(() => {
+                modal.classList.replace('opacity-0', 'opacity-100');
+                card.classList.replace('scale-95', 'scale-100');
+            }, 50);
+
+            document.getElementById('btn-close-success').onclick = () => {
+                window.location.reload();
+            };
+        };
+
+        // ==============================================
+        // REFERENCIAS DOM
+        // ==============================================
         const initialLoader = document.getElementById('initial-loader');
         const loginScreen = document.getElementById('login-screen');
         const dashboardScreen = document.getElementById('dashboard-screen');
         const clientIdDisplay = document.getElementById('client-id');
         const tokenDisplay = document.getElementById('token-count');
-        const tokenError = document.getElementById('token-error');
 
         document.getElementById('btn-login').addEventListener('click', async () => {
-            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (e) { alert("Autenticación cancelada."); }
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } 
+            catch (e) { showNyxNotification("Proceso de autenticación cancelado.", "error"); }
         });
 
         document.getElementById('btn-logout').addEventListener('click', () => {
@@ -434,7 +546,11 @@
         candidateInput.addEventListener('input', (e) => {
             const name = e.target.value.trim() || "[Nombre del Candidato]";
             subjectInput.value = baseSubject.replace("[Nombre del Candidato]", name);
-            pitchTextarea.value = basePitch.replace("[Nombre del Candidato]", name);
+            
+            // Only auto-update if the user hasn't heavily modified the text
+            if(pitchTextarea.value.includes("Hola, equipo de Selección:")) {
+                 pitchTextarea.value = basePitch.replace("[Nombre del Candidato]", name);
+            }
         });
 
         // ==============================================
@@ -442,18 +558,18 @@
         // ==============================================
         const btnStart = document.getElementById('btn-start-wizard');
         const wizardContainer = document.getElementById('wizard-container');
+        const presentationSection = document.getElementById('presentation-section');
         const steps = [document.getElementById('step-1'), document.getElementById('step-2'), document.getElementById('step-3')];
         const navSteps = [document.getElementById('nav-step-1'), document.getElementById('nav-step-2'), document.getElementById('nav-step-3')];
         let currentStep = 0;
 
         btnStart.addEventListener('click', () => {
             if(currentUserData.tokens < COST_NYX_DISPATCH) {
-                tokenError.innerText = `Saldo insuficiente. Créditos actuales: ${currentUserData.tokens}`;
-                tokenError.classList.remove('hidden'); return;
+                showNyxNotification(`Saldo insuficiente. Créditos actuales: ${currentUserData.tokens}. Se requieren ${COST_NYX_DISPATCH}.`, "error");
+                return;
             }
-            tokenError.classList.add('hidden');
             wizardContainer.classList.remove('hidden');
-            btnStart.parentElement.classList.add('hidden');
+            presentationSection.classList.add('hidden');
         });
 
         const updateNavVisuals = () => {
@@ -468,11 +584,17 @@
 
         document.querySelectorAll('.btn-next').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (currentStep === 0 && selectedBranches.size === 0) return alert("Selecciona al menos una empresa.");
+                if (currentStep === 0 && selectedBranches.size === 0) {
+                    return showNyxNotification("Selecciona al menos una corporación de destino.", "error");
+                }
                 if (currentStep === 1) {
                     if (!candidateInput.value.trim()) {
                         candidateInput.focus();
-                        return alert("Por favor ingresa tu nombre completo.");
+                        return showNyxNotification("El nombre del candidato es requerido.", "error");
+                    }
+                    if (!pitchTextarea.value.trim()) {
+                        pitchTextarea.focus();
+                        return showNyxNotification("El cuerpo del mensaje no puede estar vacío.", "error");
                     }
                 }
                 
@@ -570,13 +692,11 @@
 
             const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith('.pdf');
             if (!isPdf || file.size > 5242880) {
-                document.getElementById('file-error').innerText = "El archivo debe ser PDF y menor a 5MB.";
-                document.getElementById('file-error').classList.remove('hidden'); 
+                showNyxNotification("El archivo debe ser PDF y menor a 5MB.", "error");
                 cvUpload.value = ''; 
                 return;
             }
             
-            document.getElementById('file-error').classList.add('hidden');
             document.getElementById('file-name-display').textContent = file.name;
             
             const box = e.target.closest('div.border-dashed');
@@ -593,11 +713,11 @@
         });
 
         // ==============================================
-        // EJECUCIÓN CORPORATIVA (SIMULACIÓN LIMPIA)
+        // EJECUCIÓN CORPORATIVA (SIMULACIÓN Y CONEXIÓN)
         // ==============================================
         btnFire.addEventListener('click', async () => {
             if(currentUserData.tokens < COST_NYX_DISPATCH) return;
-            if(selectedBranches.size === 0) return alert("Selecciona al menos una corporación.");
+            if(selectedBranches.size === 0) return showNyxNotification("Selecciona al menos una corporación.", "error");
             
             const senderName = document.getElementById('sender-name').value.trim();
             const emailSubject = document.getElementById('email-subject').value.trim();
@@ -622,7 +742,6 @@
             
             procScreen.classList.remove('hidden');
             
-            // Secuencia Corporativa Larga y Profesional
             const processSteps = [
                 { msg: "Inicializando plataforma de distribución corporativa...", prog: 10, delay: 1000 },
                 { msg: "Validando credenciales y permisos de enrutamiento...", prog: 20, delay: 1200 },
@@ -639,11 +758,8 @@
                     await new Promise(resolve => setTimeout(resolve, step.delay));
                     
                     const li = document.createElement('li');
-                    li.className = "flex items-center gap-3 animate-fade text-white font-medium";
-                    li.innerHTML = `
-                        <div class="h-2 w-2 bg-white rounded-full flex-shrink-0"></div> 
-                        <span>${step.msg}</span>
-                    `;
+                    li.className = "flex items-center gap-3 animate-fade text-white";
+                    li.innerHTML = `<span class="text-white">></span> <span>${step.msg}</span>`;
                     
                     if (logsContainer.children.length >= 4) {
                         logsContainer.removeChild(logsContainer.firstElementChild);
@@ -654,7 +770,6 @@
                 }
             };
 
-            // Ejecutamos la simulación UI en paralelo con el Fetch real
             const backendRequest = fetch('https://cerebronyx.lautybg22.workers.dev/', {
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
@@ -662,29 +777,28 @@
             });
 
             try {
-                await runSimulation(); // Esperamos que termine la animación visual
-                const backendResponse = await backendRequest; // Verificamos el resultado del backend
+                await runSimulation(); 
+                const backendResponse = await backendRequest; 
 
                 if (backendResponse.ok) {
                     progressBar.style.width = '100%';
                     const li = document.createElement('li');
                     li.className = "flex items-center gap-3 animate-fade text-white font-bold mt-2";
-                    li.innerHTML = `<div class="h-3 w-3 bg-white rounded-sm flex-shrink-0"></div> <span>Distribución completada exitosamente.</span>`;
+                    li.innerHTML = `<span>></span> <span>Distribución completada exitosamente.</span>`;
                     if (logsContainer.children.length >= 4) logsContainer.removeChild(logsContainer.firstElementChild);
                     logsContainer.appendChild(li);
 
                     setTimeout(() => {
-                        alert(`Operación Exitosa.\nEl perfil ha sido distribuido correctamente a ${finalBranchesArray.length} corporaciones.`);
-                        window.location.reload(); 
-                    }, 2000);
+                        showSuccessModal(`El perfil ha sido distribuido correctamente a ${finalBranchesArray.length} corporaciones.`);
+                    }, 1500);
                 } else {
                     const err = await backendResponse.text();
-                    alert(`Falla en servidor remoto: ${err}`);
-                    window.location.reload();
+                    procScreen.classList.add('hidden');
+                    showNyxNotification(`Falla remota: ${err}`, "error");
                 }
             } catch (error) {
-                alert("Error crítico de red. Operación abortada.");
-                window.location.reload();
+                procScreen.classList.add('hidden');
+                showNyxNotification("Error crítico de red. Operación abortada.", "error");
             }
         });
     </script>
