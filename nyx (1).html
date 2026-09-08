@@ -292,7 +292,7 @@
         const roomsTbody = document.getElementById('rooms-tbody');
         const voipAnim = document.getElementById('voip-anim-container');
 
-        // --- 2. MOTORES DE GENERACIÓN ALEATORIA (IPS LOCALES INCLUIDAS) ---
+        // --- 2. MOTORES DE GENERACIÓN ALEATORIA ---
         function generateUUID() { return Math.random().toString(36).substring(2,10).toUpperCase(); }
         
         const genEngines = {
@@ -319,7 +319,7 @@
             }
         };
 
-        // --- 3. BASE DE DATOS (SIN SALAS) ---
+        // --- 3. BASE DE DATOS ---
         const realisticDB = {
             "wemesh-inc": {
                 "infrastructure": {
@@ -424,7 +424,7 @@
             }
         }
 
-        // --- 4. KALI TERMINAL (Optimizada y Ligera) ---
+        // --- 4. KALI TERMINAL ---
         function getTimestamp() {
             const now = new Date();
             return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}.${now.getMilliseconds().toString().padStart(3,'0')}`;
@@ -447,7 +447,7 @@
 
         // --- 5. SALAS REALISTAS Y MODAL ---
         function generateRoomsDOM() {
-            roomsTbody.innerHTML = ''; // Limpiar
+            roomsTbody.innerHTML = '';
             for(let i=0; i<50; i++) {
                 const roomId = generateUUID();
                 const hostIp = genEngines.ips();
@@ -471,7 +471,7 @@
                 roomsTbody.appendChild(tr);
             }
         }
-        generateRoomsDOM(); // Llamada inicial
+        generateRoomsDOM(); 
 
         function openModal(roomId, mediaApi, drm, codec, hostIp, wssNode, jwt) {
             const modal = document.getElementById('room-modal');
@@ -506,18 +506,19 @@
             document.getElementById('room-modal').classList.add('hidden');
         }
 
-        // --- 6. LÓGICA DE ATAQUE Y SISTEMA DE CAÍDA (CRASH) ---
+        // --- 6. LÓGICA DE ATAQUE, SOCKETS Y SISTEMA DE CAÍDA (CRASH) ---
         function handleAttackTypeChange() {
             const type = document.getElementById('attack-type').value;
             voipAnim.classList.toggle('active', type === 'voip');
         }
 
         function getAttackSettings(rate) {
+            // Modificadas las tasas de rechazo para permitir que los sockets crezcan brutalmente en High/Extreme antes de caer.
             switch(rate) {
                 case 'low': return { targetRps: 3, tickMs: 250, rejectRate: 0.00 };
                 case 'med': return { targetRps: 15, tickMs: 100, rejectRate: 0.02 };
-                case 'high': return { targetRps: 80, tickMs: 50, rejectRate: 0.35 }; 
-                case 'extreme': return { targetRps: 800, tickMs: 20, rejectRate: 0.85 };
+                case 'high': return { targetRps: 80, tickMs: 50, rejectRate: 0.15 }; 
+                case 'extreme': return { targetRps: 800, tickMs: 20, rejectRate: 0.45 };
             }
         }
 
@@ -527,7 +528,6 @@
             const type = document.getElementById('attack-type').value;
 
             if (isAttacking) {
-                // UI: Estado de Ataque
                 btnFire.classList.replace('border-gray-700', 'border-red-600');
                 btnFire.classList.replace('hover:border-accent', 'hover:bg-red-900');
                 btnFire.innerHTML = '[ ABORTAR EJECUCIÓN ]';
@@ -541,7 +541,6 @@
                 writeKali(`INIT PAYLOAD: Vector=${type} | Rate=${rateStr}`);
                 startLoop(rateStr, type);
             } else {
-                // UI: Restauración y reseteo
                 btnFire.classList.replace('border-red-600', 'border-gray-700');
                 btnFire.classList.replace('hover:bg-red-900', 'hover:border-accent');
                 btnFire.innerHTML = '[ INICIALIZAR HILOS ]';
@@ -552,7 +551,6 @@
                 statusTxt.className = 'font-bold uppercase tracking-wider text-green-500';
                 document.getElementById('status-dot').innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>`;
                 
-                // Si el servidor estaba caído, lo reiniciamos simulando que el ataque cesó
                 if (state.serverCrashed) {
                     state.serverCrashed = false;
                     state.activeSockets = 1303;
@@ -580,38 +578,41 @@
                 const reqsInThisTick = (instantRps / (1000 / conf.tickMs));
                 state.totalReqs += Math.ceil(reqsInThisTick);
                 
-                const rejectedThisTick = Math.ceil(reqsInThisTick * conf.rejectRate * jitter);
+                let rejectedThisTick = 0;
+
+                // --- NUEVA LÓGICA DE RECHAZO TOTAL SI EL SERVIDOR ESTÁ CAÍDO ---
+                if (state.serverCrashed) {
+                    rejectedThisTick = Math.ceil(reqsInThisTick); // 100% de las peticiones son rechazadas (Error 503)
+                } else {
+                    rejectedThisTick = Math.ceil(reqsInThisTick * conf.rejectRate * jitter); // Rechazo normal por WAF
+                }
+
                 state.rejectedReqs += rejectedThisTick;
                 const acceptedReqs = reqsInThisTick - rejectedThisTick;
 
-                // --- LÓGICA DE COLAPSO (CRASH SERVER) ---
+                // Trigger de Colapso Inicial
                 if (state.rejectedReqs >= 10000 && !state.serverCrashed) {
                     state.serverCrashed = true;
                     
-                    // Modificar UI del Header a Offline
                     document.getElementById('target-status').innerText = '503 OFFLINE';
                     document.getElementById('target-status').className = 'font-bold uppercase tracking-wider text-gray-500';
-                    document.getElementById('status-dot').innerHTML = `<span class="relative inline-flex rounded-full h-2 w-2 bg-gray-600"></span>`; // Sin ping (muerto)
+                    document.getElementById('status-dot').innerHTML = `<span class="relative inline-flex rounded-full h-2 w-2 bg-gray-600"></span>`; 
                     
-                    // Eliminar salas y mostrar error en tabla
                     document.getElementById('table-count').innerText = "Mostrando 0 de 0 abiertas";
                     roomsTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500 font-bold uppercase tracking-widest bg-[#110000] border-y border-red-900"><i class="fa-solid fa-server mr-2"></i> ERROR 503 - SERVIDOR ERROR FUERA DE LÍNEA (NODOS CAÍDOS)</td></tr>`;
-                    
-                    // Alerta Crítica en Terminal
-                    writeKali(`CRITICAL: 503 Servidor Error Fuera de Línea - Conexión Perdida`);
                 }
 
-                // Cálculo de Sockets
+                // --- FÍSICA DE SOCKETS ---
                 if (!state.serverCrashed) {
+                    // Los sockets crecen masivamente dependiendo de las aceptadas
                     if (type === 'ws') state.activeSockets += Math.floor(acceptedReqs * 1.5); 
                     else if (type === 'logic') state.activeSockets += Math.floor(acceptedReqs * 0.4); 
                     else if (type === 'voip') state.activeSockets += Math.floor(acceptedReqs * 0.8);
                 } else {
-                    // Si el servidor está caído, los sockets activos bajan fulminantemente a 0
+                    // Cae a 0 instantáneamente y se queda en 0.
                     state.activeSockets = 0;
                 }
                 
-                // Actualizar Visuales del Dashboard
                 metricRps.innerText = state.currentRps.toFixed(1);
                 metricTotal.innerText = state.totalReqs.toLocaleString();
                 metricRejected.innerText = state.rejectedReqs.toLocaleString();
@@ -621,11 +622,19 @@
                 barRps.style.width = barWidth + "%";
                 barRps.style.backgroundColor = barWidth > 10 ? "#ef4444" : "#2563eb";
 
-                // Log de Kali (Solo si no está crasheado para no spamear sobre error)
-                if (Math.random() > 0.80 && !state.serverCrashed) {
-                    if(type === 'ws') writeKali(`WSS Handshake -> ${genEngines.nodes()} -> 101 Switching Protocols`);
-                    if(type === 'logic') writeKali(`POST /api/v1/sync -> Payload ${Math.floor(Math.random()*2000)}B -> 200 OK`);
-                    if(type === 'voip') writeKali(`UDP Stream -> Injecting OPUS blob -> Target SFU Node`);
+                // --- NUEVO COMPORTAMIENTO DE LOG DE KALI ---
+                if (state.serverCrashed) {
+                    // Bucle de error constante y realista
+                    if (Math.random() > 0.40) { 
+                        writeKali(`CRITICAL: 503 Servidor Error Fuera de Línea - Conexión Perdida`);
+                    }
+                } else {
+                    // Logs normales
+                    if (Math.random() > 0.80) {
+                        if(type === 'ws') writeKali(`WSS Handshake -> ${genEngines.nodes()} -> 101 Switching Protocols`);
+                        if(type === 'logic') writeKali(`POST /api/v1/sync -> Payload ${Math.floor(Math.random()*2000)}B -> 200 OK`);
+                        if(type === 'voip') writeKali(`UDP Stream -> Injecting OPUS blob -> Target SFU Node`);
+                    }
                 }
 
             }, conf.tickMs);
@@ -676,4 +685,5 @@
     </script>
 </body>
 </html>
+
 
