@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel De Peticiones</title>
+    <title>Lampemania33 | Advanced Network Stress Framework</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -33,13 +33,12 @@
         }
     </script>
     <style>
-        /* Custom Scrollbar - Ligeramente más ancha para mejor usabilidad */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
 
-        /* El body bloquea el scroll nativo, delegándolo al tag main/content */
         body { background-color: #020202; color: #e2e8f0; overflow: hidden; }
 
         .table-container { max-height: 250px; overflow-y: auto; }
@@ -76,7 +75,7 @@
     <aside class="w-64 bg-darkPanel border-r border-gray-800 flex flex-col hidden md:flex z-20 shadow-2xl">
         <div class="h-16 flex items-center px-6 border-b border-gray-800 bg-[#020202]">
             <img src="logo2.png" alt="Logo" class="w-7 h-7 object-contain mr-3" onerror="this.style.display='none'">
-            <h1 class="text-sm font-bold tracking-widest text-white uppercase">Pegasus<span class="text-accent">33</span></h1>
+            <h1 class="text-sm font-bold tracking-widest text-white uppercase">Lampemania<span class="text-accent">33</span></h1>
         </div>
         <nav class="flex-1 py-6 px-4 space-y-1">
             <a href="#" class="flex items-center px-4 py-3 bg-gray-900 text-white rounded border-l-2 border-accent"><i class="fa-solid fa-crosshairs w-6 text-gray-400"></i> Target Ops</a>
@@ -100,13 +99,16 @@
             <div class="flex items-center gap-4">
                 <button onclick="toggleCmd()" class="px-4 py-2 bg-gray-900 hover:bg-gray-800 rounded text-xs border border-gray-700 transition font-mono"><i class="fa-solid fa-code mr-2"></i>CMD_ROOT</button>
                 <div class="flex items-center gap-2 text-xs font-mono">
-                    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>
+                    <span id="status-dot" class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
                     <span id="target-status" class="text-green-500 font-bold uppercase tracking-wider">Gateway Open</span>
                 </div>
             </div>
         </header>
 
-        <!-- Content Area - FIX: overflow-y-auto restaura la capacidad de bajar -->
+        <!-- Content Area -->
         <div class="flex-1 overflow-y-auto p-4 md:p-5 flex flex-col gap-5">
             
             <!-- Target Telemetry -->
@@ -137,7 +139,7 @@
                 <div class="w-full lg:w-1/4 bg-darkCard border border-gray-800 rounded flex flex-col shrink-0">
                     <div class="px-4 py-3 border-b border-gray-800 font-mono text-xs text-gray-400 flex items-center bg-[#050505]">
                         <img src="logo2.png" class="w-4 h-4 mr-2" onerror="this.style.display='none'"> 
-                        VECTOR DE ATAKE RAVERON
+                        VECTOR_CONFIG
                     </div>
                     <div class="p-4 flex-1 flex flex-col gap-4">
                         <div>
@@ -153,7 +155,7 @@
                             <div class="eq-bar"></div><div class="eq-bar red"></div><div class="eq-bar"></div>
                             <div class="ml-2 flex flex-col justify-end">
                                 <span class="text-[10px] font-mono text-gray-400">Codec: OPUS/48000Hz</span>
-                                <span class="text-[10px] font-mono text-red-400">Injecting...</span>
+                                <span class="text-[10px] font-mono text-red-400">Injecting Fake Blobs...</span>
                             </div>
                         </div>
                         <div>
@@ -176,7 +178,7 @@
                 <!-- DB and Kali Terminal -->
                 <div class="w-full lg:w-3/4 flex flex-col gap-5">
                     
-                    <!-- DB Viewer - FIX: Altura estricta para evitar desbordes -->
+                    <!-- DB Viewer -->
                     <div class="bg-darkCard border border-gray-800 rounded flex flex-col h-[350px]">
                         <div class="px-4 pt-2 border-b border-gray-800 font-mono text-xs flex justify-between items-end bg-[#050505] shrink-0">
                             <div class="flex gap-1">
@@ -189,7 +191,7 @@
                         <div class="p-4 flex-1 overflow-y-auto bg-[#0a0a0c] hidden" id="db-cloud"></div>
                     </div>
 
-                    <!-- Kali Linux Root Terminal - FIX: Altura estricta para no romper flexbox -->
+                    <!-- Kali Linux Root Terminal -->
                     <div class="bg-[#0a0a0c] border border-gray-800 rounded flex flex-col shadow-2xl relative h-[300px]">
                         <div class="px-4 py-2 border-b border-gray-800 kali-header flex justify-between items-center shrink-0">
                             <span class="text-[10px] text-gray-400 font-mono font-bold tracking-wider">root@kali:~ /usr/share/lampemania33</span>
@@ -205,8 +207,8 @@
             <!-- Bottom Row: Rooms Table -->
             <div class="bg-darkCard border border-gray-800 rounded flex flex-col shrink-0 mb-4">
                 <div class="px-4 py-3 border-b border-gray-800 font-mono text-xs bg-[#050505] flex justify-between">
-                    <span class="text-gray-400">ÍNDICE DE SALAS ACTIVAS intercepción en tiempo real</span>
-                    <span class="text-accent font-bold" id="table-count">1,303 abiertas</span>
+                    <span class="text-gray-400">ÍNDICE DE SALAS ACTIVAS (Intercepción en tiempo real)</span>
+                    <span class="text-accent font-bold" id="table-count">Mostrando 50 de 1,303 abiertas</span>
                 </div>
                 <div class="table-container">
                     <table class="w-full text-left text-xs border-collapse font-mono">
@@ -236,7 +238,7 @@
             <button onclick="toggleCmd()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-times"></i></button>
         </div>
         <div class="p-3 flex-1 overflow-y-auto text-gray-300" id="cmd-output">
-            <div class="text-accent font-bold mb-2">LazarusPegaso33 Shell</div>
+            <div class="text-accent font-bold mb-2">Lampemania33 Interactive Shell v4.2.1</div>
             <div><span class="text-accent">~$</span> <span class="text-white">ping wemesh-inc.firebaseapp.com</span></div>
             <div class="text-gray-500 mb-2">
                 PING wemesh-inc.firebaseapp.com (199.36.158.100) 56(84) bytes of data.<br>
@@ -274,7 +276,8 @@
             currentRps: 0,
             activeSockets: 1303,
             totalReqs: 0,
-            rejectedReqs: 0
+            rejectedReqs: 0,
+            serverCrashed: false // BANDERA DE COLAPSO
         };
         
         const btnFire = document.getElementById('btn-fire');
@@ -289,11 +292,22 @@
         const roomsTbody = document.getElementById('rooms-tbody');
         const voipAnim = document.getElementById('voip-anim-container');
 
-        // --- 2. MOTORES DE GENERACIÓN ALEATORIA ---
+        // --- 2. MOTORES DE GENERACIÓN ALEATORIA (IPS LOCALES INCLUIDAS) ---
         function generateUUID() { return Math.random().toString(36).substring(2,10).toUpperCase(); }
         
         const genEngines = {
-            ips: () => `${Math.floor(Math.random()*150+50)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`,
+            ips: () => {
+                const arRanges = [
+                    { oct1: 181, oct2Min: 1, oct2Max: 170 },
+                    { oct1: 190, oct2Min: 10, oct2Max: 250 },
+                    { oct1: 186, oct2Min: 10, oct2Max: 150 },
+                    { oct1: 200, oct2Min: 5, oct2Max: 125 },
+                    { oct1: 152, oct2Min: 168, oct2Max: 175 }
+                ];
+                const range = arRanges[Math.floor(Math.random() * arRanges.length)];
+                const oct2 = Math.floor(Math.random() * (range.oct2Max - range.oct2Min + 1)) + range.oct2Min;
+                return `${range.oct1}.${oct2}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 254) + 1}`;
+            },
             nodes: () => `wss://sync-node-${Math.floor(Math.random()*20+1).toString().padStart(2,'0')}.wemesh.com`,
             codecs: () => ['Opus @ 48kHz (VBR)', 'Opus @ 24kHz (Narrowband)', 'AAC-LD @ 32kHz', 'Speex 16kHz'][Math.floor(Math.random()*4)],
             mediaApis: () => ['YouTube iFrame API v3', 'Netflix Private DRM API', 'Prime Video HTML5 Engine', 'Custom HLS M3U8 Stream'][Math.floor(Math.random()*4)],
@@ -326,8 +340,8 @@
                     "maintenance_mode": false
                 },
                 "users": {
-                    "usr_8F92A1": { "name": "Sofi_Arg", "email": "sofia938lyx@gmail.com", "premium": false, "last_ip": "181.164.88.2" },
-                    "usr_B44X9C": { "name": "lautidev1719", "email": "lautyy1719@hotmail.com", "premium": true, "last_ip": "181.164.88.2" },
+                    "usr_8F92A1": { "name": "Sofi_Arg", "email": "sofi***@gmail.com", "premium": false, "last_ip": "181.164.88.2" },
+                    "usr_B44X9C": { "name": "LautiDev", "email": "laut***@hotmail.com", "premium": true, "last_ip": "190.22.10.14" },
                     "usr_Z910KL": { "name": "Guest_9921", "email": null, "premium": false, "last_ip": "177.34.90.1" }
                 },
                 "security": {
@@ -418,45 +432,46 @@
 
         function writeKali(output) {
             const time = getTimestamp();
-            const colorClass = output.includes('200 OK') ? 'text-green-400' : (output.includes('WSS') ? 'text-blue-400' : 'text-gray-400');
+            const colorClass = output.includes('200 OK') ? 'text-green-400' : 
+                               output.includes('WSS') ? 'text-blue-400' : 
+                               output.includes('CRITICAL') || output.includes('FATAL') ? 'text-red-500 font-bold' : 'text-gray-400';
             
-            // Estructura plana de 1 línea
             const line = `<div class="mb-1"><span class="text-gray-600">[${time}]</span> <span class="${colorClass}">${output}</span></div>`;
-            
             kaliTerm.insertAdjacentHTML('beforeend', line);
             
-            // Límite estricto en memoria de los logs para no crashear
             if (kaliTerm.children.length > 25) {
                 kaliTerm.removeChild(kaliTerm.firstChild);
             }
-            
             kaliTerm.scrollTop = kaliTerm.scrollHeight;
         }
 
         // --- 5. SALAS REALISTAS Y MODAL ---
-        for(let i=0; i<50; i++) {
-            const roomId = generateUUID();
-            const hostIp = genEngines.ips();
-            const mediaApi = genEngines.mediaApis();
-            const wssNode = genEngines.nodes();
-            const codec = genEngines.codecs();
-            const drm = genEngines.drm();
-            const jwt = genEngines.jwt();
-            
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-gray-800 hover:bg-[#111] transition cursor-pointer";
-            
-            tr.onclick = () => openModal(roomId, mediaApi, drm, codec, hostIp, wssNode, jwt);
-            
-            tr.innerHTML = `
-                <td class="py-2 px-4 font-bold text-gray-300 text-[10px]">${roomId}</td>
-                <td class="py-2 px-4 text-kaliGreen text-[10px]">${hostIp}</td>
-                <td class="py-2 px-4 text-white text-[10px]">${wssNode.split('//')[1]}</td>
-                <td class="py-2 px-4 text-gray-400 truncate max-w-[120px] text-[10px]">${mediaApi}</td>
-                <td class="py-2 px-4 text-right"><button class="bg-[#1a1a1a] border border-gray-700 hover:border-accent text-white px-3 py-1 rounded text-[9px] uppercase tracking-wider font-bold"><i class="fa-solid fa-radar mr-1"></i> SCAN</button></td>
-            `;
-            roomsTbody.appendChild(tr);
+        function generateRoomsDOM() {
+            roomsTbody.innerHTML = ''; // Limpiar
+            for(let i=0; i<50; i++) {
+                const roomId = generateUUID();
+                const hostIp = genEngines.ips();
+                const mediaApi = genEngines.mediaApis();
+                const wssNode = genEngines.nodes();
+                const codec = genEngines.codecs();
+                const drm = genEngines.drm();
+                const jwt = genEngines.jwt();
+                
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-800 hover:bg-[#111] transition cursor-pointer";
+                tr.onclick = () => openModal(roomId, mediaApi, drm, codec, hostIp, wssNode, jwt);
+                
+                tr.innerHTML = `
+                    <td class="py-2 px-4 font-bold text-gray-300 text-[10px]">${roomId}</td>
+                    <td class="py-2 px-4 text-kaliGreen text-[10px]">${hostIp}</td>
+                    <td class="py-2 px-4 text-white text-[10px]">${wssNode.split('//')[1]}</td>
+                    <td class="py-2 px-4 text-gray-400 truncate max-w-[120px] text-[10px]">${mediaApi}</td>
+                    <td class="py-2 px-4 text-right"><button class="bg-[#1a1a1a] border border-gray-700 hover:border-accent text-white px-3 py-1 rounded text-[9px] uppercase tracking-wider font-bold"><i class="fa-solid fa-radar mr-1"></i> SCAN</button></td>
+                `;
+                roomsTbody.appendChild(tr);
+            }
         }
+        generateRoomsDOM(); // Llamada inicial
 
         function openModal(roomId, mediaApi, drm, codec, hostIp, wssNode, jwt) {
             const modal = document.getElementById('room-modal');
@@ -491,7 +506,7 @@
             document.getElementById('room-modal').classList.add('hidden');
         }
 
-        // --- 6. LÓGICA DE ATAQUE ---
+        // --- 6. LÓGICA DE ATAQUE Y SISTEMA DE CAÍDA (CRASH) ---
         function handleAttackTypeChange() {
             const type = document.getElementById('attack-type').value;
             voipAnim.classList.toggle('active', type === 'voip');
@@ -512,26 +527,44 @@
             const type = document.getElementById('attack-type').value;
 
             if (isAttacking) {
+                // UI: Estado de Ataque
                 btnFire.classList.replace('border-gray-700', 'border-red-600');
                 btnFire.classList.replace('hover:border-accent', 'hover:bg-red-900');
                 btnFire.innerHTML = '[ ABORTAR EJECUCIÓN ]';
                 btnFire.style.color = "#ff3333";
                 
-                document.getElementById('target-status').innerText = 'CRITICAL FLOOD';
-                document.getElementById('target-status').classList.replace('text-green-500', 'text-red-500');
-                
+                const statusTxt = document.getElementById('target-status');
+                statusTxt.innerText = 'CRITICAL FLOOD';
+                statusTxt.className = 'font-bold uppercase tracking-wider text-red-500';
+                document.getElementById('status-dot').innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>`;
+
                 writeKali(`INIT PAYLOAD: Vector=${type} | Rate=${rateStr}`);
                 startLoop(rateStr, type);
             } else {
+                // UI: Restauración y reseteo
                 btnFire.classList.replace('border-red-600', 'border-gray-700');
                 btnFire.classList.replace('hover:bg-red-900', 'hover:border-accent');
                 btnFire.innerHTML = '[ INICIALIZAR HILOS ]';
                 btnFire.style.color = "#fff";
                 
-                document.getElementById('target-status').innerText = 'GATEWAY OPEN';
-                document.getElementById('target-status').classList.replace('text-red-500', 'text-green-500');
+                const statusTxt = document.getElementById('target-status');
+                statusTxt.innerText = 'GATEWAY OPEN';
+                statusTxt.className = 'font-bold uppercase tracking-wider text-green-500';
+                document.getElementById('status-dot').innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>`;
                 
-                writeKali(`SIGINT: Deteniendo inyección. Limpiando sockets.`);
+                // Si el servidor estaba caído, lo reiniciamos simulando que el ataque cesó
+                if (state.serverCrashed) {
+                    state.serverCrashed = false;
+                    state.activeSockets = 1303;
+                    state.rejectedReqs = 0;
+                    state.totalReqs = 0;
+                    document.getElementById('table-count').innerText = "Mostrando 50 de 1,303 abiertas";
+                    generateRoomsDOM();
+                    writeKali(`SYSTEM: Servidor reiniciado tras cese de ataque. Red estable.`);
+                } else {
+                    writeKali(`SIGINT: Deteniendo inyección. Limpiando sockets.`);
+                }
+                
                 stopLoop();
             }
         }
@@ -551,10 +584,34 @@
                 state.rejectedReqs += rejectedThisTick;
                 const acceptedReqs = reqsInThisTick - rejectedThisTick;
 
-                if (type === 'ws') state.activeSockets += Math.floor(acceptedReqs * 1.5); 
-                else if (type === 'logic') state.activeSockets += Math.floor(acceptedReqs * 0.4); 
-                else if (type === 'voip') state.activeSockets += Math.floor(acceptedReqs * 0.8);
+                // --- LÓGICA DE COLAPSO (CRASH SERVER) ---
+                if (state.rejectedReqs >= 10000 && !state.serverCrashed) {
+                    state.serverCrashed = true;
+                    
+                    // Modificar UI del Header a Offline
+                    document.getElementById('target-status').innerText = '503 OFFLINE';
+                    document.getElementById('target-status').className = 'font-bold uppercase tracking-wider text-gray-500';
+                    document.getElementById('status-dot').innerHTML = `<span class="relative inline-flex rounded-full h-2 w-2 bg-gray-600"></span>`; // Sin ping (muerto)
+                    
+                    // Eliminar salas y mostrar error en tabla
+                    document.getElementById('table-count').innerText = "Mostrando 0 de 0 abiertas";
+                    roomsTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500 font-bold uppercase tracking-widest bg-[#110000] border-y border-red-900"><i class="fa-solid fa-server mr-2"></i> ERROR 503 - SERVIDOR ERROR FUERA DE LÍNEA (NODOS CAÍDOS)</td></tr>`;
+                    
+                    // Alerta Crítica en Terminal
+                    writeKali(`CRITICAL: 503 Servidor Error Fuera de Línea - Conexión Perdida`);
+                }
+
+                // Cálculo de Sockets
+                if (!state.serverCrashed) {
+                    if (type === 'ws') state.activeSockets += Math.floor(acceptedReqs * 1.5); 
+                    else if (type === 'logic') state.activeSockets += Math.floor(acceptedReqs * 0.4); 
+                    else if (type === 'voip') state.activeSockets += Math.floor(acceptedReqs * 0.8);
+                } else {
+                    // Si el servidor está caído, los sockets activos bajan fulminantemente a 0
+                    state.activeSockets = 0;
+                }
                 
+                // Actualizar Visuales del Dashboard
                 metricRps.innerText = state.currentRps.toFixed(1);
                 metricTotal.innerText = state.totalReqs.toLocaleString();
                 metricRejected.innerText = state.rejectedReqs.toLocaleString();
@@ -564,8 +621,8 @@
                 barRps.style.width = barWidth + "%";
                 barRps.style.backgroundColor = barWidth > 10 ? "#ef4444" : "#2563eb";
 
-                // Log de Kali optimizado (Solo peticiones puras)
-                if (Math.random() > 0.80) {
+                // Log de Kali (Solo si no está crasheado para no spamear sobre error)
+                if (Math.random() > 0.80 && !state.serverCrashed) {
                     if(type === 'ws') writeKali(`WSS Handshake -> ${genEngines.nodes()} -> 101 Switching Protocols`);
                     if(type === 'logic') writeKali(`POST /api/v1/sync -> Payload ${Math.floor(Math.random()*2000)}B -> 200 OK`);
                     if(type === 'voip') writeKali(`UDP Stream -> Injecting OPUS blob -> Target SFU Node`);
@@ -609,7 +666,7 @@
                 let resp = '';
                 if(val === 'help') resp = "COMMANDS: ping, status, clear, extract_db";
                 else if(val === 'clear') { cmdOutput.innerHTML = ''; return; }
-                else if(val === 'status') resp = `Active Sockets: ${state.activeSockets}`;
+                else if(val === 'status') resp = `Active Sockets: ${state.activeSockets} | Server Crashed: ${state.serverCrashed}`;
                 else resp = `bash: ${val}: command not found`;
                 
                 cmdOutput.innerHTML += `<div class="text-gray-500">${resp}</div>`;
@@ -619,6 +676,4 @@
     </script>
 </body>
 </html>
-
-
 
